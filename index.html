@@ -6,7 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MO-FO Sankey</title>
-  <style>.node rect {
+  <style>:root {
+      --mo-gray-05: #f2f2f2;
+    }
+    .node rect {
       fill-opacity: .9;
       shape-rendering: crispEdges;
     }
@@ -24,6 +27,14 @@
 
     .link:hover {
       stroke-opacity: .5;
+    }
+
+    .tooltip {
+     position:absolute;
+     background-color:var(--mo-gray-05);
+     width: 10rem;
+     padding: 8px;
+     transition: opacity 4ms;
     }</style>
 </head>
 
