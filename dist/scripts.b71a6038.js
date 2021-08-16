@@ -20563,7 +20563,11 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./categorical/category10.js":"node_modules/d3-scale-chromatic/src/categorical/category10.js","./categorical/Accent.js":"node_modules/d3-scale-chromatic/src/categorical/Accent.js","./categorical/Dark2.js":"node_modules/d3-scale-chromatic/src/categorical/Dark2.js","./categorical/Paired.js":"node_modules/d3-scale-chromatic/src/categorical/Paired.js","./categorical/Pastel1.js":"node_modules/d3-scale-chromatic/src/categorical/Pastel1.js","./categorical/Pastel2.js":"node_modules/d3-scale-chromatic/src/categorical/Pastel2.js","./categorical/Set1.js":"node_modules/d3-scale-chromatic/src/categorical/Set1.js","./categorical/Set2.js":"node_modules/d3-scale-chromatic/src/categorical/Set2.js","./categorical/Set3.js":"node_modules/d3-scale-chromatic/src/categorical/Set3.js","./categorical/Tableau10.js":"node_modules/d3-scale-chromatic/src/categorical/Tableau10.js","./diverging/BrBG.js":"node_modules/d3-scale-chromatic/src/diverging/BrBG.js","./diverging/PRGn.js":"node_modules/d3-scale-chromatic/src/diverging/PRGn.js","./diverging/PiYG.js":"node_modules/d3-scale-chromatic/src/diverging/PiYG.js","./diverging/PuOr.js":"node_modules/d3-scale-chromatic/src/diverging/PuOr.js","./diverging/RdBu.js":"node_modules/d3-scale-chromatic/src/diverging/RdBu.js","./diverging/RdGy.js":"node_modules/d3-scale-chromatic/src/diverging/RdGy.js","./diverging/RdYlBu.js":"node_modules/d3-scale-chromatic/src/diverging/RdYlBu.js","./diverging/RdYlGn.js":"node_modules/d3-scale-chromatic/src/diverging/RdYlGn.js","./diverging/Spectral.js":"node_modules/d3-scale-chromatic/src/diverging/Spectral.js","./sequential-multi/BuGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/BuGn.js","./sequential-multi/BuPu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/BuPu.js","./sequential-multi/GnBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/GnBu.js","./sequential-multi/OrRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/OrRd.js","./sequential-multi/PuBuGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuBuGn.js","./sequential-multi/PuBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuBu.js","./sequential-multi/PuRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuRd.js","./sequential-multi/RdPu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/RdPu.js","./sequential-multi/YlGnBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlGnBu.js","./sequential-multi/YlGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlGn.js","./sequential-multi/YlOrBr.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlOrBr.js","./sequential-multi/YlOrRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlOrRd.js","./sequential-single/Blues.js":"node_modules/d3-scale-chromatic/src/sequential-single/Blues.js","./sequential-single/Greens.js":"node_modules/d3-scale-chromatic/src/sequential-single/Greens.js","./sequential-single/Greys.js":"node_modules/d3-scale-chromatic/src/sequential-single/Greys.js","./sequential-single/Purples.js":"node_modules/d3-scale-chromatic/src/sequential-single/Purples.js","./sequential-single/Reds.js":"node_modules/d3-scale-chromatic/src/sequential-single/Reds.js","./sequential-single/Oranges.js":"node_modules/d3-scale-chromatic/src/sequential-single/Oranges.js","./sequential-multi/cividis.js":"node_modules/d3-scale-chromatic/src/sequential-multi/cividis.js","./sequential-multi/cubehelix.js":"node_modules/d3-scale-chromatic/src/sequential-multi/cubehelix.js","./sequential-multi/rainbow.js":"node_modules/d3-scale-chromatic/src/sequential-multi/rainbow.js","./sequential-multi/sinebow.js":"node_modules/d3-scale-chromatic/src/sequential-multi/sinebow.js","./sequential-multi/turbo.js":"node_modules/d3-scale-chromatic/src/sequential-multi/turbo.js","./sequential-multi/viridis.js":"node_modules/d3-scale-chromatic/src/sequential-multi/viridis.js"}],"scripts.js":[function(require,module,exports) {
+},{"./categorical/category10.js":"node_modules/d3-scale-chromatic/src/categorical/category10.js","./categorical/Accent.js":"node_modules/d3-scale-chromatic/src/categorical/Accent.js","./categorical/Dark2.js":"node_modules/d3-scale-chromatic/src/categorical/Dark2.js","./categorical/Paired.js":"node_modules/d3-scale-chromatic/src/categorical/Paired.js","./categorical/Pastel1.js":"node_modules/d3-scale-chromatic/src/categorical/Pastel1.js","./categorical/Pastel2.js":"node_modules/d3-scale-chromatic/src/categorical/Pastel2.js","./categorical/Set1.js":"node_modules/d3-scale-chromatic/src/categorical/Set1.js","./categorical/Set2.js":"node_modules/d3-scale-chromatic/src/categorical/Set2.js","./categorical/Set3.js":"node_modules/d3-scale-chromatic/src/categorical/Set3.js","./categorical/Tableau10.js":"node_modules/d3-scale-chromatic/src/categorical/Tableau10.js","./diverging/BrBG.js":"node_modules/d3-scale-chromatic/src/diverging/BrBG.js","./diverging/PRGn.js":"node_modules/d3-scale-chromatic/src/diverging/PRGn.js","./diverging/PiYG.js":"node_modules/d3-scale-chromatic/src/diverging/PiYG.js","./diverging/PuOr.js":"node_modules/d3-scale-chromatic/src/diverging/PuOr.js","./diverging/RdBu.js":"node_modules/d3-scale-chromatic/src/diverging/RdBu.js","./diverging/RdGy.js":"node_modules/d3-scale-chromatic/src/diverging/RdGy.js","./diverging/RdYlBu.js":"node_modules/d3-scale-chromatic/src/diverging/RdYlBu.js","./diverging/RdYlGn.js":"node_modules/d3-scale-chromatic/src/diverging/RdYlGn.js","./diverging/Spectral.js":"node_modules/d3-scale-chromatic/src/diverging/Spectral.js","./sequential-multi/BuGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/BuGn.js","./sequential-multi/BuPu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/BuPu.js","./sequential-multi/GnBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/GnBu.js","./sequential-multi/OrRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/OrRd.js","./sequential-multi/PuBuGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuBuGn.js","./sequential-multi/PuBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuBu.js","./sequential-multi/PuRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuRd.js","./sequential-multi/RdPu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/RdPu.js","./sequential-multi/YlGnBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlGnBu.js","./sequential-multi/YlGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlGn.js","./sequential-multi/YlOrBr.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlOrBr.js","./sequential-multi/YlOrRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlOrRd.js","./sequential-single/Blues.js":"node_modules/d3-scale-chromatic/src/sequential-single/Blues.js","./sequential-single/Greens.js":"node_modules/d3-scale-chromatic/src/sequential-single/Greens.js","./sequential-single/Greys.js":"node_modules/d3-scale-chromatic/src/sequential-single/Greys.js","./sequential-single/Purples.js":"node_modules/d3-scale-chromatic/src/sequential-single/Purples.js","./sequential-single/Reds.js":"node_modules/d3-scale-chromatic/src/sequential-single/Reds.js","./sequential-single/Oranges.js":"node_modules/d3-scale-chromatic/src/sequential-single/Oranges.js","./sequential-multi/cividis.js":"node_modules/d3-scale-chromatic/src/sequential-multi/cividis.js","./sequential-multi/cubehelix.js":"node_modules/d3-scale-chromatic/src/sequential-multi/cubehelix.js","./sequential-multi/rainbow.js":"node_modules/d3-scale-chromatic/src/sequential-multi/rainbow.js","./sequential-multi/sinebow.js":"node_modules/d3-scale-chromatic/src/sequential-multi/sinebow.js","./sequential-multi/turbo.js":"node_modules/d3-scale-chromatic/src/sequential-multi/turbo.js","./sequential-multi/viridis.js":"node_modules/d3-scale-chromatic/src/sequential-multi/viridis.js"}],"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":[function(require,module,exports) {
+module.exports = "/Copy of Data for Visualizations - Issue areas by Engagement Type.b9bfafbb.csv";
+},{}],"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":[function(require,module,exports) {
+module.exports = "/Copy of Data for Visualizations - Output Types by Engagement Type.f216aa58.csv";
+},{}],"scripts.js":[function(require,module,exports) {
 "use strict";
 
 require("regenerator-runtime/runtime");
@@ -20582,7 +20586,12 @@ var _d3ScaleChromatic = require("d3-scale-chromatic");
 
 var _d3Color = require("d3-color");
 
+var issuesToEngagement = require("./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv");
+
+var engagementToOutput = require("./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv");
+
 var d3 = Object.assign({}, {
+  csv: _d3Fetch.csv,
   select: _d3Selection.select,
   selectAll: _d3Selection.selectAll,
   json: _d3Fetch.json,
@@ -20592,8 +20601,8 @@ var d3 = Object.assign({}, {
   scaleOrdinal: _d3Scale.scaleOrdinal,
   schemeCategory10: _d3ScaleChromatic.schemeCategory10,
   rgb: _d3Color.rgb
-});
-var jsonUrl = "https://gist.githubusercontent.com/tekd/e9d8aee9e059f773aaf52f1130f98c65/raw/4a2af7014f0a8eed1a384f9d3f478fef6f67b218/sankey-test.json";
+}); // const jsonUrl = `https://gist.githubusercontent.com/tekd/e9d8aee9e059f773aaf52f1130f98c65/raw/4a2af7014f0a8eed1a384f9d3f478fef6f67b218/sankey-test.json`;
+
 /*
   SET UP GRAPH DIMENSIONS
 */
@@ -20604,8 +20613,8 @@ var margin = {
   left: 10,
   right: 10
 };
-var width = 900;
-var height = 300;
+var width = 1200;
+var height = 600;
 /*
   FORMATTING HELPERS
 */
@@ -20613,7 +20622,7 @@ var height = 300;
 var formatSetting = d3.format('.0f');
 
 var formatNumber = function formatNumber(d) {
-  return formatSetting(d);
+  return d;
 };
 
 var color = d3.scaleOrdinal(_d3ScaleChromatic.schemeCategory10);
@@ -20626,29 +20635,104 @@ var svg = d3.select('body').append('svg').attr('width', width).attr('height', he
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().nodeWidth(36).nodePadding(40).size([width, height]);
+var sankeyGraph = d3.sankey().nodeWidth(20).nodePadding(10).size([width, height]);
 var path = sankeyGraph.links();
-/*
-  LOAD DATA
+/**
+ *  ADD TOOLTIPS
+ */
+
+var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+/* 
+  FORMAT DATA
 */
 
-d3.json(jsonUrl).then(function (data) {
-  var graph = sankeyGraph(data);
-  console.log(graph);
+Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
+.then(function (data) {
+  var graph = {
+    nodes: [],
+    links: []
+  };
+  data[0].forEach(function (d) {
+    var sourceCol = 'Issue Area Tags\r\n(pick ONE) ';
+    var targetCol = 'Engagement Type';
+    var valueCol = 'COUNTA of Issue Area Tags\r\n(pick ONE) ';
+    graph.nodes.push({
+      name: d[sourceCol]
+    });
+    graph.nodes.push({
+      name: d[targetCol]
+    });
+    graph.links.push({
+      source: d[sourceCol],
+      target: d[targetCol],
+      value: d[valueCol]
+    });
+  });
+  /*
+  */
+
+  data[1].forEach(function (d) {
+    var sourceCol = 'Engagement Type';
+    var targetCol = 'Primary Output\n(pick ONE)';
+    var valueCol = 'COUNTA of Primary Output\n(pick ONE)';
+    graph.nodes.push({
+      name: d[sourceCol]
+    });
+    graph.nodes.push({
+      name: d[targetCol]
+    });
+    graph.links.push({
+      source: d[sourceCol],
+      target: d[targetCol],
+      value: d[valueCol]
+    });
+  });
+  var uniqueNodesStr = new Set(graph.nodes.map(function (node) {
+    return JSON.stringify(node);
+  })); // return unique nodes
+
+  graph.nodes = Array.from(uniqueNodesStr).map(function (node, idx) {
+    return Object.assign({
+      node: idx
+    }, JSON.parse(node));
+  }); //replace link names
+
+  graph.links.forEach(function (d, i) {
+    var graphMap = graph.nodes.map(function (node) {
+      return node.name;
+    });
+    graph.links[i].source = graphMap.indexOf(graph.links[i].source);
+    graph.links[i].target = graphMap.indexOf(graph.links[i].target);
+  });
+  return graph;
+}).then(function (data) {
+  /* LOAD DATA */
+  var chart = sankeyGraph(data);
   /* ADD LINKs */
 
-  var link = svg.append('g').selectAll('.link').data(graph.links).enter().append('path').attr('class', 'link').attr('d', d3.sankeyLinkHorizontal()).attr('stroke-width', function (d) {
+  var link = svg.append('g').selectAll('.link').data(function () {
+    return chart.links;
+  }).enter().append('path').attr('class', 'link').attr('d', d3.sankeyLinkHorizontal()).attr('stroke-width', function (d) {
     return d.width;
   });
   /* ADD LINK TITLES: currently only showing on hover tooltip*/
 
   link.append('title').text(function (d) {
-    console.log(d);
-    return "".concat(d.source.name, " \u2192 ").concat(d.target.name, " \n ").concat((0, _d3Format.format)(d.value));
+    return "".concat(d.source.name, " \u2192 ").concat(d.target.name);
+  });
+  /**
+   *  ADD TOOLTIPS
+   */
+
+  link.on('mouseover', function (d, i) {
+    console.log(d.target);
+    tooltip.html("<p>".concat(d.target.textContent, "</p>")).style('left', d.clientX + 'px').style('top', d.clientY + 'px').style('opacity', 1);
+  }).on('mouseout', function (d) {
+    tooltip.style('opacity', 0);
   });
   /* ADD NODES */
 
-  var node = svg.append('g').selectAll('.node').data(graph.nodes).enter().append('g').attr('class', 'node');
+  var node = svg.append('g').selectAll('.node').data(chart.nodes).enter().append('g').attr('class', 'node');
   /* ADD NODE RECTANGLES */
 
   node.append('rect').attr('x', function (d) {
@@ -20658,11 +20742,11 @@ d3.json(jsonUrl).then(function (data) {
   }).attr('height', function (d) {
     return d.y1 - d.y0;
   }).attr('width', sankeyGraph.nodeWidth()).style('fill', function (d) {
-    return d.color = color(d.name.replace(/ .*/, ''));
+    return d.color = color(d.name);
   }).style('stroke', function (d) {
     return d3.rgb(d.color).darker(2);
   }).append('title').text(function (d) {
-    return "".concat(d.name, " \n ").concat((0, _d3Format.format)(d.value));
+    return "".concat(d.name, " ").concat(d.value);
   });
   /* ADD NODE TITLES */
 
@@ -20678,7 +20762,7 @@ d3.json(jsonUrl).then(function (data) {
     return d.x1 + 6;
   }).attr('text-anchor', 'start');
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv","./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -20706,7 +20790,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50673" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61145" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
