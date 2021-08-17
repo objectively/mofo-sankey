@@ -20563,10 +20563,362 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./categorical/category10.js":"node_modules/d3-scale-chromatic/src/categorical/category10.js","./categorical/Accent.js":"node_modules/d3-scale-chromatic/src/categorical/Accent.js","./categorical/Dark2.js":"node_modules/d3-scale-chromatic/src/categorical/Dark2.js","./categorical/Paired.js":"node_modules/d3-scale-chromatic/src/categorical/Paired.js","./categorical/Pastel1.js":"node_modules/d3-scale-chromatic/src/categorical/Pastel1.js","./categorical/Pastel2.js":"node_modules/d3-scale-chromatic/src/categorical/Pastel2.js","./categorical/Set1.js":"node_modules/d3-scale-chromatic/src/categorical/Set1.js","./categorical/Set2.js":"node_modules/d3-scale-chromatic/src/categorical/Set2.js","./categorical/Set3.js":"node_modules/d3-scale-chromatic/src/categorical/Set3.js","./categorical/Tableau10.js":"node_modules/d3-scale-chromatic/src/categorical/Tableau10.js","./diverging/BrBG.js":"node_modules/d3-scale-chromatic/src/diverging/BrBG.js","./diverging/PRGn.js":"node_modules/d3-scale-chromatic/src/diverging/PRGn.js","./diverging/PiYG.js":"node_modules/d3-scale-chromatic/src/diverging/PiYG.js","./diverging/PuOr.js":"node_modules/d3-scale-chromatic/src/diverging/PuOr.js","./diverging/RdBu.js":"node_modules/d3-scale-chromatic/src/diverging/RdBu.js","./diverging/RdGy.js":"node_modules/d3-scale-chromatic/src/diverging/RdGy.js","./diverging/RdYlBu.js":"node_modules/d3-scale-chromatic/src/diverging/RdYlBu.js","./diverging/RdYlGn.js":"node_modules/d3-scale-chromatic/src/diverging/RdYlGn.js","./diverging/Spectral.js":"node_modules/d3-scale-chromatic/src/diverging/Spectral.js","./sequential-multi/BuGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/BuGn.js","./sequential-multi/BuPu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/BuPu.js","./sequential-multi/GnBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/GnBu.js","./sequential-multi/OrRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/OrRd.js","./sequential-multi/PuBuGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuBuGn.js","./sequential-multi/PuBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuBu.js","./sequential-multi/PuRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuRd.js","./sequential-multi/RdPu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/RdPu.js","./sequential-multi/YlGnBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlGnBu.js","./sequential-multi/YlGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlGn.js","./sequential-multi/YlOrBr.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlOrBr.js","./sequential-multi/YlOrRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlOrRd.js","./sequential-single/Blues.js":"node_modules/d3-scale-chromatic/src/sequential-single/Blues.js","./sequential-single/Greens.js":"node_modules/d3-scale-chromatic/src/sequential-single/Greens.js","./sequential-single/Greys.js":"node_modules/d3-scale-chromatic/src/sequential-single/Greys.js","./sequential-single/Purples.js":"node_modules/d3-scale-chromatic/src/sequential-single/Purples.js","./sequential-single/Reds.js":"node_modules/d3-scale-chromatic/src/sequential-single/Reds.js","./sequential-single/Oranges.js":"node_modules/d3-scale-chromatic/src/sequential-single/Oranges.js","./sequential-multi/cividis.js":"node_modules/d3-scale-chromatic/src/sequential-multi/cividis.js","./sequential-multi/cubehelix.js":"node_modules/d3-scale-chromatic/src/sequential-multi/cubehelix.js","./sequential-multi/rainbow.js":"node_modules/d3-scale-chromatic/src/sequential-multi/rainbow.js","./sequential-multi/sinebow.js":"node_modules/d3-scale-chromatic/src/sequential-multi/sinebow.js","./sequential-multi/turbo.js":"node_modules/d3-scale-chromatic/src/sequential-multi/turbo.js","./sequential-multi/viridis.js":"node_modules/d3-scale-chromatic/src/sequential-multi/viridis.js"}],"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":[function(require,module,exports) {
+},{"./categorical/category10.js":"node_modules/d3-scale-chromatic/src/categorical/category10.js","./categorical/Accent.js":"node_modules/d3-scale-chromatic/src/categorical/Accent.js","./categorical/Dark2.js":"node_modules/d3-scale-chromatic/src/categorical/Dark2.js","./categorical/Paired.js":"node_modules/d3-scale-chromatic/src/categorical/Paired.js","./categorical/Pastel1.js":"node_modules/d3-scale-chromatic/src/categorical/Pastel1.js","./categorical/Pastel2.js":"node_modules/d3-scale-chromatic/src/categorical/Pastel2.js","./categorical/Set1.js":"node_modules/d3-scale-chromatic/src/categorical/Set1.js","./categorical/Set2.js":"node_modules/d3-scale-chromatic/src/categorical/Set2.js","./categorical/Set3.js":"node_modules/d3-scale-chromatic/src/categorical/Set3.js","./categorical/Tableau10.js":"node_modules/d3-scale-chromatic/src/categorical/Tableau10.js","./diverging/BrBG.js":"node_modules/d3-scale-chromatic/src/diverging/BrBG.js","./diverging/PRGn.js":"node_modules/d3-scale-chromatic/src/diverging/PRGn.js","./diverging/PiYG.js":"node_modules/d3-scale-chromatic/src/diverging/PiYG.js","./diverging/PuOr.js":"node_modules/d3-scale-chromatic/src/diverging/PuOr.js","./diverging/RdBu.js":"node_modules/d3-scale-chromatic/src/diverging/RdBu.js","./diverging/RdGy.js":"node_modules/d3-scale-chromatic/src/diverging/RdGy.js","./diverging/RdYlBu.js":"node_modules/d3-scale-chromatic/src/diverging/RdYlBu.js","./diverging/RdYlGn.js":"node_modules/d3-scale-chromatic/src/diverging/RdYlGn.js","./diverging/Spectral.js":"node_modules/d3-scale-chromatic/src/diverging/Spectral.js","./sequential-multi/BuGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/BuGn.js","./sequential-multi/BuPu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/BuPu.js","./sequential-multi/GnBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/GnBu.js","./sequential-multi/OrRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/OrRd.js","./sequential-multi/PuBuGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuBuGn.js","./sequential-multi/PuBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuBu.js","./sequential-multi/PuRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/PuRd.js","./sequential-multi/RdPu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/RdPu.js","./sequential-multi/YlGnBu.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlGnBu.js","./sequential-multi/YlGn.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlGn.js","./sequential-multi/YlOrBr.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlOrBr.js","./sequential-multi/YlOrRd.js":"node_modules/d3-scale-chromatic/src/sequential-multi/YlOrRd.js","./sequential-single/Blues.js":"node_modules/d3-scale-chromatic/src/sequential-single/Blues.js","./sequential-single/Greens.js":"node_modules/d3-scale-chromatic/src/sequential-single/Greens.js","./sequential-single/Greys.js":"node_modules/d3-scale-chromatic/src/sequential-single/Greys.js","./sequential-single/Purples.js":"node_modules/d3-scale-chromatic/src/sequential-single/Purples.js","./sequential-single/Reds.js":"node_modules/d3-scale-chromatic/src/sequential-single/Reds.js","./sequential-single/Oranges.js":"node_modules/d3-scale-chromatic/src/sequential-single/Oranges.js","./sequential-multi/cividis.js":"node_modules/d3-scale-chromatic/src/sequential-multi/cividis.js","./sequential-multi/cubehelix.js":"node_modules/d3-scale-chromatic/src/sequential-multi/cubehelix.js","./sequential-multi/rainbow.js":"node_modules/d3-scale-chromatic/src/sequential-multi/rainbow.js","./sequential-multi/sinebow.js":"node_modules/d3-scale-chromatic/src/sequential-multi/sinebow.js","./sequential-multi/turbo.js":"node_modules/d3-scale-chromatic/src/sequential-multi/turbo.js","./sequential-multi/viridis.js":"node_modules/d3-scale-chromatic/src/sequential-multi/viridis.js"}],"node_modules/d3-collection/src/map.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.prefix = void 0;
+var prefix = "$";
+exports.prefix = prefix;
+
+function Map() {}
+
+Map.prototype = map.prototype = {
+  constructor: Map,
+  has: function (key) {
+    return prefix + key in this;
+  },
+  get: function (key) {
+    return this[prefix + key];
+  },
+  set: function (key, value) {
+    this[prefix + key] = value;
+    return this;
+  },
+  remove: function (key) {
+    var property = prefix + key;
+    return property in this && delete this[property];
+  },
+  clear: function () {
+    for (var property in this) if (property[0] === prefix) delete this[property];
+  },
+  keys: function () {
+    var keys = [];
+
+    for (var property in this) if (property[0] === prefix) keys.push(property.slice(1));
+
+    return keys;
+  },
+  values: function () {
+    var values = [];
+
+    for (var property in this) if (property[0] === prefix) values.push(this[property]);
+
+    return values;
+  },
+  entries: function () {
+    var entries = [];
+
+    for (var property in this) if (property[0] === prefix) entries.push({
+      key: property.slice(1),
+      value: this[property]
+    });
+
+    return entries;
+  },
+  size: function () {
+    var size = 0;
+
+    for (var property in this) if (property[0] === prefix) ++size;
+
+    return size;
+  },
+  empty: function () {
+    for (var property in this) if (property[0] === prefix) return false;
+
+    return true;
+  },
+  each: function (f) {
+    for (var property in this) if (property[0] === prefix) f(this[property], property.slice(1), this);
+  }
+};
+
+function map(object, f) {
+  var map = new Map(); // Copy constructor.
+
+  if (object instanceof Map) object.each(function (value, key) {
+    map.set(key, value);
+  }); // Index array by numeric index or specified key function.
+  else if (Array.isArray(object)) {
+    var i = -1,
+        n = object.length,
+        o;
+    if (f == null) while (++i < n) map.set(i, object[i]);else while (++i < n) map.set(f(o = object[i], i, object), o);
+  } // Convert object to map.
+  else if (object) for (var key in object) map.set(key, object[key]);
+  return map;
+}
+
+var _default = map;
+exports.default = _default;
+},{}],"node_modules/d3-collection/src/nest.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _map = _interopRequireDefault(require("./map"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _default() {
+  var keys = [],
+      sortKeys = [],
+      sortValues,
+      rollup,
+      nest;
+
+  function apply(array, depth, createResult, setResult) {
+    if (depth >= keys.length) {
+      if (sortValues != null) array.sort(sortValues);
+      return rollup != null ? rollup(array) : array;
+    }
+
+    var i = -1,
+        n = array.length,
+        key = keys[depth++],
+        keyValue,
+        value,
+        valuesByKey = (0, _map.default)(),
+        values,
+        result = createResult();
+
+    while (++i < n) {
+      if (values = valuesByKey.get(keyValue = key(value = array[i]) + "")) {
+        values.push(value);
+      } else {
+        valuesByKey.set(keyValue, [value]);
+      }
+    }
+
+    valuesByKey.each(function (values, key) {
+      setResult(result, key, apply(values, depth, createResult, setResult));
+    });
+    return result;
+  }
+
+  function entries(map, depth) {
+    if (++depth > keys.length) return map;
+    var array,
+        sortKey = sortKeys[depth - 1];
+    if (rollup != null && depth >= keys.length) array = map.entries();else array = [], map.each(function (v, k) {
+      array.push({
+        key: k,
+        values: entries(v, depth)
+      });
+    });
+    return sortKey != null ? array.sort(function (a, b) {
+      return sortKey(a.key, b.key);
+    }) : array;
+  }
+
+  return nest = {
+    object: function (array) {
+      return apply(array, 0, createObject, setObject);
+    },
+    map: function (array) {
+      return apply(array, 0, createMap, setMap);
+    },
+    entries: function (array) {
+      return entries(apply(array, 0, createMap, setMap), 0);
+    },
+    key: function (d) {
+      keys.push(d);
+      return nest;
+    },
+    sortKeys: function (order) {
+      sortKeys[keys.length - 1] = order;
+      return nest;
+    },
+    sortValues: function (order) {
+      sortValues = order;
+      return nest;
+    },
+    rollup: function (f) {
+      rollup = f;
+      return nest;
+    }
+  };
+}
+
+function createObject() {
+  return {};
+}
+
+function setObject(object, key, value) {
+  object[key] = value;
+}
+
+function createMap() {
+  return (0, _map.default)();
+}
+
+function setMap(map, key, value) {
+  map.set(key, value);
+}
+},{"./map":"node_modules/d3-collection/src/map.js"}],"node_modules/d3-collection/src/set.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _map = _interopRequireWildcard(require("./map"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function Set() {}
+
+var proto = _map.default.prototype;
+Set.prototype = set.prototype = {
+  constructor: Set,
+  has: proto.has,
+  add: function (value) {
+    value += "";
+    this[_map.prefix + value] = value;
+    return this;
+  },
+  remove: proto.remove,
+  clear: proto.clear,
+  values: proto.keys,
+  size: proto.size,
+  empty: proto.empty,
+  each: proto.each
+};
+
+function set(object, f) {
+  var set = new Set(); // Copy constructor.
+
+  if (object instanceof Set) object.each(function (value) {
+    set.add(value);
+  }); // Otherwise, assume it’s an array.
+  else if (object) {
+    var i = -1,
+        n = object.length;
+    if (f == null) while (++i < n) set.add(object[i]);else while (++i < n) set.add(f(object[i], i, object));
+  }
+  return set;
+}
+
+var _default = set;
+exports.default = _default;
+},{"./map":"node_modules/d3-collection/src/map.js"}],"node_modules/d3-collection/src/keys.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+function _default(map) {
+  var keys = [];
+
+  for (var key in map) keys.push(key);
+
+  return keys;
+}
+},{}],"node_modules/d3-collection/src/values.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+function _default(map) {
+  var values = [];
+
+  for (var key in map) values.push(map[key]);
+
+  return values;
+}
+},{}],"node_modules/d3-collection/src/entries.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+function _default(map) {
+  var entries = [];
+
+  for (var key in map) entries.push({
+    key: key,
+    value: map[key]
+  });
+
+  return entries;
+}
+},{}],"node_modules/d3-collection/src/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "nest", {
+  enumerable: true,
+  get: function () {
+    return _nest.default;
+  }
+});
+Object.defineProperty(exports, "set", {
+  enumerable: true,
+  get: function () {
+    return _set.default;
+  }
+});
+Object.defineProperty(exports, "map", {
+  enumerable: true,
+  get: function () {
+    return _map.default;
+  }
+});
+Object.defineProperty(exports, "keys", {
+  enumerable: true,
+  get: function () {
+    return _keys.default;
+  }
+});
+Object.defineProperty(exports, "values", {
+  enumerable: true,
+  get: function () {
+    return _values.default;
+  }
+});
+Object.defineProperty(exports, "entries", {
+  enumerable: true,
+  get: function () {
+    return _entries.default;
+  }
+});
+
+var _nest = _interopRequireDefault(require("./nest"));
+
+var _set = _interopRequireDefault(require("./set"));
+
+var _map = _interopRequireDefault(require("./map"));
+
+var _keys = _interopRequireDefault(require("./keys"));
+
+var _values = _interopRequireDefault(require("./values"));
+
+var _entries = _interopRequireDefault(require("./entries"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+},{"./nest":"node_modules/d3-collection/src/nest.js","./set":"node_modules/d3-collection/src/set.js","./map":"node_modules/d3-collection/src/map.js","./keys":"node_modules/d3-collection/src/keys.js","./values":"node_modules/d3-collection/src/values.js","./entries":"node_modules/d3-collection/src/entries.js"}],"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":[function(require,module,exports) {
 module.exports = "/Copy of Data for Visualizations - Issue areas by Engagement Type.b9bfafbb.csv";
 },{}],"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":[function(require,module,exports) {
 module.exports = "/Copy of Data for Visualizations - Output Types by Engagement Type.f216aa58.csv";
+},{}],"data/Copy of Data for Visualizations - Programs Awards Count.csv":[function(require,module,exports) {
+module.exports = "/Copy of Data for Visualizations - Programs Awards Count.eb55250e.csv";
 },{}],"scripts.js":[function(require,module,exports) {
 "use strict";
 
@@ -20586,12 +20938,17 @@ var _d3ScaleChromatic = require("d3-scale-chromatic");
 
 var _d3Color = require("d3-color");
 
+var _d3Collection = require("d3-collection");
+
 var issuesToEngagement = require("./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv");
 
 var engagementToOutput = require("./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv");
 
+var programAwardsCount = require("./data/Copy of Data for Visualizations - Programs Awards Count.csv");
+
 var d3 = Object.assign({}, {
   csv: _d3Fetch.csv,
+  nest: _d3Collection.nest,
   select: _d3Selection.select,
   selectAll: _d3Selection.selectAll,
   json: _d3Fetch.json,
@@ -20614,7 +20971,7 @@ var margin = {
   right: 10
 };
 var width = 1200;
-var height = 600;
+var height = 2000;
 /*
   FORMATTING HELPERS
 */
@@ -20625,7 +20982,17 @@ var formatNumber = function formatNumber(d) {
   return d;
 };
 
-var color = d3.scaleOrdinal(_d3ScaleChromatic.schemeCategory10);
+var color = d3.scaleOrdinal(_d3ScaleChromatic.schemeCategory10); // SETUP VARIABLES
+
+var programAwards;
+var groupCol = 'Issue Area Tags\n(pick ONE) ';
+var groupEngagement = 'Engagement Type';
+var groupCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
+var awardsData;
+var outputsData;
+var outputEngagement = 'Engagement Type';
+var outputPrimary = 'Primary Output\n(pick ONE)';
+var outputCount = 'COUNTA of Primary Output\n(pick ONE)';
 /*
   APPEND SVG TO PAGE
 */
@@ -20635,7 +21002,7 @@ var svg = d3.select('body').append('svg').attr('width', width).attr('height', he
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().nodeWidth(20).nodePadding(10).size([width, height]);
+var sankeyGraph = d3.sankey().nodeWidth(30).nodePadding(20).size([width, height]);
 var path = sankeyGraph.links();
 /**
  *  ADD TOOLTIPS
@@ -20646,7 +21013,7 @@ var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('op
   FORMAT DATA
 */
 
-Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
+Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput), d3.csv(programAwardsCount)]) // begin
 .then(function (data) {
   var graph = {
     nodes: [],
@@ -20656,8 +21023,16 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
     var sourceCol = 'Issue Area Tags\r\n(pick ONE) ';
     var targetCol = 'Engagement Type';
     var valueCol = 'COUNTA of Issue Area Tags\r\n(pick ONE) ';
+    /**
+     *  ADD PROGRAMS AND AWARDS TO ISSUES
+     */
+
+    programAwards = d3.nest().key(function (d) {
+      return d[groupCol];
+    }).entries(data[2]);
     graph.nodes.push({
-      name: d[sourceCol]
+      name: d[sourceCol],
+      nodeType: 'issue'
     });
     graph.nodes.push({
       name: d[targetCol]
@@ -20669,14 +21044,15 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
     });
   });
   /*
-  */
+   */
 
   data[1].forEach(function (d) {
     var sourceCol = 'Engagement Type';
     var targetCol = 'Primary Output\n(pick ONE)';
     var valueCol = 'COUNTA of Primary Output\n(pick ONE)';
     graph.nodes.push({
-      name: d[sourceCol]
+      name: d[sourceCol],
+      nodeType: 'engagement'
     });
     graph.nodes.push({
       name: d[targetCol]
@@ -20687,6 +21063,9 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
       value: d[valueCol]
     });
   });
+  outputsData = d3.nest().key(function (d) {
+    return d['Engagement Type'];
+  }).entries(data[1]);
   var uniqueNodesStr = new Set(graph.nodes.map(function (node) {
     return JSON.stringify(node);
   })); // return unique nodes
@@ -20715,24 +21094,45 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
   }).enter().append('path').attr('class', 'link').attr('d', d3.sankeyLinkHorizontal()).attr('stroke-width', function (d) {
     return d.width;
   });
-  /* ADD LINK TITLES: currently only showing on hover tooltip*/
-
-  link.append('title').text(function (d) {
-    return "".concat(d.source.name, " \u2192 ").concat(d.target.name);
-  });
   /**
    *  ADD TOOLTIPS
    */
 
-  link.on('mouseover', function (d, i) {
-    console.log(d.target);
-    tooltip.html("<p>".concat(d.target.textContent, "</p>")).style('left', d.clientX + 'px').style('top', d.clientY + 'px').style('opacity', 1);
+  link.on('mouseover', function (mouseEvent, data) {
+    var linkData = programAwards.filter(function (program) {
+      return program.key === data.source.name;
+    })[0];
+
+    if (linkData) {
+      awardsData = linkData.values.reduce(function (acc, program) {
+        return acc += "".concat(program['Engagement Type'], " - ").concat(program[groupCount], " Awards </br>");
+      }, "");
+    }
+
+    console.log(linkData);
+    var outputData = outputsData.filter(function (output) {
+      return output.key === data.source.name;
+    })[0];
+    var outputTypesCount;
+    var outputDetail;
+
+    if (outputData) {
+      outputTypesCount = outputData && outputData.values.length;
+      outputDetail = outputData.values.reduce(function (acc, output) {
+        return acc += "".concat(output[outputPrimary], " - ").concat(output[outputCount], "</br>");
+      }, "");
+    }
+
+    var tooltipHtml = data.source.nodeType === 'issue' ? "\n        <div class=\"details\">\n        <div class=\"issue-title\">\n          ".concat(data.source.name, "\n        </div>\n          <div class=\"total-programs\">\n            ").concat(linkData && linkData.values.length, " Projects\n          </div>\n          <div class=\"total-awards\">\n            ").concat(awardsData && awardsData, "\n          </div>\n        </div>\n      ") : "<div class=\"details\">\n                <div class=\"issue-title\">\n                  ".concat(data.source.name, "\n                </div>\n                <div class=\"total-programs\">\n                  ").concat(outputTypesCount, " Output Types\n                </div>\n                <div class=\"total-awards\">\n                  ").concat(outputDetail, "\n                </div>\n              </div>");
+    tooltip.html(tooltipHtml).style('left', mouseEvent.pageX + 'px').style('top', mouseEvent.pageY + 'px').style('opacity', 1);
   }).on('mouseout', function (d) {
     tooltip.style('opacity', 0);
   });
   /* ADD NODES */
 
-  var node = svg.append('g').selectAll('.node').data(chart.nodes).enter().append('g').attr('class', 'node');
+  var node = svg.append('g').selectAll('.node').data(function () {
+    return chart.nodes;
+  }).enter().append('g').attr('class', 'node');
   /* ADD NODE RECTANGLES */
 
   node.append('rect').attr('x', function (d) {
@@ -20745,8 +21145,6 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
     return d.color = color(d.name);
   }).style('stroke', function (d) {
     return d3.rgb(d.color).darker(2);
-  }).append('title').text(function (d) {
-    return "".concat(d.name, " ").concat(d.value);
   });
   /* ADD NODE TITLES */
 
@@ -20762,7 +21160,7 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
     return d.x1 + 6;
   }).attr('text-anchor', 'start');
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv","./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv","./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv","./data/Copy of Data for Visualizations - Programs Awards Count.csv":"data/Copy of Data for Visualizations - Programs Awards Count.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -20790,7 +21188,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61145" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51824" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

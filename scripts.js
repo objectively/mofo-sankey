@@ -7,14 +7,17 @@ import { format } from 'd3-format';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
 import { rgb } from 'd3-color';
+import { nest } from 'd3-collection';
 
 let issuesToEngagement = require(`./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv`);
 let engagementToOutput = require(`./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv`);
+let programAwardsCount = require(`./data/Copy of Data for Visualizations - Programs Awards Count.csv`);
 
 const d3 = Object.assign(
   {},
   {
     csv,
+    nest,
     select,
     selectAll,
     json,
@@ -41,7 +44,7 @@ const margin = {
 };
 
 const width = 1200;
-const height = 600;
+const height = 2000;
 
 /*
   FORMATTING HELPERS
@@ -50,6 +53,17 @@ const height = 600;
 const formatSetting = d3.format('.0f');
 const formatNumber = (d) => d;
 const color = d3.scaleOrdinal(schemeCategory10);
+
+// SETUP VARIABLES
+let programAwards;
+let groupCol = 'Issue Area Tags\n(pick ONE) ';
+let groupEngagement = 'Engagement Type';
+let groupCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
+let awardsData;
+let outputsData;
+let outputEngagement = 'Engagement Type';
+let outputPrimary = 'Primary Output\n(pick ONE)';
+let outputCount = 'COUNTA of Primary Output\n(pick ONE)';
 
 /*
   APPEND SVG TO PAGE
@@ -69,8 +83,8 @@ let svg = d3
 
 let sankeyGraph = d3
   .sankey()
-  .nodeWidth(20)
-  .nodePadding(10)
+  .nodeWidth(30)
+  .nodePadding(20)
   .size([width, height]);
 
 let path = sankeyGraph.links();
@@ -82,14 +96,17 @@ let tooltip = d3
   .select('body')
   .append('div')
   .attr('class', 'tooltip')
-  .style('opacity', 0)
-
+  .style('opacity', 0);
 
 /* 
   FORMAT DATA
 */
 
-Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
+Promise.all([
+  d3.csv(issuesToEngagement),
+  d3.csv(engagementToOutput),
+  d3.csv(programAwardsCount)
+]) // begin
   .then((data) => {
     let graph = { nodes: [], links: [] };
 
@@ -98,7 +115,20 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
       let targetCol = 'Engagement Type';
       let valueCol = 'COUNTA of Issue Area Tags\r\n(pick ONE) ';
 
-      graph.nodes.push({ name: d[sourceCol] });
+      /**
+       *  ADD PROGRAMS AND AWARDS TO ISSUES
+       */
+
+      programAwards = d3
+        .nest()
+        .key((d) => d[groupCol])
+        .entries(data[2]);
+
+      graph.nodes.push({
+        name: d[sourceCol],
+        nodeType: 'issue'
+      });
+
       graph.nodes.push({ name: d[targetCol] });
       graph.links.push({
         source: d[sourceCol],
@@ -106,13 +136,14 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
         value: d[valueCol]
       });
     });
-/*
-*/
+
+    /*
+     */
     data[1].forEach((d) => {
       let sourceCol = 'Engagement Type';
       let targetCol = 'Primary Output\n(pick ONE)';
       let valueCol = 'COUNTA of Primary Output\n(pick ONE)';
-      graph.nodes.push({ name: d[sourceCol] });
+      graph.nodes.push({ name: d[sourceCol], nodeType: 'engagement' });
       graph.nodes.push({ name: d[targetCol] });
       graph.links.push({
         source: d[sourceCol],
@@ -120,6 +151,12 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
         value: d[valueCol]
       });
     });
+
+    outputsData = d3
+      .nest()
+      .key((d) => d['Engagement Type'])
+      .entries(data[1]);
+
     let uniqueNodesStr = new Set(
       graph.nodes.map((node) => JSON.stringify(node))
     );
@@ -155,32 +192,78 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
       .attr('d', d3.sankeyLinkHorizontal())
       .attr('stroke-width', (d) => d.width);
 
-    /* ADD LINK TITLES: currently only showing on hover tooltip*/
-    link.append('title').text((d) => {
-      return `${d.source.name} → ${d.target.name}`;
-    });
-
     /**
      *  ADD TOOLTIPS
      */
     link
-      .on('mouseover', function (d, i) {
-        console.log(d.target)
+      .on('mouseover', function (mouseEvent, data) {
+        let linkData = programAwards.filter(
+          (program) => program.key === data.source.name
+        )[0];
+
+        if (linkData) {
+          awardsData = linkData.values.reduce((acc, program) => {
+            return (acc += `${program['Engagement Type']} - ${program[groupCount]} Awards </br>`);
+          }, ``);
+        }
+        console.log(linkData);
+        let outputData = outputsData.filter(
+          (output) => output.key === data.source.name
+        )[0];
+        let outputTypesCount;
+        let outputDetail;
+        if (outputData) {
+          outputTypesCount = outputData && outputData.values.length;
+
+          outputDetail = outputData.values.reduce((acc, output) => {
+            return (acc += `${output[outputPrimary]} - ${output[outputCount]}</br>`);
+          }, ``);
+        }
+
+        let tooltipHtml =
+          data.source.nodeType === 'issue'
+            ? `
+        <div class="details">
+        <div class="issue-title">
+          ${data.source.name}
+        </div>
+          <div class="total-programs">
+            ${linkData && linkData.values.length} Projects
+          </div>
+          <div class="total-awards">
+            ${awardsData && awardsData}
+          </div>
+        </div>
+      `
+            : `<div class="details">
+                <div class="issue-title">
+                  ${data.source.name}
+                </div>
+                <div class="total-programs">
+                  ${outputTypesCount} Output Types
+                </div>
+                <div class="total-awards">
+                  ${outputDetail}
+                </div>
+              </div>`;
+
         tooltip
-          .html(`<p>${d.target.textContent}</p>`)
-          .style('left', d.clientX + 'px')
-          .style('top', d.clientY + 'px')
-          .style('opacity', 1)
+          .html(tooltipHtml)
+          .style('left', mouseEvent.pageX + 'px')
+          .style('top', mouseEvent.pageY + 'px')
+          .style('opacity', 1);
       })
       .on('mouseout', function (d) {
-        tooltip.style('opacity', 0)
+        tooltip.style('opacity', 0);
       });
 
     /* ADD NODES */
     let node = svg
       .append('g')
       .selectAll('.node')
-      .data(chart.nodes)
+      .data(() => {
+        return chart.nodes;
+      })
       .enter()
       .append('g')
       .attr('class', 'node');
@@ -195,9 +278,7 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
       .style('fill', (d) => {
         return (d.color = color(d.name));
       })
-      .style('stroke', (d) => d3.rgb(d.color).darker(2))
-      .append('title')
-      .text((d) => `${d.name} ${d.value}`);
+      .style('stroke', (d) => d3.rgb(d.color).darker(2));
 
     /* ADD NODE TITLES */
     node
@@ -206,7 +287,9 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput)]) // begin
       .attr('y', (d) => (d.y1 + d.y0) / 2)
       .attr('dy', '0.35em')
       .attr('text-anchor', 'end')
-      .text((d) => d.name)
+      .text((d) => {
+        return d.name;
+      })
       .filter((d) => d.x0 < width / 2)
       .attr('x', (d) => d.x1 + 6)
       .attr('text-anchor', 'start');
