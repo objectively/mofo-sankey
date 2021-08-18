@@ -13,6 +13,10 @@ let issuesToEngagement = require(`./data/Copy of Data for Visualizations - Issue
 let engagementToOutput = require(`./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv`);
 let programAwardsCount = require(`./data/Copy of Data for Visualizations - Programs Awards Count.csv`);
 
+let realIssuesToEngagement = require(`./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
+let realEngagementToOutput = require(`./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
+let realProgramAwardsCount = require(`./data/real/Sankey data - Moz F&A - Awards Count.csv`);
+
 const d3 = Object.assign(
   {},
   {
@@ -44,7 +48,7 @@ const margin = {
 };
 
 const width = 1200;
-const height = 2000;
+const height = 1000;
 
 /*
   FORMATTING HELPERS
@@ -56,14 +60,15 @@ const color = d3.scaleOrdinal(schemeCategory10);
 
 // SETUP VARIABLES
 let programAwards;
+let realProgramAwards;
 let groupCol = 'Issue Area Tags\n(pick ONE) ';
 let groupEngagement = 'Engagement Type';
 let groupCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 let awardsData;
 let outputsData;
-let outputEngagement = 'Engagement Type';
-let outputPrimary = 'Primary Output\n(pick ONE)';
-let outputCount = 'COUNTA of Primary Output\n(pick ONE)';
+let outputEngagement = 'Program';
+let outputPrimary = 'Issue Area Tags\n(pick ONE) ';
+let outputCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 
 /*
   APPEND SVG TO PAGE
@@ -103,23 +108,30 @@ let tooltip = d3
 */
 
 Promise.all([
-  d3.csv(issuesToEngagement),
-  d3.csv(engagementToOutput),
-  d3.csv(programAwardsCount)
+  // d3.csv(issuesToEngagement),
+  // d3.csv(engagementToOutput),
+  // d3.csv(programAwardsCount)
+  d3.csv(realIssuesToEngagement),
+  d3.csv(realEngagementToOutput),
+  d3.csv(realProgramAwardsCount)
 ]) // begin
   .then((data) => {
     let graph = { nodes: [], links: [] };
 
     data[0].forEach((d) => {
-      let sourceCol = 'Issue Area Tags\r\n(pick ONE) ';
-      let targetCol = 'Engagement Type';
-      let valueCol = 'COUNTA of Issue Area Tags\r\n(pick ONE) ';
+      let sourceCol = 'Issue Area Tags\n(pick ONE) ';
+      let targetCol = 'Program';
+      let valueCol = 'Number of Awards'; // is this awards now
+
+      if (d[sourceCol] === d[targetCol]) {
+        // console.log(d[sourceCol]);
+      }
 
       /**
        *  ADD PROGRAMS AND AWARDS TO ISSUES
+       
        */
-
-      programAwards = d3
+      realProgramAwards = d3
         .nest()
         .key((d) => d[groupCol])
         .entries(data[2]);
@@ -137,12 +149,10 @@ Promise.all([
       });
     });
 
-    /*
-     */
     data[1].forEach((d) => {
-      let sourceCol = 'Engagement Type';
+      let sourceCol = 'Program';
       let targetCol = 'Primary Output\n(pick ONE)';
-      let valueCol = 'COUNTA of Primary Output\n(pick ONE)';
+      let valueCol = ' Number of awards';
       graph.nodes.push({ name: d[sourceCol], nodeType: 'engagement' });
       graph.nodes.push({ name: d[targetCol] });
       graph.links.push({
@@ -152,9 +162,12 @@ Promise.all([
       });
     });
 
+    /*
+     */
     outputsData = d3
       .nest()
-      .key((d) => d['Engagement Type'])
+      .key((d) => d['Program'])
+      .key((d) => d['Primary Output\n(pick ONE)'])
       .entries(data[1]);
 
     let uniqueNodesStr = new Set(
@@ -197,54 +210,54 @@ Promise.all([
      */
     link
       .on('mouseover', function (mouseEvent, data) {
-        let linkData = programAwards.filter(
+        let linkData = realProgramAwards.filter(
           (program) => program.key === data.source.name
         )[0];
 
         if (linkData) {
           awardsData = linkData.values.reduce((acc, program) => {
-            return (acc += `${program['Engagement Type']} - ${program[groupCount]} Awards </br>`);
+            return (acc += `${program['Program']} - ${program[groupCount]} Awards </br>`);
           }, ``);
         }
-        console.log(linkData);
+
         let outputData = outputsData.filter(
           (output) => output.key === data.source.name
         )[0];
         let outputTypesCount;
         let outputDetail;
         if (outputData) {
-          outputTypesCount = outputData && outputData.values.length;
 
+          outputTypesCount = outputData && outputData.values.length;
           outputDetail = outputData.values.reduce((acc, output) => {
-            return (acc += `${output[outputPrimary]} - ${output[outputCount]}</br>`);
+            return (acc += `${output.key} - ${output.values.length} </br>`);
           }, ``);
         }
 
         let tooltipHtml =
           data.source.nodeType === 'issue'
             ? `
-        <div class="details">
-        <div class="issue-title">
-          ${data.source.name}
-        </div>
-          <div class="total-programs">
-            ${linkData && linkData.values.length} Projects
-          </div>
-          <div class="total-awards">
-            ${awardsData && awardsData}
-          </div>
-        </div>
-      `
+              <div class="details">
+              <div class="issue-title">
+              ${data.source.name}
+              </div>
+              <div class="total-programs">
+              ${linkData && linkData.values.length} Projects
+              </div>
+              <div class="total-awards">
+              ${awardsData && awardsData}
+              </div>
+              </div>
+              `
             : `<div class="details">
-                <div class="issue-title">
-                  ${data.source.name}
-                </div>
-                <div class="total-programs">
-                  ${outputTypesCount} Output Types
-                </div>
-                <div class="total-awards">
-                  ${outputDetail}
-                </div>
+              <div class="issue-title">
+              ${data.source.name}
+              </div>
+              <div class="total-programs">
+              ${outputTypesCount} Output Types
+              </div>
+              <div class="total-awards">
+              ${outputDetail}
+              </div>
               </div>`;
 
         tooltip
