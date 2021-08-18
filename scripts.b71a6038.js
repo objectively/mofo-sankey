@@ -20919,6 +20919,12 @@ module.exports = "/Copy of Data for Visualizations - Issue areas by Engagement T
 module.exports = "/Copy of Data for Visualizations - Output Types by Engagement Type.f216aa58.csv";
 },{}],"data/Copy of Data for Visualizations - Programs Awards Count.csv":[function(require,module,exports) {
 module.exports = "/Copy of Data for Visualizations - Programs Awards Count.eb55250e.csv";
+},{}],"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":[function(require,module,exports) {
+module.exports = "/Sankey data - Moz F&A - Issue Area _ Program _ Output.b5bad402.csv";
+},{}],"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":[function(require,module,exports) {
+module.exports = "/Sankey data - Moz F&A - Output _ Program _ Issue Area.04826edd.csv";
+},{}],"data/real/Sankey data - Moz F&A - Awards Count.csv":[function(require,module,exports) {
+module.exports = "/Sankey data - Moz F&A - Awards Count.3cdeec21.csv";
 },{}],"scripts.js":[function(require,module,exports) {
 "use strict";
 
@@ -20946,6 +20952,12 @@ var engagementToOutput = require("./data/Copy of Data for Visualizations - Outpu
 
 var programAwardsCount = require("./data/Copy of Data for Visualizations - Programs Awards Count.csv");
 
+var realIssuesToEngagement = require("./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv");
+
+var realEngagementToOutput = require("./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv");
+
+var realProgramAwardsCount = require("./data/real/Sankey data - Moz F&A - Awards Count.csv");
+
 var d3 = Object.assign({}, {
   csv: _d3Fetch.csv,
   nest: _d3Collection.nest,
@@ -20971,7 +20983,7 @@ var margin = {
   right: 10
 };
 var width = 1200;
-var height = 2000;
+var height = 1000;
 /*
   FORMATTING HELPERS
 */
@@ -20985,14 +20997,15 @@ var formatNumber = function formatNumber(d) {
 var color = d3.scaleOrdinal(_d3ScaleChromatic.schemeCategory10); // SETUP VARIABLES
 
 var programAwards;
+var realProgramAwards;
 var groupCol = 'Issue Area Tags\n(pick ONE) ';
 var groupEngagement = 'Engagement Type';
 var groupCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 var awardsData;
 var outputsData;
-var outputEngagement = 'Engagement Type';
-var outputPrimary = 'Primary Output\n(pick ONE)';
-var outputCount = 'COUNTA of Primary Output\n(pick ONE)';
+var outputEngagement = 'Program';
+var outputPrimary = 'Issue Area Tags\n(pick ONE) ';
+var outputCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 /*
   APPEND SVG TO PAGE
 */
@@ -21013,21 +21026,29 @@ var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('op
   FORMAT DATA
 */
 
-Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput), d3.csv(programAwardsCount)]) // begin
+Promise.all([// d3.csv(issuesToEngagement),
+// d3.csv(engagementToOutput),
+// d3.csv(programAwardsCount)
+d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgramAwardsCount)]) // begin
 .then(function (data) {
   var graph = {
     nodes: [],
     links: []
   };
   data[0].forEach(function (d) {
-    var sourceCol = 'Issue Area Tags\r\n(pick ONE) ';
-    var targetCol = 'Engagement Type';
-    var valueCol = 'COUNTA of Issue Area Tags\r\n(pick ONE) ';
+    var sourceCol = 'Issue Area Tags\n(pick ONE) ';
+    var targetCol = 'Program';
+    var valueCol = 'Number of Awards'; // is this awards now
+
+    if (d[sourceCol] === d[targetCol]) {// console.log(d[sourceCol]);
+    }
     /**
      *  ADD PROGRAMS AND AWARDS TO ISSUES
+     
      */
 
-    programAwards = d3.nest().key(function (d) {
+
+    realProgramAwards = d3.nest().key(function (d) {
       return d[groupCol];
     }).entries(data[2]);
     graph.nodes.push({
@@ -21043,13 +21064,10 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput), d3.csv(prog
       value: d[valueCol]
     });
   });
-  /*
-   */
-
   data[1].forEach(function (d) {
-    var sourceCol = 'Engagement Type';
+    var sourceCol = 'Program';
     var targetCol = 'Primary Output\n(pick ONE)';
-    var valueCol = 'COUNTA of Primary Output\n(pick ONE)';
+    var valueCol = ' Number of awards';
     graph.nodes.push({
       name: d[sourceCol],
       nodeType: 'engagement'
@@ -21063,8 +21081,13 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput), d3.csv(prog
       value: d[valueCol]
     });
   });
+  /*
+   */
+
   outputsData = d3.nest().key(function (d) {
-    return d['Engagement Type'];
+    return d['Program'];
+  }).key(function (d) {
+    return d['Primary Output\n(pick ONE)'];
   }).entries(data[1]);
   var uniqueNodesStr = new Set(graph.nodes.map(function (node) {
     return JSON.stringify(node);
@@ -21099,17 +21122,16 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput), d3.csv(prog
    */
 
   link.on('mouseover', function (mouseEvent, data) {
-    var linkData = programAwards.filter(function (program) {
+    var linkData = realProgramAwards.filter(function (program) {
       return program.key === data.source.name;
     })[0];
 
     if (linkData) {
       awardsData = linkData.values.reduce(function (acc, program) {
-        return acc += "".concat(program['Engagement Type'], " - ").concat(program[groupCount], " Awards </br>");
+        return acc += "".concat(program['Program'], " - ").concat(program[groupCount], " Awards </br>");
       }, "");
     }
 
-    console.log(linkData);
     var outputData = outputsData.filter(function (output) {
       return output.key === data.source.name;
     })[0];
@@ -21119,11 +21141,11 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput), d3.csv(prog
     if (outputData) {
       outputTypesCount = outputData && outputData.values.length;
       outputDetail = outputData.values.reduce(function (acc, output) {
-        return acc += "".concat(output[outputPrimary], " - ").concat(output[outputCount], "</br>");
+        return acc += "".concat(output.key, " - ").concat(output.values.length, " </br>");
       }, "");
     }
 
-    var tooltipHtml = data.source.nodeType === 'issue' ? "\n        <div class=\"details\">\n        <div class=\"issue-title\">\n          ".concat(data.source.name, "\n        </div>\n          <div class=\"total-programs\">\n            ").concat(linkData && linkData.values.length, " Projects\n          </div>\n          <div class=\"total-awards\">\n            ").concat(awardsData && awardsData, "\n          </div>\n        </div>\n      ") : "<div class=\"details\">\n                <div class=\"issue-title\">\n                  ".concat(data.source.name, "\n                </div>\n                <div class=\"total-programs\">\n                  ").concat(outputTypesCount, " Output Types\n                </div>\n                <div class=\"total-awards\">\n                  ").concat(outputDetail, "\n                </div>\n              </div>");
+    var tooltipHtml = data.source.nodeType === 'issue' ? "\n              <div class=\"details\">\n              <div class=\"issue-title\">\n              ".concat(data.source.name, "\n              </div>\n              <div class=\"total-programs\">\n              ").concat(linkData && linkData.values.length, " Projects\n              </div>\n              <div class=\"total-awards\">\n              ").concat(awardsData && awardsData, "\n              </div>\n              </div>\n              ") : "<div class=\"details\">\n              <div class=\"issue-title\">\n              ".concat(data.source.name, "\n              </div>\n              <div class=\"total-programs\">\n              ").concat(outputTypesCount, " Output Types\n              </div>\n              <div class=\"total-awards\">\n              ").concat(outputDetail, "\n              </div>\n              </div>");
     tooltip.html(tooltipHtml).style('left', mouseEvent.pageX + 'px').style('top', mouseEvent.pageY + 'px').style('opacity', 1);
   }).on('mouseout', function (d) {
     tooltip.style('opacity', 0);
@@ -21160,7 +21182,7 @@ Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput), d3.csv(prog
     return d.x1 + 6;
   }).attr('text-anchor', 'start');
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv","./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv","./data/Copy of Data for Visualizations - Programs Awards Count.csv":"data/Copy of Data for Visualizations - Programs Awards Count.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv","./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv","./data/Copy of Data for Visualizations - Programs Awards Count.csv":"data/Copy of Data for Visualizations - Programs Awards Count.csv","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv","./data/real/Sankey data - Moz F&A - Awards Count.csv":"data/real/Sankey data - Moz F&A - Awards Count.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -21188,7 +21210,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51824" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55829" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
