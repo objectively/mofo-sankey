@@ -1,5 +1,5 @@
 import 'regenerator-runtime/runtime';
-
+var slugify = require('slugify')
 import { select, selectAll } from 'd3-selection';
 import { csv, json } from 'd3-fetch';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
@@ -148,6 +148,7 @@ Promise.all([
         value: d[valueCol]
       });
     });
+    /*
 
     data[1].forEach((d) => {
       let sourceCol = 'Program';
@@ -161,9 +162,8 @@ Promise.all([
         value: d[valueCol]
       });
     });
-
-    /*
      */
+
     outputsData = d3
       .nest()
       .key((d) => d['Program'])
@@ -201,13 +201,18 @@ Promise.all([
       })
       .enter()
       .append('path')
-      .attr('class', 'link')
+      .attr('class', (d) => {
+
+        return `link ${slugify(d.source.name).toLowerCase()}`;
+      })
       .attr('d', d3.sankeyLinkHorizontal())
       .attr('stroke-width', (d) => d.width);
 
     /**
      *  ADD TOOLTIPS
      */
+    link.on('mouseover', (e) => {}).on('mouseout', (e) => {});
+    /*
     link
       .on('mouseover', function (mouseEvent, data) {
         let linkData = realProgramAwards.filter(
@@ -226,7 +231,6 @@ Promise.all([
         let outputTypesCount;
         let outputDetail;
         if (outputData) {
-
           outputTypesCount = outputData && outputData.values.length;
           outputDetail = outputData.values.reduce((acc, output) => {
             return (acc += `${output.key} - ${output.values.length} </br>`);
@@ -269,7 +273,7 @@ Promise.all([
       .on('mouseout', function (d) {
         tooltip.style('opacity', 0);
       });
-
+*/
     /* ADD NODES */
     let node = svg
       .append('g')
@@ -284,6 +288,7 @@ Promise.all([
     /* ADD NODE RECTANGLES */
     node
       .append('rect')
+      .attr('class', (d) => `rect ${slugify(d.name).toLowerCase()} issue-area`)
       .attr('x', (d) => d.x0)
       .attr('y', (d) => d.y0)
       .attr('height', (d) => d.y1 - d.y0)
@@ -292,6 +297,70 @@ Promise.all([
         return (d.color = color(d.name));
       })
       .style('stroke', (d) => d3.rgb(d.color).darker(2));
+
+    /* ADD TOOLTIPS TO NODE RECTANGLES */
+
+    d3.selectAll(`.rect`)
+      .on('mouseover', (event, data) => {
+        console.log(data);
+        let linkData = realProgramAwards.filter(
+          (program) => program.key === data.name
+        )[0];
+
+        if (linkData) {
+          awardsData = linkData.values.reduce((acc, program) => {
+            return (acc += `${program['Program']} - ${program[groupCount]} Awards </br>`);
+          }, ``);
+        }
+
+        let outputData = outputsData.filter(
+          (output) => output.key === data.name
+        )[0];
+        let outputTypesCount;
+        let outputDetail;
+        if (outputData) {
+          outputTypesCount = outputData && outputData.values.length;
+          outputDetail = outputData.values.reduce((acc, output) => {
+            return (acc += `${output.key} - ${output.values.length} </br>`);
+          }, ``);
+        }
+
+        let tooltipHtml =
+          data.nodeType === 'issue'
+            ? `
+          <div class="details">
+          <div class="issue-title">
+          ${data.name}
+          </div>
+          <div class="total-programs">
+          ${linkData && linkData.values.length} Projects
+          </div>
+          <div class="total-awards">
+          ${awardsData && awardsData}
+          </div>
+          </div>
+          `
+            : `<div class="details">
+          <div class="issue-title">
+          ${data.name}
+          </div>
+          <div class="total-programs">
+          ${outputTypesCount} Output Types
+          </div>
+          <div class="total-awards">
+          ${outputDetail}
+          </div>
+          </div>`;
+
+        tooltip
+          .html(tooltipHtml)
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY + 'px')
+          .style('opacity', 1);
+      })
+      .on('mouseout', () => {
+        tooltip.style('opacity', 0);
+      });
 
     /* ADD NODE TITLES */
     node
@@ -306,4 +375,12 @@ Promise.all([
       .filter((d) => d.x0 < width / 2)
       .attr('x', (d) => d.x1 + 6)
       .attr('text-anchor', 'start');
+
+
+    /** HIGHLIGHT ALL RELATED PATHS ON NODE MOUSEOVER */
+    d3.selectAll('.node')
+      .on('mouseover', (event, data) => {
+        d3.selectAll(`.${slugify(data.name).toLowerCase()}`).style('stroke-opacity', .7)
+      })
+      .on('mouseout', () => { d3.selectAll('.link').style('stroke-opacity', .2)})
   });
