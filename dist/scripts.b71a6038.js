@@ -21046,8 +21046,8 @@ var margin = {
   left: 10,
   right: 10
 };
-var width = 800;
-var height = 600;
+var width = 1000;
+var height = 800;
 /*
   FORMATTING HELPERS
 */
@@ -21072,6 +21072,7 @@ var outputPrimary = 'Issue Area Tags\n(pick ONE) ';
 var outputCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 var nestedIssues;
 var issuesProgramDetail;
+var programsToOutput;
 /*
   APPEND SVG TO PAGE
 */
@@ -21081,7 +21082,7 @@ var svg = d3.select('body').append('svg').attr('width', width).attr('height', he
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().nodeWidth(30).nodePadding(20).size([width, height]);
+var sankeyGraph = d3.sankey().nodeWidth(20).nodePadding(5).size([width, height]);
 var path = sankeyGraph.links();
 /**
  *  ADD TOOLTIPS
@@ -21120,8 +21121,7 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
   nestedIssues.forEach(function (data) {
     data.forEach(function (issue) {
       graph.nodes.push({
-        name: issue.source,
-        nodeType: 'issue'
+        name: issue.source
       });
       graph.nodes.push({
         name: issue.target
@@ -21132,35 +21132,43 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
         value: issue.totalAwards
       });
     });
-    /**
-     *  ADD PROGRAMS AND AWARDS TO ISSUES
-     
-     */
-    // realProgramAwards = d3
-    //   .nest()
-    //   .key((d) => d[groupCol])
-    //   .entries(data[2]);
-  });
-  /*
-   data[1].forEach((d) => {
-    let sourceCol = 'Program';
-    let targetCol = 'Primary Output\n(pick ONE)';
-    let valueCol = ' Number of awards';
-    graph.nodes.push({ name: d[sourceCol], nodeType: 'engagement' });
-    graph.nodes.push({ name: d[targetCol] });
-    graph.links.push({
-      source: d[sourceCol],
-      target: d[targetCol],
-      value: d[valueCol]
+  }); //store transformed data before replacing link names
+
+  issuesProgramDetail = graph.links;
+  /* TRANSFROM SECOND SANKEY*/
+
+  programsToOutput = d3.nest().key(function (d) {
+    return d['Program'];
+  }).key(function (d) {
+    return d['Primary Output\n(pick ONE)'];
+  }).entries(data[1]);
+  programsToOutput = programsToOutput.map(function (program) {
+    return program.values.map(function (value) {
+      return {
+        source: program.key,
+        target: value.key,
+        totalAwards: value.values.reduce(function (acc, award) {
+          return acc += parseInt(award[' Number of awards']);
+        }, 0)
+      };
     });
   });
-   */
-  // outputsData = d3
-  //   .nest()
-  //   .key((d) => d['Program'])
-  //   .key((d) => d['Primary Output\n(pick ONE)'])
-  //   .entries(data[1]);
-
+  console.log('programs to output');
+  programsToOutput.forEach(function (program) {
+    program.forEach(function (p) {
+      graph.nodes.push({
+        name: p.source
+      });
+      graph.nodes.push({
+        name: p.target
+      });
+      graph.links.push({
+        source: p.source,
+        target: p.target,
+        value: p.totalAwards
+      });
+    });
+  });
   var uniqueNodesStr = new Set(graph.nodes.map(function (node) {
     return JSON.stringify(node);
   })); // return unique nodes
@@ -21169,9 +21177,11 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
     return Object.assign({
       node: idx
     }, JSON.parse(node));
-  }); //store transformed data before replacing link names
-
-  issuesProgramDetail = graph.links; //replace link names
+  });
+  console.log('are these unique');
+  console.log(graph.nodes.map(function (n) {
+    return n.name;
+  }).sort()); //replace link names
 
   graph.links.forEach(function (d, i) {
     var graphMap = graph.nodes.map(function (node) {
@@ -21180,12 +21190,9 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
     graph.links[i].source = graphMap.indexOf(graph.links[i].source);
     graph.links[i].target = graphMap.indexOf(graph.links[i].target);
   });
-  console.log(graph);
   return graph;
 }).then(function (data) {
-  console.log(data);
   /* LOAD DATA */
-
   var chart = sankeyGraph(data);
   /* ADD LINKs */
 
@@ -21223,6 +21230,10 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
   }).attr('y', function (d) {
     return d.y0;
   }).attr('height', function (d) {
+    if (d.y1 - d.y0 == 0) {
+      console.log(d.name);
+    }
+
     return d.y1 - d.y0;
   }).attr('width', sankeyGraph.nodeWidth()).style('fill', function (d) {
     return d.color = color(d.name);
@@ -21240,20 +21251,9 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
       awardsData = nodeData.reduce(function (acc, issue) {
         return acc += "".concat(issue.target.name, " - ").concat(issue.value, " ").concat(issue.value > 1 ? 'awards' : "award", '</br>');
       }, "");
-    } // let outputData = outputsData.filter(
-    //   (output) => output.key === data.name
-    // )[0];
-    // let outputTypesCount;
-    // let outputDetail;
-    // if (outputData) {
-    //   outputTypesCount = outputData && outputData.values.length;
-    //   outputDetail = outputData.values.reduce((acc, output) => {
-    //     return (acc += `${output.key} - ${output.values.length} </br>`);
-    //   }, ``);
-    // }
+    }
 
-
-    var tooltipHtml = data.nodeType === 'issue' ? "\n          <div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.name, "\n          </div>\n          <div class=\"total-programs\">\n          ").concat(nodeData.length, " Programs\n          </div>\n          <div class=\"total-awards\">\n          ").concat(awardsData, "\n          </div>\n          </div>\n          ") : "<div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.name, "\n          </div>\n          <div class=\"total-programs\">\n          ").concat(outputTypesCount, " Output Types\n          </div>\n          <div class=\"total-awards\">\n          ").concat(outputDetail, "\n          </div>\n          </div>");
+    var tooltipHtml = data.nodeType === 'issue' ? "\n          <div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.name, "\n          </div>\n          <div class=\"total-programs\">\n          ").concat(nodeData.length, " Programs\n          </div>\n          <div class=\"total-awards\">\n          ").concat(awardsData, "\n          </div>\n          </div>\n          ") : "<div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.name, "\n          </div>\n          <div class=\"total-programs\">\n          X Output Types\n          </div>\n          <div class=\"total-awards\">\n          XDETAILX\n          </div>\n          </div>");
     tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
   }).on('mouseout', function () {
     tooltip.style('opacity', 0);

@@ -47,8 +47,8 @@ const margin = {
   right: 10
 };
 
-const width = 800;
-const height = 600;
+const width = 1000;
+const height = 800;
 
 /*
   FORMATTING HELPERS
@@ -71,6 +71,7 @@ let outputPrimary = 'Issue Area Tags\n(pick ONE) ';
 let outputCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 let nestedIssues;
 let issuesProgramDetail;
+let programsToOutput;
 /*
   APPEND SVG TO PAGE
 */
@@ -89,8 +90,8 @@ let svg = d3
 
 let sankeyGraph = d3
   .sankey()
-  .nodeWidth(30)
-  .nodePadding(20)
+  .nodeWidth(20)
+  .nodePadding(5)
   .size([width, height]);
 
 let path = sankeyGraph.links();
@@ -118,7 +119,6 @@ Promise.all([
 ]) // begin
   .then((data) => {
     let graph = { nodes: [], links: [] };
-
     nestedIssues = d3
       .nest()
       .key((d) => d['Issue Area Tags\n(pick ONE) '])
@@ -140,8 +140,7 @@ Promise.all([
     nestedIssues.forEach((data) => {
       data.forEach((issue) => {
         graph.nodes.push({
-          name: issue.source,
-          nodeType: 'issue'
+          name: issue.source
         });
 
         graph.nodes.push({ name: issue.target });
@@ -152,37 +151,42 @@ Promise.all([
           value: issue.totalAwards
         });
       });
-
-      /**
-       *  ADD PROGRAMS AND AWARDS TO ISSUES
-       
-       */
-      // realProgramAwards = d3
-      //   .nest()
-      //   .key((d) => d[groupCol])
-      //   .entries(data[2]);
     });
-    /*
 
-    data[1].forEach((d) => {
-      let sourceCol = 'Program';
-      let targetCol = 'Primary Output\n(pick ONE)';
-      let valueCol = ' Number of awards';
-      graph.nodes.push({ name: d[sourceCol], nodeType: 'engagement' });
-      graph.nodes.push({ name: d[targetCol] });
-      graph.links.push({
-        source: d[sourceCol],
-        target: d[targetCol],
-        value: d[valueCol]
+    //store transformed data before replacing link names
+    issuesProgramDetail = graph.links;
+
+    /* TRANSFROM SECOND SANKEY*/
+    programsToOutput = d3
+      .nest()
+      .key((d) => d['Program'])
+      .key((d) => d['Primary Output\n(pick ONE)'])
+      .entries(data[1]);
+
+    programsToOutput = programsToOutput.map((program) => {
+      return program.values.map((value) => {
+        return {
+          source: program.key,
+          target: value.key,
+          totalAwards: value.values.reduce((acc, award) => {
+            return (acc += parseInt(award[' Number of awards']));
+          }, 0)
+        };
       });
     });
-     */
+    console.log('programs to output');
 
-    // outputsData = d3
-    //   .nest()
-    //   .key((d) => d['Program'])
-    //   .key((d) => d['Primary Output\n(pick ONE)'])
-    //   .entries(data[1]);
+    programsToOutput.forEach((program) => {
+      program.forEach((p) => {
+        graph.nodes.push({ name: p.source });
+        graph.nodes.push({ name: p.target });
+        graph.links.push({
+          source: p.source,
+          target: p.target,
+          value: p.totalAwards
+        });
+      });
+    });
 
     let uniqueNodesStr = new Set(
       graph.nodes.map((node) => JSON.stringify(node))
@@ -193,8 +197,8 @@ Promise.all([
       return Object.assign({ node: idx }, JSON.parse(node));
     });
 
-    //store transformed data before replacing link names
-    issuesProgramDetail = graph.links;
+    console.log('are these unique');
+    console.log(graph.nodes.map((n) => n.name).sort());
 
     //replace link names
     graph.links.forEach((d, i) => {
@@ -202,11 +206,10 @@ Promise.all([
       graph.links[i].source = graphMap.indexOf(graph.links[i].source);
       graph.links[i].target = graphMap.indexOf(graph.links[i].target);
     });
-    console.log(graph);
+
     return graph;
   })
   .then((data) => {
-    console.log(data);
     /* LOAD DATA */
 
     let chart = sankeyGraph(data);
@@ -269,7 +272,12 @@ Promise.all([
       .attr('class', (d) => `rect ${slugify(d.name).toLowerCase()} issue-area`)
       .attr('x', (d) => d.x0)
       .attr('y', (d) => d.y0)
-      .attr('height', (d) => d.y1 - d.y0)
+      .attr('height', (d) => {
+        if (d.y1 - d.y0 == 0) {
+          console.log(d.name);
+        }
+        return d.y1 - d.y0;
+      })
       .attr('width', sankeyGraph.nodeWidth())
       .style('fill', (d) => {
         return (d.color = color(d.name));
@@ -292,18 +300,6 @@ Promise.all([
           }, ``);
         }
 
-        // let outputData = outputsData.filter(
-        //   (output) => output.key === data.name
-        // )[0];
-        // let outputTypesCount;
-        // let outputDetail;
-        // if (outputData) {
-        //   outputTypesCount = outputData && outputData.values.length;
-        //   outputDetail = outputData.values.reduce((acc, output) => {
-        //     return (acc += `${output.key} - ${output.values.length} </br>`);
-        //   }, ``);
-        // }
-
         let tooltipHtml =
           data.nodeType === 'issue'
             ? `
@@ -324,10 +320,10 @@ Promise.all([
           ${data.name}
           </div>
           <div class="total-programs">
-          ${outputTypesCount} Output Types
+          X Output Types
           </div>
           <div class="total-awards">
-          ${outputDetail}
+          XDETAILX
           </div>
           </div>`;
 
