@@ -20975,13 +20975,7 @@ var _values = _interopRequireDefault(require("./values"));
 var _entries = _interopRequireDefault(require("./entries"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./nest":"node_modules/d3-collection/src/nest.js","./set":"node_modules/d3-collection/src/set.js","./map":"node_modules/d3-collection/src/map.js","./keys":"node_modules/d3-collection/src/keys.js","./values":"node_modules/d3-collection/src/values.js","./entries":"node_modules/d3-collection/src/entries.js"}],"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":[function(require,module,exports) {
-module.exports = "/Copy of Data for Visualizations - Issue areas by Engagement Type.b9bfafbb.csv";
-},{}],"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":[function(require,module,exports) {
-module.exports = "/Copy of Data for Visualizations - Output Types by Engagement Type.f216aa58.csv";
-},{}],"data/Copy of Data for Visualizations - Programs Awards Count.csv":[function(require,module,exports) {
-module.exports = "/Copy of Data for Visualizations - Programs Awards Count.eb55250e.csv";
-},{}],"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":[function(require,module,exports) {
+},{"./nest":"node_modules/d3-collection/src/nest.js","./set":"node_modules/d3-collection/src/set.js","./map":"node_modules/d3-collection/src/map.js","./keys":"node_modules/d3-collection/src/keys.js","./values":"node_modules/d3-collection/src/values.js","./entries":"node_modules/d3-collection/src/entries.js"}],"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":[function(require,module,exports) {
 module.exports = "/Sankey data - Moz F&A - Issue Area _ Program _ Output.b5bad402.csv";
 },{}],"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":[function(require,module,exports) {
 module.exports = "/Sankey data - Moz F&A - Output _ Program _ Issue Area.04826edd.csv";
@@ -21009,12 +21003,6 @@ var _d3Color = require("d3-color");
 var _d3Collection = require("d3-collection");
 
 var slugify = require('slugify');
-
-var issuesToEngagement = require("./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv");
-
-var engagementToOutput = require("./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv");
-
-var programAwardsCount = require("./data/Copy of Data for Visualizations - Programs Awards Count.csv");
 
 var realIssuesToEngagement = require("./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv");
 
@@ -21093,10 +21081,7 @@ var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('op
   FORMAT DATA
 */
 
-Promise.all([// d3.csv(issuesToEngagement),
-// d3.csv(engagementToOutput),
-// d3.csv(programAwardsCount)
-d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgramAwardsCount)]) // begin
+Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgramAwardsCount)]) // begin
 .then(function (data) {
   var graph = {
     nodes: [],
@@ -21153,7 +21138,6 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
       };
     });
   });
-  console.log('programs to output');
   programsToOutput.forEach(function (program) {
     program.forEach(function (p) {
       graph.nodes.push({
@@ -21177,11 +21161,7 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
     return Object.assign({
       node: idx
     }, JSON.parse(node));
-  });
-  console.log('are these unique');
-  console.log(graph.nodes.map(function (n) {
-    return n.name;
-  }).sort()); //replace link names
+  }); //replace link names
 
   graph.links.forEach(function (d, i) {
     var graphMap = graph.nodes.map(function (node) {
@@ -21280,7 +21260,7 @@ d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgr
   });
   /** HIGHLIGHT INDIVIDUAL LINE */
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv":"data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv","./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv":"data/Copy of Data for Visualizations - Output Types by Engagement Type.csv","./data/Copy of Data for Visualizations - Programs Awards Count.csv":"data/Copy of Data for Visualizations - Programs Awards Count.csv","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv","./data/real/Sankey data - Moz F&A - Awards Count.csv":"data/real/Sankey data - Moz F&A - Awards Count.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv","./data/real/Sankey data - Moz F&A - Awards Count.csv":"data/real/Sankey data - Moz F&A - Awards Count.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
