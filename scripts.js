@@ -1,5 +1,5 @@
 import 'regenerator-runtime/runtime';
-var slugify = require('slugify')
+var slugify = require('slugify');
 import { select, selectAll } from 'd3-selection';
 import { csv, json } from 'd3-fetch';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
@@ -47,8 +47,8 @@ const margin = {
   right: 10
 };
 
-const width = 1200;
-const height = 1000;
+const width = 800;
+const height = 600;
 
 /*
   FORMATTING HELPERS
@@ -69,7 +69,8 @@ let outputsData;
 let outputEngagement = 'Program';
 let outputPrimary = 'Issue Area Tags\n(pick ONE) ';
 let outputCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
-
+let nestedIssues;
+let issuesProgramDetail;
 /*
   APPEND SVG TO PAGE
 */
@@ -118,35 +119,48 @@ Promise.all([
   .then((data) => {
     let graph = { nodes: [], links: [] };
 
-    data[0].forEach((d) => {
-      let sourceCol = 'Issue Area Tags\n(pick ONE) ';
-      let targetCol = 'Program';
-      let valueCol = 'Number of Awards'; // is this awards now
+    nestedIssues = d3
+      .nest()
+      .key((d) => d['Issue Area Tags\n(pick ONE) '])
+      .key((d) => d['Program'])
+      .entries(data[0]);
 
-      if (d[sourceCol] === d[targetCol]) {
-        // console.log(d[sourceCol]);
-      }
+    nestedIssues = nestedIssues.map((issue) => {
+      return issue.values.map((value) => {
+        return {
+          source: issue.key,
+          target: value.key,
+          totalAwards: value.values.reduce((acc, award) => {
+            return (acc += parseInt(award['Number of Awards']));
+          }, 0)
+        };
+      });
+    });
+
+    nestedIssues.forEach((data) => {
+      data.forEach((issue) => {
+        graph.nodes.push({
+          name: issue.source,
+          nodeType: 'issue'
+        });
+
+        graph.nodes.push({ name: issue.target });
+
+        graph.links.push({
+          source: issue.source,
+          target: issue.target,
+          value: issue.totalAwards
+        });
+      });
 
       /**
        *  ADD PROGRAMS AND AWARDS TO ISSUES
        
        */
-      realProgramAwards = d3
-        .nest()
-        .key((d) => d[groupCol])
-        .entries(data[2]);
-
-      graph.nodes.push({
-        name: d[sourceCol],
-        nodeType: 'issue'
-      });
-
-      graph.nodes.push({ name: d[targetCol] });
-      graph.links.push({
-        source: d[sourceCol],
-        target: d[targetCol],
-        value: d[valueCol]
-      });
+      // realProgramAwards = d3
+      //   .nest()
+      //   .key((d) => d[groupCol])
+      //   .entries(data[2]);
     });
     /*
 
@@ -164,19 +178,23 @@ Promise.all([
     });
      */
 
-    outputsData = d3
-      .nest()
-      .key((d) => d['Program'])
-      .key((d) => d['Primary Output\n(pick ONE)'])
-      .entries(data[1]);
+    // outputsData = d3
+    //   .nest()
+    //   .key((d) => d['Program'])
+    //   .key((d) => d['Primary Output\n(pick ONE)'])
+    //   .entries(data[1]);
 
     let uniqueNodesStr = new Set(
       graph.nodes.map((node) => JSON.stringify(node))
     );
+
     // return unique nodes
     graph.nodes = Array.from(uniqueNodesStr).map((node, idx) => {
       return Object.assign({ node: idx }, JSON.parse(node));
     });
+
+    //store transformed data before replacing link names
+    issuesProgramDetail = graph.links;
 
     //replace link names
     graph.links.forEach((d, i) => {
@@ -184,14 +202,14 @@ Promise.all([
       graph.links[i].source = graphMap.indexOf(graph.links[i].source);
       graph.links[i].target = graphMap.indexOf(graph.links[i].target);
     });
-
+    console.log(graph);
     return graph;
   })
   .then((data) => {
+    console.log(data);
     /* LOAD DATA */
 
     let chart = sankeyGraph(data);
-
     /* ADD LINKs */
     let link = svg
       .append('g')
@@ -202,7 +220,6 @@ Promise.all([
       .enter()
       .append('path')
       .attr('class', (d) => {
-
         return `link ${slugify(d.source.name).toLowerCase()}`;
       })
       .attr('d', d3.sankeyLinkHorizontal())
@@ -211,69 +228,30 @@ Promise.all([
     /**
      *  ADD TOOLTIPS
      */
-    link.on('mouseover', (e) => {}).on('mouseout', (e) => {});
     /*
+     */
     link
-      .on('mouseover', function (mouseEvent, data) {
-        let linkData = realProgramAwards.filter(
-          (program) => program.key === data.source.name
-        )[0];
-
-        if (linkData) {
-          awardsData = linkData.values.reduce((acc, program) => {
-            return (acc += `${program['Program']} - ${program[groupCount]} Awards </br>`);
-          }, ``);
-        }
-
-        let outputData = outputsData.filter(
-          (output) => output.key === data.source.name
-        )[0];
-        let outputTypesCount;
-        let outputDetail;
-        if (outputData) {
-          outputTypesCount = outputData && outputData.values.length;
-          outputDetail = outputData.values.reduce((acc, output) => {
-            return (acc += `${output.key} - ${output.values.length} </br>`);
-          }, ``);
-        }
-
-        let tooltipHtml =
-          data.source.nodeType === 'issue'
-            ? `
-              <div class="details">
-              <div class="issue-title">
-              ${data.source.name}
-              </div>
-              <div class="total-programs">
-              ${linkData && linkData.values.length} Projects
-              </div>
-              <div class="total-awards">
-              ${awardsData && awardsData}
-              </div>
-              </div>
-              `
-            : `<div class="details">
-              <div class="issue-title">
-              ${data.source.name}
-              </div>
-              <div class="total-programs">
-              ${outputTypesCount} Output Types
-              </div>
-              <div class="total-awards">
-              ${outputDetail}
-              </div>
-              </div>`;
+      .on('mouseover', function (event, data) {
+        let tooltipHtml = `
+        <div class="details">
+          <div class="issue-title">
+          ${data.source.name}
+          </div>
+          <div class="total-awards">
+          ${data.target.name} - ${data.value} Awards
+          </div>
+          </div>
+        `;
 
         tooltip
           .html(tooltipHtml)
-          .style('left', mouseEvent.pageX + 'px')
-          .style('top', mouseEvent.pageY + 'px')
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY + 'px')
           .style('opacity', 1);
       })
       .on('mouseout', function (d) {
         tooltip.style('opacity', 0);
       });
-*/
     /* ADD NODES */
     let node = svg
       .append('g')
@@ -302,28 +280,29 @@ Promise.all([
 
     d3.selectAll(`.rect`)
       .on('mouseover', (event, data) => {
-        console.log(data);
-        let linkData = realProgramAwards.filter(
-          (program) => program.key === data.name
-        )[0];
+        let nodeData = issuesProgramDetail.filter(
+          (program) => program.source.name === data.name
+        );
 
-        if (linkData) {
-          awardsData = linkData.values.reduce((acc, program) => {
-            return (acc += `${program['Program']} - ${program[groupCount]} Awards </br>`);
+        if (nodeData) {
+          awardsData = nodeData.reduce((acc, issue) => {
+            return (acc += `${issue.target.name} - ${issue.value} ${
+              issue.value > 1 ? 'awards' : `award`
+            }${'</br>'}`);
           }, ``);
         }
 
-        let outputData = outputsData.filter(
-          (output) => output.key === data.name
-        )[0];
-        let outputTypesCount;
-        let outputDetail;
-        if (outputData) {
-          outputTypesCount = outputData && outputData.values.length;
-          outputDetail = outputData.values.reduce((acc, output) => {
-            return (acc += `${output.key} - ${output.values.length} </br>`);
-          }, ``);
-        }
+        // let outputData = outputsData.filter(
+        //   (output) => output.key === data.name
+        // )[0];
+        // let outputTypesCount;
+        // let outputDetail;
+        // if (outputData) {
+        //   outputTypesCount = outputData && outputData.values.length;
+        //   outputDetail = outputData.values.reduce((acc, output) => {
+        //     return (acc += `${output.key} - ${output.values.length} </br>`);
+        //   }, ``);
+        // }
 
         let tooltipHtml =
           data.nodeType === 'issue'
@@ -333,10 +312,10 @@ Promise.all([
           ${data.name}
           </div>
           <div class="total-programs">
-          ${linkData && linkData.values.length} Projects
+          ${nodeData.length} Programs
           </div>
           <div class="total-awards">
-          ${awardsData && awardsData}
+          ${awardsData}
           </div>
           </div>
           `
@@ -376,11 +355,17 @@ Promise.all([
       .attr('x', (d) => d.x1 + 6)
       .attr('text-anchor', 'start');
 
-
     /** HIGHLIGHT ALL RELATED PATHS ON NODE MOUSEOVER */
     d3.selectAll('.node')
       .on('mouseover', (event, data) => {
-        d3.selectAll(`.${slugify(data.name).toLowerCase()}`).style('stroke-opacity', .7)
+        d3.selectAll(`.${slugify(data.name).toLowerCase()}`).style(
+          'stroke-opacity',
+          0.7
+        );
       })
-      .on('mouseout', () => { d3.selectAll('.link').style('stroke-opacity', .2)})
+      .on('mouseout', () => {
+        d3.selectAll('.link').style('stroke-opacity', 0.2);
+      });
+
+    /** HIGHLIGHT INDIVIDUAL LINE */
   });
