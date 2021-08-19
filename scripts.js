@@ -9,10 +9,6 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import { rgb } from 'd3-color';
 import { nest } from 'd3-collection';
 
-let issuesToEngagement = require(`./data/Copy of Data for Visualizations - Issue areas by Engagement Type.csv`);
-let engagementToOutput = require(`./data/Copy of Data for Visualizations - Output Types by Engagement Type.csv`);
-let programAwardsCount = require(`./data/Copy of Data for Visualizations - Programs Awards Count.csv`);
-
 let realIssuesToEngagement = require(`./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
 let realEngagementToOutput = require(`./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
 let realProgramAwardsCount = require(`./data/real/Sankey data - Moz F&A - Awards Count.csv`);
@@ -110,9 +106,6 @@ let tooltip = d3
 */
 
 Promise.all([
-  // d3.csv(issuesToEngagement),
-  // d3.csv(engagementToOutput),
-  // d3.csv(programAwardsCount)
   d3.csv(realIssuesToEngagement),
   d3.csv(realEngagementToOutput),
   d3.csv(realProgramAwardsCount)
@@ -174,7 +167,6 @@ Promise.all([
         };
       });
     });
-    console.log('programs to output');
 
     programsToOutput.forEach((program) => {
       program.forEach((p) => {
@@ -196,9 +188,6 @@ Promise.all([
     graph.nodes = Array.from(uniqueNodesStr).map((node, idx) => {
       return Object.assign({ node: idx }, JSON.parse(node));
     });
-
-    console.log('are these unique');
-    console.log(graph.nodes.map((n) => n.name).sort());
 
     //replace link names
     graph.links.forEach((d, i) => {
