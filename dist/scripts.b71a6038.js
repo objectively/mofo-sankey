@@ -20979,8 +20979,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 module.exports = "/Sankey data - Moz F&A - Issue Area _ Program _ Output.b5bad402.csv";
 },{}],"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":[function(require,module,exports) {
 module.exports = "/Sankey data - Moz F&A - Output _ Program _ Issue Area.04826edd.csv";
-},{}],"data/real/Sankey data - Moz F&A - Awards Count.csv":[function(require,module,exports) {
-module.exports = "/Sankey data - Moz F&A - Awards Count.3cdeec21.csv";
 },{}],"scripts.js":[function(require,module,exports) {
 "use strict";
 
@@ -21007,8 +21005,6 @@ var slugify = require('slugify');
 var realIssuesToEngagement = require("./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv");
 
 var realEngagementToOutput = require("./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv");
-
-var realProgramAwardsCount = require("./data/real/Sankey data - Moz F&A - Awards Count.csv");
 
 var d3 = Object.assign({}, {
   csv: _d3Fetch.csv,
@@ -21047,6 +21043,7 @@ var nestedIssues;
 var issuesProgramDetail;
 var programsToOutput;
 var elementClasses = {};
+var outputsToProgram;
 /*
   APPEND SVG TO PAGE
 */
@@ -21109,6 +21106,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }); //store transformed data before replacing link names
 
   issuesProgramDetail = graph.links;
+  /** SAVE Outputs to Program for output tooltip*/
+
+  outputsToProgram = d3.nest().key(function (d) {
+    return d['Primary Output\n(pick ONE)'];
+  }).key(function (d) {
+    return d['Program'];
+  }).entries(data[1]);
   /* TRANSFROM SECOND SANKEY*/
 
   programsToOutput = d3.nest().key(function (d) {
@@ -21209,53 +21213,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).style('stroke', function (d) {
     return d3.rgb(d.color).darker(2);
   });
-  /* ADD TOOLTIPS TO NODE RECTANGLES */
-
-  /*
-  d3.selectAll(`.rect`)
-    .on('mouseover', (event, data) => {
-      
-       let tooltipHtml; 
-      if (d3.select(this).classed('issue-area')) {
-        tooltipHtml = `
-          <div class="details">
-            <div class="issue-title">
-              ${data.name}
-            </div>
-            <div class="total-programs">
-              ${nodeData.length} Programs
-            </div>
-            <div class="total-awards">
-              ${awardsData}
-            </div>
-          </div>
-        `;
-      } else if (d3.select(this).classed('program')) {
-        tooltip = `
-          <div class="details">
-            <div class="issue-title">
-              ${data.name}
-            </div>
-            <div class="total-programs">
-              X Output Types
-            </div>
-            <div class="total-awards">
-              XDETAILX
-            </div>
-          </div>
-        `;
-      }
-       tooltip
-        .html(tooltipHtml)
-        .style('left', event.pageX + 'px')
-        .style('top', event.pageY + 'px')
-        .style('opacity', 1);
-    })
-    .on('mouseout', () => {
-      tooltip.style('opacity', 0);
-    });
-  */
-
   /* ADD NODE TITLES */
 
   node.append('text').attr('x', function (d) {
@@ -21294,9 +21251,39 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
   }).on('mouseout', function () {
     tooltip.style('opacity', 0);
+  }); // ADD TOOLTIPS TO PROGRAM NODES
+
+  d3.selectAll("rect.program").on('mouseover', function (event, data) {
+    var nodeData = issuesProgramDetail.filter(function (program) {
+      return program.source.name === data.name;
+    });
+    var outputs = data.sourceLinks.map(function (d) {
+      return [d.target.name, d.value];
+    }).sort();
+    var tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Issues</span>\n                ").concat(data.targetLinks.map(function (d) {
+      return d.source.name;
+    }).sort().join('</br>'), "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Outputs</span>\n                  ").concat(outputs.map(function (output) {
+      return "".concat(output[1], " ").concat(output[0]);
+    }).join('</br>'), "\n              </div>\n            </div>\n          ");
+    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
+  }).on('mouseout', function () {
+    tooltip.style('opacity', 0);
+  }); // ADD TOOLTIPS TO OUTPUT NODES
+
+  d3.selectAll(".output").on('mouseover', function (event, data) {
+    var nodeData = outputsToProgram.filter(function (output) {
+      return output.key === data.name;
+    })[0];
+    var outputPrograms = nodeData.values.reduce(function (acc, program) {
+      return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
+    }, "");
+    var tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Programs creating this output</span>\n                  ").concat(outputPrograms, "\n              </div>\n            </div>\n          ");
+    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
+  }).on('mouseout', function () {
+    tooltip.style('opacity', 0);
   });
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv","./data/real/Sankey data - Moz F&A - Awards Count.csv":"data/real/Sankey data - Moz F&A - Awards Count.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -21324,7 +21311,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58914" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61707" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

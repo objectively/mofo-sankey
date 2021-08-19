@@ -11,7 +11,6 @@ import { nest } from 'd3-collection';
 
 let realIssuesToEngagement = require(`./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
 let realEngagementToOutput = require(`./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
-let realProgramAwardsCount = require(`./data/real/Sankey data - Moz F&A - Awards Count.csv`);
 
 const d3 = Object.assign(
   {},
@@ -57,6 +56,7 @@ let nestedIssues;
 let issuesProgramDetail;
 let programsToOutput;
 let elementClasses = {};
+let outputsToProgram;
 /*
   APPEND SVG TO PAGE
 */
@@ -134,6 +134,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     //store transformed data before replacing link names
     issuesProgramDetail = graph.links;
+
+    /** SAVE Outputs to Program for output tooltip*/
+
+    outputsToProgram = d3
+      .nest()
+      .key((d) => d['Primary Output\n(pick ONE)'])
+      .key((d) => d['Program'])
+      .entries(data[1]);
 
     /* TRANSFROM SECOND SANKEY*/
     programsToOutput = d3
@@ -262,54 +270,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       })
       .style('stroke', (d) => d3.rgb(d.color).darker(2));
 
-    /* ADD TOOLTIPS TO NODE RECTANGLES */
-
-    /*
-    d3.selectAll(`.rect`)
-      .on('mouseover', (event, data) => {
-        
-
-        let tooltipHtml; 
-        if (d3.select(this).classed('issue-area')) {
-          tooltipHtml = `
-            <div class="details">
-              <div class="issue-title">
-                ${data.name}
-              </div>
-              <div class="total-programs">
-                ${nodeData.length} Programs
-              </div>
-              <div class="total-awards">
-                ${awardsData}
-              </div>
-            </div>
-          `;
-        } else if (d3.select(this).classed('program')) {
-          tooltip = `
-            <div class="details">
-              <div class="issue-title">
-                ${data.name}
-              </div>
-              <div class="total-programs">
-                X Output Types
-              </div>
-              <div class="total-awards">
-                XDETAILX
-              </div>
-            </div>
-          `;
-        }
-
-        tooltip
-          .html(tooltipHtml)
-          .style('left', event.pageX + 'px')
-          .style('top', event.pageY + 'px')
-          .style('opacity', 1);
-      })
-      .on('mouseout', () => {
-        tooltip.style('opacity', 0);
-      });
-*/
     /* ADD NODE TITLES */
     node
       .append('text')
@@ -365,6 +325,79 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             </div>
           </div>  
         `;
+        tooltip
+          .html(tooltipHtml)
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY + 'px')
+          .style('opacity', 1);
+      })
+      .on('mouseout', () => {
+        tooltip.style('opacity', 0);
+      });
+
+    // ADD TOOLTIPS TO PROGRAM NODES
+    d3.selectAll(`rect.program`)
+      .on('mouseover', (event, data) => {
+        let nodeData = issuesProgramDetail.filter(
+          (program) => program.source.name === data.name
+        );
+        let outputs = data.sourceLinks
+          .map((d) => [d.target.name, d.value])
+          .sort();
+
+        let tooltipHtml = `
+            <div class="details">
+              <div class="issue-title">
+                ${data.name}
+              </div>
+              <div class="issues-list">
+                <span class="detail-heading">Issues</span>
+                ${data.targetLinks
+                  .map((d) => d.source.name)
+                  .sort()
+                  .join('</br>')}
+              </div>
+              <div class="outputs-list">
+                <span class="detail-heading">Outputs</span>
+                  ${outputs
+                    .map((output) => `${output[1]} ${output[0]}`)
+                    .join('</br>')}
+              </div>
+            </div>
+          `;
+        tooltip
+          .html(tooltipHtml)
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY + 'px')
+          .style('opacity', 1);
+      })
+      .on('mouseout', () => {
+        tooltip.style('opacity', 0);
+      });
+
+    // ADD TOOLTIPS TO OUTPUT NODES
+    d3.selectAll(`.output`)
+      .on('mouseover', (event, data) => {
+
+        let nodeData = outputsToProgram.filter((output) => {
+          return output.key === data.name;
+        })[0];
+  
+        let outputPrograms = nodeData.values.reduce((acc, program) => {
+          return (acc += `${program.key} - ${program.values.length}</br>`);
+        }, ``);
+
+        let tooltipHtml = `
+            <div class="details">
+              <div class="issue-title">
+                ${data.name}
+              </div>
+              <div class="outputs-list">
+                <span class="detail-heading">Programs creating this output</span>
+                  ${outputPrograms}
+              </div>
+            </div>
+          `;
         tooltip
           .html(tooltipHtml)
           .style('left', event.pageX + 'px')
