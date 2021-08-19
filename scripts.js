@@ -56,7 +56,7 @@ let awardsData;
 let nestedIssues;
 let issuesProgramDetail;
 let programsToOutput;
-let elementClasses = {}
+let elementClasses = {};
 /*
   APPEND SVG TO PAGE
 */
@@ -117,9 +117,9 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     nestedIssues.forEach((data) => {
       data.forEach((issue) => {
-        // Add issueAreas to elementClasses 
-        elementClasses[issue.source] = 'issue-area'
-        elementClasses[issue.target] = 'program'
+        // Add issueAreas to elementClasses
+        elementClasses[issue.source] = 'issue-area';
+        elementClasses[issue.target] = 'program';
         graph.nodes.push({
           name: issue.source
         });
@@ -157,7 +157,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     programsToOutput.forEach((program) => {
       program.forEach((p) => {
         elementClasses[p.source] = 'program';
-        elementClasses[p.target] = 'output'
+        elementClasses[p.target] = 'output';
         graph.nodes.push({ name: p.source });
         graph.nodes.push({ name: p.target });
         graph.links.push({
@@ -247,7 +247,9 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     node
       .append('rect')
       .attr('class', (d) => {
-        return `rect ${slugify(d.name, {lower: true})} ${elementClasses[d.name]}`
+        return `rect ${slugify(d.name, { lower: true })} ${
+          elementClasses[d.name]
+        }`;
       })
       .attr('x', (d) => d.x0)
       .attr('y', (d) => d.y0)
@@ -262,46 +264,41 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     /* ADD TOOLTIPS TO NODE RECTANGLES */
 
+    /*
     d3.selectAll(`.rect`)
       .on('mouseover', (event, data) => {
-        let nodeData = issuesProgramDetail.filter(
-          (program) => program.source.name === data.name
-        );
+        
 
-        if (nodeData) {
-          awardsData = nodeData.reduce((acc, issue) => {
-            return (acc += `${issue.target.name} - ${issue.value} ${
-              issue.value > 1 ? 'awards' : `award`
-            }${'</br>'}`);
-          }, ``);
+        let tooltipHtml; 
+        if (d3.select(this).classed('issue-area')) {
+          tooltipHtml = `
+            <div class="details">
+              <div class="issue-title">
+                ${data.name}
+              </div>
+              <div class="total-programs">
+                ${nodeData.length} Programs
+              </div>
+              <div class="total-awards">
+                ${awardsData}
+              </div>
+            </div>
+          `;
+        } else if (d3.select(this).classed('program')) {
+          tooltip = `
+            <div class="details">
+              <div class="issue-title">
+                ${data.name}
+              </div>
+              <div class="total-programs">
+                X Output Types
+              </div>
+              <div class="total-awards">
+                XDETAILX
+              </div>
+            </div>
+          `;
         }
-
-        let tooltipHtml =
-          data.nodeType === 'issue'
-            ? `
-          <div class="details">
-          <div class="issue-title">
-          ${data.name}
-          </div>
-          <div class="total-programs">
-          ${nodeData.length} Programs
-          </div>
-          <div class="total-awards">
-          ${awardsData}
-          </div>
-          </div>
-          `
-            : `<div class="details">
-          <div class="issue-title">
-          ${data.name}
-          </div>
-          <div class="total-programs">
-          X Output Types
-          </div>
-          <div class="total-awards">
-          XDETAILX
-          </div>
-          </div>`;
 
         tooltip
           .html(tooltipHtml)
@@ -312,7 +309,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .on('mouseout', () => {
         tooltip.style('opacity', 0);
       });
-
+*/
     /* ADD NODE TITLES */
     node
       .append('text')
@@ -340,4 +337,41 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       });
 
     /** HIGHLIGHT INDIVIDUAL LINE */
+
+    // ADD TOOLTIPS TO ISSUE AREA NODES
+    d3.selectAll(`.issue-area`)
+      .on('mouseover', (event, data) => {
+        let nodeData = issuesProgramDetail.filter(
+          (program) => program.source.name === data.name
+        );
+
+        if (nodeData) {
+          awardsData = nodeData.reduce((acc, issue) => {
+            return (acc += `${issue.target.name} - ${issue.value} ${
+              issue.value > 1 ? 'awards' : `award`
+            }${'</br>'}`);
+          }, ``);
+        }
+        let tooltipHtml = `
+          <div class="details">
+            <div class="issue-title">
+              ${data.name}
+            </div>
+            <div class="total-programs">
+              ${nodeData.length} Programs
+            </div>
+            <div class="total-awards">
+              ${awardsData}
+            </div>
+          </div>  
+        `;
+        tooltip
+          .html(tooltipHtml)
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY + 'px')
+          .style('opacity', 1);
+      })
+      .on('mouseout', () => {
+        tooltip.style('opacity', 0);
+      });
   });

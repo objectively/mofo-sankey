@@ -21091,7 +21091,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   });
   nestedIssues.forEach(function (data) {
     data.forEach(function (issue) {
-      // Add issueAreas to elementClasses 
+      // Add issueAreas to elementClasses
       elementClasses[issue.source] = 'issue-area';
       elementClasses[issue.target] = 'program';
       graph.nodes.push({
@@ -21211,22 +21211,51 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   });
   /* ADD TOOLTIPS TO NODE RECTANGLES */
 
-  d3.selectAll(".rect").on('mouseover', function (event, data) {
-    var nodeData = issuesProgramDetail.filter(function (program) {
-      return program.source.name === data.name;
+  /*
+  d3.selectAll(`.rect`)
+    .on('mouseover', (event, data) => {
+      
+       let tooltipHtml; 
+      if (d3.select(this).classed('issue-area')) {
+        tooltipHtml = `
+          <div class="details">
+            <div class="issue-title">
+              ${data.name}
+            </div>
+            <div class="total-programs">
+              ${nodeData.length} Programs
+            </div>
+            <div class="total-awards">
+              ${awardsData}
+            </div>
+          </div>
+        `;
+      } else if (d3.select(this).classed('program')) {
+        tooltip = `
+          <div class="details">
+            <div class="issue-title">
+              ${data.name}
+            </div>
+            <div class="total-programs">
+              X Output Types
+            </div>
+            <div class="total-awards">
+              XDETAILX
+            </div>
+          </div>
+        `;
+      }
+       tooltip
+        .html(tooltipHtml)
+        .style('left', event.pageX + 'px')
+        .style('top', event.pageY + 'px')
+        .style('opacity', 1);
+    })
+    .on('mouseout', () => {
+      tooltip.style('opacity', 0);
     });
+  */
 
-    if (nodeData) {
-      awardsData = nodeData.reduce(function (acc, issue) {
-        return acc += "".concat(issue.target.name, " - ").concat(issue.value, " ").concat(issue.value > 1 ? 'awards' : "award", '</br>');
-      }, "");
-    }
-
-    var tooltipHtml = data.nodeType === 'issue' ? "\n          <div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.name, "\n          </div>\n          <div class=\"total-programs\">\n          ").concat(nodeData.length, " Programs\n          </div>\n          <div class=\"total-awards\">\n          ").concat(awardsData, "\n          </div>\n          </div>\n          ") : "<div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.name, "\n          </div>\n          <div class=\"total-programs\">\n          X Output Types\n          </div>\n          <div class=\"total-awards\">\n          XDETAILX\n          </div>\n          </div>");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
-  }).on('mouseout', function () {
-    tooltip.style('opacity', 0);
-  });
   /* ADD NODE TITLES */
 
   node.append('text').attr('x', function (d) {
@@ -21248,6 +21277,24 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     d3.selectAll('.link').style('stroke-opacity', 0.2);
   });
   /** HIGHLIGHT INDIVIDUAL LINE */
+  // ADD TOOLTIPS TO ISSUE AREA NODES
+
+  d3.selectAll(".issue-area").on('mouseover', function (event, data) {
+    var nodeData = issuesProgramDetail.filter(function (program) {
+      return program.source.name === data.name;
+    });
+
+    if (nodeData) {
+      awardsData = nodeData.reduce(function (acc, issue) {
+        return acc += "".concat(issue.target.name, " - ").concat(issue.value, " ").concat(issue.value > 1 ? 'awards' : "award", '</br>');
+      }, "");
+    }
+
+    var tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
+    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
+  }).on('mouseout', function () {
+    tooltip.style('opacity', 0);
+  });
 });
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv","./data/real/Sankey data - Moz F&A - Awards Count.csv":"data/real/Sankey data - Moz F&A - Awards Count.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
