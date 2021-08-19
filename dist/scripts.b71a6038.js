@@ -21040,27 +21040,13 @@ var height = 800;
   FORMATTING HELPERS
 */
 
-var formatSetting = d3.format('.0f');
-
-var formatNumber = function formatNumber(d) {
-  return d;
-};
-
 var color = d3.scaleOrdinal(_d3ScaleChromatic.schemeCategory10); // SETUP VARIABLES
 
-var programAwards;
-var realProgramAwards;
-var groupCol = 'Issue Area Tags\n(pick ONE) ';
-var groupEngagement = 'Engagement Type';
-var groupCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 var awardsData;
-var outputsData;
-var outputEngagement = 'Program';
-var outputPrimary = 'Issue Area Tags\n(pick ONE) ';
-var outputCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 var nestedIssues;
 var issuesProgramDetail;
 var programsToOutput;
+var elementClasses = {};
 /*
   APPEND SVG TO PAGE
 */
@@ -21081,7 +21067,7 @@ var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('op
   FORMAT DATA
 */
 
-Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.csv(realProgramAwardsCount)]) // begin
+Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
 .then(function (data) {
   var graph = {
     nodes: [],
@@ -21105,6 +21091,9 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.
   });
   nestedIssues.forEach(function (data) {
     data.forEach(function (issue) {
+      // Add issueAreas to elementClasses 
+      elementClasses[issue.source] = 'issue-area';
+      elementClasses[issue.target] = 'program';
       graph.nodes.push({
         name: issue.source
       });
@@ -21140,6 +21129,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.
   });
   programsToOutput.forEach(function (program) {
     program.forEach(function (p) {
+      elementClasses[p.source] = 'program';
+      elementClasses[p.target] = 'output';
       graph.nodes.push({
         name: p.source
       });
@@ -21204,16 +21195,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput), d3.
   /* ADD NODE RECTANGLES */
 
   node.append('rect').attr('class', function (d) {
-    return "rect ".concat(slugify(d.name).toLowerCase(), " issue-area");
+    return "rect ".concat(slugify(d.name, {
+      lower: true
+    }), " ").concat(elementClasses[d.name]);
   }).attr('x', function (d) {
     return d.x0;
   }).attr('y', function (d) {
     return d.y0;
   }).attr('height', function (d) {
-    if (d.y1 - d.y0 == 0) {
-      console.log(d.name);
-    }
-
     return d.y1 - d.y0;
   }).attr('width', sankeyGraph.nodeWidth()).style('fill', function (d) {
     return d.color = color(d.name);
@@ -21288,7 +21277,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57081" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58914" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

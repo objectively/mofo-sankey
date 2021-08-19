@@ -49,25 +49,14 @@ const height = 800;
 /*
   FORMATTING HELPERS
 */
-
-const formatSetting = d3.format('.0f');
-const formatNumber = (d) => d;
 const color = d3.scaleOrdinal(schemeCategory10);
 
 // SETUP VARIABLES
-let programAwards;
-let realProgramAwards;
-let groupCol = 'Issue Area Tags\n(pick ONE) ';
-let groupEngagement = 'Engagement Type';
-let groupCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 let awardsData;
-let outputsData;
-let outputEngagement = 'Program';
-let outputPrimary = 'Issue Area Tags\n(pick ONE) ';
-let outputCount = 'COUNTA of Fellow/ Award Amount \n(total, incl suppl)';
 let nestedIssues;
 let issuesProgramDetail;
 let programsToOutput;
+let elementClasses = {}
 /*
   APPEND SVG TO PAGE
 */
@@ -105,11 +94,7 @@ let tooltip = d3
   FORMAT DATA
 */
 
-Promise.all([
-  d3.csv(realIssuesToEngagement),
-  d3.csv(realEngagementToOutput),
-  d3.csv(realProgramAwardsCount)
-]) // begin
+Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
   .then((data) => {
     let graph = { nodes: [], links: [] };
     nestedIssues = d3
@@ -132,12 +117,13 @@ Promise.all([
 
     nestedIssues.forEach((data) => {
       data.forEach((issue) => {
+        // Add issueAreas to elementClasses 
+        elementClasses[issue.source] = 'issue-area'
+        elementClasses[issue.target] = 'program'
         graph.nodes.push({
           name: issue.source
         });
-
         graph.nodes.push({ name: issue.target });
-
         graph.links.push({
           source: issue.source,
           target: issue.target,
@@ -170,6 +156,8 @@ Promise.all([
 
     programsToOutput.forEach((program) => {
       program.forEach((p) => {
+        elementClasses[p.source] = 'program';
+        elementClasses[p.target] = 'output'
         graph.nodes.push({ name: p.source });
         graph.nodes.push({ name: p.target });
         graph.links.push({
@@ -258,13 +246,12 @@ Promise.all([
     /* ADD NODE RECTANGLES */
     node
       .append('rect')
-      .attr('class', (d) => `rect ${slugify(d.name).toLowerCase()} issue-area`)
+      .attr('class', (d) => {
+        return `rect ${slugify(d.name, {lower: true})} ${elementClasses[d.name]}`
+      })
       .attr('x', (d) => d.x0)
       .attr('y', (d) => d.y0)
       .attr('height', (d) => {
-        if (d.y1 - d.y0 == 0) {
-          console.log(d.name);
-        }
         return d.y1 - d.y0;
       })
       .attr('width', sankeyGraph.nodeWidth())
