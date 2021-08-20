@@ -8,6 +8,7 @@ import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
 import { rgb } from 'd3-color';
 import { nest } from 'd3-collection';
+import { transition } from 'd3-transition';
 
 let realIssuesToEngagement = require(`./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
 let realEngagementToOutput = require(`./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
@@ -25,7 +26,8 @@ const d3 = Object.assign(
     format,
     scaleOrdinal,
     schemeCategory10,
-    rgb
+    rgb,
+    transition
   }
 );
 
@@ -35,15 +37,12 @@ const d3 = Object.assign(
   SET UP GRAPH DIMENSIONS
 */
 
-const margin = {
-  top: 10,
-  bottom: 10,
-  left: 10,
-  right: 10
-};
+const aspect = 0.8;
 
-const width = 1000;
-const height = 800;
+var margin = { top: 10, right: 10, bottom: 10, left: 10 };
+
+var height = 600;
+var width = 800 / aspect - margin.left - margin.right;
 
 /*
   FORMATTING HELPERS
@@ -57,17 +56,18 @@ let issuesProgramDetail;
 let programsToOutput;
 let elementClasses = {};
 let outputsToProgram;
+let tooltip;
+let tooltipHtml;
 /*
   APPEND SVG TO PAGE
 */
 
 let svg = d3
-  .select('body')
+  .select('#container')
   .append('svg')
   .attr('width', width)
   .attr('height', height)
-  .append('g')
-  .attr('transform', `translate(${margin.left},${margin.top})`);
+  .append('g');
 
 /*
   SETUP SANKEY PROPERTIES
@@ -76,7 +76,7 @@ let svg = d3
 let sankeyGraph = d3
   .sankey()
   .nodeWidth(20)
-  .nodePadding(5)
+  .nodePadding(10)
   .size([width, height]);
 
 let path = sankeyGraph.links();
@@ -84,7 +84,7 @@ let path = sankeyGraph.links();
 /**
  *  ADD TOOLTIPS
  */
-let tooltip = d3
+tooltip = d3
   .select('body')
   .append('div')
   .attr('class', 'tooltip')
@@ -97,6 +97,7 @@ let tooltip = d3
 Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
   .then((data) => {
     let graph = { nodes: [], links: [] };
+
     nestedIssues = d3
       .nest()
       .key((d) => d['Issue Area Tags\n(pick ONE) '])
@@ -220,7 +221,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
      */
     link
       .on('mouseover', function (event, data) {
-        let tooltipHtml = `
+        tooltipHtml = `
         <div class="details">
           <div class="issue-title">
           ${data.source.name}
@@ -235,10 +236,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .html(tooltipHtml)
           .style('left', event.pageX + 'px')
           .style('top', event.pageY + 'px')
-          .style('opacity', 1);
+          .transition().duration(200).style('opacity', 1);
       })
       .on('mouseout', function (d) {
-        tooltip.style('opacity', 0);
+        tooltip.transition().duration(500).style('opacity', 0);
       });
     /* ADD NODES */
     let node = svg
@@ -285,15 +286,15 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('text-anchor', 'start');
 
     /** HIGHLIGHT ALL RELATED PATHS ON NODE MOUSEOVER */
-    d3.selectAll('.node')
+    d3.selectAll('.issue-area')
       .on('mouseover', (event, data) => {
-        d3.selectAll(`.${slugify(data.name).toLowerCase()}`).style(
+        d3.selectAll(`.${slugify(data.name).toLowerCase()}`).transition().duration(200).style(
           'stroke-opacity',
           0.7
         );
       })
       .on('mouseout', () => {
-        d3.selectAll('.link').style('stroke-opacity', 0.2);
+        d3.selectAll('.link').transition().duration(200).style('stroke-opacity', 0.2);
       });
 
     /** HIGHLIGHT INDIVIDUAL LINE */
@@ -312,7 +313,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             }${'</br>'}`);
           }, ``);
         }
-        let tooltipHtml = `
+        tooltipHtml = `
           <div class="details">
             <div class="issue-title">
               ${data.name}
@@ -327,12 +328,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         `;
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX + 'px')
+          .style('left', (event.pageX + 50) + 'px')
           .style('top', event.pageY + 'px')
-          .style('opacity', 1);
+          .transition().duration(200).style('opacity', 1);
       })
       .on('mouseout', () => {
-        tooltip.style('opacity', 0);
+        tooltip.transition().duration(200).style('opacity', 0);
       });
 
     // ADD TOOLTIPS TO PROGRAM NODES
@@ -345,7 +346,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .map((d) => [d.target.name, d.value])
           .sort();
 
-        let tooltipHtml = `
+        tooltipHtml = `
             <div class="details">
               <div class="issue-title">
                 ${data.name}
@@ -367,27 +368,26 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           `;
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX + 'px')
-          .style('top', event.pageY + 'px')
-          .style('opacity', 1);
+          .style('left', (event.pageX - 150) + 'px')
+          .style('top', (event.pageY + 50)+ 'px')
+          .transition().duration(200).style('opacity', 1);
       })
       .on('mouseout', () => {
-        tooltip.style('opacity', 0);
+        tooltip.transition().duration(200).style('opacity', 0);
       });
 
     // ADD TOOLTIPS TO OUTPUT NODES
     d3.selectAll(`.output`)
       .on('mouseover', (event, data) => {
-
         let nodeData = outputsToProgram.filter((output) => {
           return output.key === data.name;
         })[0];
-  
+
         let outputPrograms = nodeData.values.reduce((acc, program) => {
           return (acc += `${program.key} - ${program.values.length}</br>`);
         }, ``);
 
-        let tooltipHtml = `
+        tooltipHtml = `
             <div class="details">
               <div class="issue-title">
                 ${data.name}
@@ -400,11 +400,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           `;
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX + 'px')
-          .style('top', event.pageY + 'px')
-          .style('opacity', 1);
+          .style('left', (event.pageX - 350)+ 'px')
+          .style('top', (event.pageY - 25) + 'px')
+          .transition().duration(200).style('opacity', 1);
       })
       .on('mouseout', () => {
-        tooltip.style('opacity', 0);
+        tooltip.transition().duration(200).style('opacity', 0);
       });
   });

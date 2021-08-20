@@ -19,6 +19,7 @@
     "d3-scale": "^4.0.0",
     "d3-scale-chromatic": "^3.0.0",
     "d3-selection": "^3.0.0",
+    "d3-transition": "^3.0.1",
     "regenerator-runtime": "^0.13.9",
     "slugify": "^1.6.0"
   },

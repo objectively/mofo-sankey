@@ -20975,7 +20975,2222 @@ var _values = _interopRequireDefault(require("./values"));
 var _entries = _interopRequireDefault(require("./entries"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./nest":"node_modules/d3-collection/src/nest.js","./set":"node_modules/d3-collection/src/set.js","./map":"node_modules/d3-collection/src/map.js","./keys":"node_modules/d3-collection/src/keys.js","./values":"node_modules/d3-collection/src/values.js","./entries":"node_modules/d3-collection/src/entries.js"}],"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":[function(require,module,exports) {
+},{"./nest":"node_modules/d3-collection/src/nest.js","./set":"node_modules/d3-collection/src/set.js","./map":"node_modules/d3-collection/src/map.js","./keys":"node_modules/d3-collection/src/keys.js","./values":"node_modules/d3-collection/src/values.js","./entries":"node_modules/d3-collection/src/entries.js"}],"node_modules/d3-dispatch/src/dispatch.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var noop = {
+  value: function value() {}
+};
+
+function dispatch() {
+  for (var i = 0, n = arguments.length, _ = {}, t; i < n; ++i) {
+    if (!(t = arguments[i] + "") || t in _ || /[\s.]/.test(t)) throw new Error("illegal type: " + t);
+    _[t] = [];
+  }
+
+  return new Dispatch(_);
+}
+
+function Dispatch(_) {
+  this._ = _;
+}
+
+function parseTypenames(typenames, types) {
+  return typenames.trim().split(/^|\s+/).map(function (t) {
+    var name = "",
+        i = t.indexOf(".");
+    if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);
+    if (t && !types.hasOwnProperty(t)) throw new Error("unknown type: " + t);
+    return {
+      type: t,
+      name: name
+    };
+  });
+}
+
+Dispatch.prototype = dispatch.prototype = {
+  constructor: Dispatch,
+  on: function on(typename, callback) {
+    var _ = this._,
+        T = parseTypenames(typename + "", _),
+        t,
+        i = -1,
+        n = T.length; // If no callback was specified, return the callback of the given type and name.
+
+    if (arguments.length < 2) {
+      while (++i < n) {
+        if ((t = (typename = T[i]).type) && (t = get(_[t], typename.name))) return t;
+      }
+
+      return;
+    } // If a type was specified, set the callback for the given type and name.
+    // Otherwise, if a null callback was specified, remove callbacks of the given name.
+
+
+    if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
+
+    while (++i < n) {
+      if (t = (typename = T[i]).type) _[t] = set(_[t], typename.name, callback);else if (callback == null) for (t in _) {
+        _[t] = set(_[t], typename.name, null);
+      }
+    }
+
+    return this;
+  },
+  copy: function copy() {
+    var copy = {},
+        _ = this._;
+
+    for (var t in _) {
+      copy[t] = _[t].slice();
+    }
+
+    return new Dispatch(copy);
+  },
+  call: function call(type, that) {
+    if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i = 0, n, t; i < n; ++i) {
+      args[i] = arguments[i + 2];
+    }
+    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+
+    for (t = this._[type], i = 0, n = t.length; i < n; ++i) {
+      t[i].value.apply(that, args);
+    }
+  },
+  apply: function apply(type, that, args) {
+    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+
+    for (var t = this._[type], i = 0, n = t.length; i < n; ++i) {
+      t[i].value.apply(that, args);
+    }
+  }
+};
+
+function get(type, name) {
+  for (var i = 0, n = type.length, c; i < n; ++i) {
+    if ((c = type[i]).name === name) {
+      return c.value;
+    }
+  }
+}
+
+function set(type, name, callback) {
+  for (var i = 0, n = type.length; i < n; ++i) {
+    if (type[i].name === name) {
+      type[i] = noop, type = type.slice(0, i).concat(type.slice(i + 1));
+      break;
+    }
+  }
+
+  if (callback != null) type.push({
+    name: name,
+    value: callback
+  });
+  return type;
+}
+
+var _default = dispatch;
+exports.default = _default;
+},{}],"node_modules/d3-dispatch/src/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "dispatch", {
+  enumerable: true,
+  get: function () {
+    return _dispatch.default;
+  }
+});
+
+var _dispatch = _interopRequireDefault(require("./dispatch.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+},{"./dispatch.js":"node_modules/d3-dispatch/src/dispatch.js"}],"node_modules/d3-timer/src/timer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.now = now;
+exports.Timer = Timer;
+exports.timer = timer;
+exports.timerFlush = timerFlush;
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+var frame = 0,
+    // is an animation frame pending?
+timeout = 0,
+    // is a timeout pending?
+interval = 0,
+    // are any timers active?
+pokeDelay = 1000,
+    // how frequently we check for clock skew
+taskHead,
+    taskTail,
+    clockLast = 0,
+    clockNow = 0,
+    clockSkew = 0,
+    clock = (typeof performance === "undefined" ? "undefined" : _typeof(performance)) === "object" && performance.now ? performance : Date,
+    setFrame = (typeof window === "undefined" ? "undefined" : _typeof(window)) === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (f) {
+  setTimeout(f, 17);
+};
+
+function now() {
+  return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
+}
+
+function clearNow() {
+  clockNow = 0;
+}
+
+function Timer() {
+  this._call = this._time = this._next = null;
+}
+
+Timer.prototype = timer.prototype = {
+  constructor: Timer,
+  restart: function restart(callback, delay, time) {
+    if (typeof callback !== "function") throw new TypeError("callback is not a function");
+    time = (time == null ? now() : +time) + (delay == null ? 0 : +delay);
+
+    if (!this._next && taskTail !== this) {
+      if (taskTail) taskTail._next = this;else taskHead = this;
+      taskTail = this;
+    }
+
+    this._call = callback;
+    this._time = time;
+    sleep();
+  },
+  stop: function stop() {
+    if (this._call) {
+      this._call = null;
+      this._time = Infinity;
+      sleep();
+    }
+  }
+};
+
+function timer(callback, delay, time) {
+  var t = new Timer();
+  t.restart(callback, delay, time);
+  return t;
+}
+
+function timerFlush() {
+  now(); // Get the current time, if not already set.
+
+  ++frame; // Pretend we’ve set an alarm, if we haven’t already.
+
+  var t = taskHead,
+      e;
+
+  while (t) {
+    if ((e = clockNow - t._time) >= 0) t._call.call(undefined, e);
+    t = t._next;
+  }
+
+  --frame;
+}
+
+function wake() {
+  clockNow = (clockLast = clock.now()) + clockSkew;
+  frame = timeout = 0;
+
+  try {
+    timerFlush();
+  } finally {
+    frame = 0;
+    nap();
+    clockNow = 0;
+  }
+}
+
+function poke() {
+  var now = clock.now(),
+      delay = now - clockLast;
+  if (delay > pokeDelay) clockSkew -= delay, clockLast = now;
+}
+
+function nap() {
+  var t0,
+      t1 = taskHead,
+      t2,
+      time = Infinity;
+
+  while (t1) {
+    if (t1._call) {
+      if (time > t1._time) time = t1._time;
+      t0 = t1, t1 = t1._next;
+    } else {
+      t2 = t1._next, t1._next = null;
+      t1 = t0 ? t0._next = t2 : taskHead = t2;
+    }
+  }
+
+  taskTail = t0;
+  sleep(time);
+}
+
+function sleep(time) {
+  if (frame) return; // Soonest alarm already set, or will be.
+
+  if (timeout) timeout = clearTimeout(timeout);
+  var delay = time - clockNow; // Strictly less than if we recomputed clockNow.
+
+  if (delay > 24) {
+    if (time < Infinity) timeout = setTimeout(wake, time - clock.now() - clockSkew);
+    if (interval) interval = clearInterval(interval);
+  } else {
+    if (!interval) clockLast = clock.now(), interval = setInterval(poke, pokeDelay);
+    frame = 1, setFrame(wake);
+  }
+}
+},{}],"node_modules/d3-timer/src/timeout.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _timer = require("./timer.js");
+
+function _default(callback, delay, time) {
+  var t = new _timer.Timer();
+  delay = delay == null ? 0 : +delay;
+  t.restart(function (elapsed) {
+    t.stop();
+    callback(elapsed + delay);
+  }, delay, time);
+  return t;
+}
+},{"./timer.js":"node_modules/d3-timer/src/timer.js"}],"node_modules/d3-timer/src/interval.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _timer = require("./timer.js");
+
+function _default(callback, delay, time) {
+  var t = new _timer.Timer(),
+      total = delay;
+  if (delay == null) return t.restart(callback, delay, time), t;
+  t._restart = t.restart;
+
+  t.restart = function (callback, delay, time) {
+    delay = +delay, time = time == null ? (0, _timer.now)() : +time;
+
+    t._restart(function tick(elapsed) {
+      elapsed += total;
+
+      t._restart(tick, total += delay, time);
+
+      callback(elapsed);
+    }, delay, time);
+  };
+
+  t.restart(callback, delay, time);
+  return t;
+}
+},{"./timer.js":"node_modules/d3-timer/src/timer.js"}],"node_modules/d3-timer/src/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "now", {
+  enumerable: true,
+  get: function () {
+    return _timer.now;
+  }
+});
+Object.defineProperty(exports, "timer", {
+  enumerable: true,
+  get: function () {
+    return _timer.timer;
+  }
+});
+Object.defineProperty(exports, "timerFlush", {
+  enumerable: true,
+  get: function () {
+    return _timer.timerFlush;
+  }
+});
+Object.defineProperty(exports, "timeout", {
+  enumerable: true,
+  get: function () {
+    return _timeout.default;
+  }
+});
+Object.defineProperty(exports, "interval", {
+  enumerable: true,
+  get: function () {
+    return _interval.default;
+  }
+});
+
+var _timer = require("./timer.js");
+
+var _timeout = _interopRequireDefault(require("./timeout.js"));
+
+var _interval = _interopRequireDefault(require("./interval.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+},{"./timer.js":"node_modules/d3-timer/src/timer.js","./timeout.js":"node_modules/d3-timer/src/timeout.js","./interval.js":"node_modules/d3-timer/src/interval.js"}],"node_modules/d3-transition/src/transition/schedule.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+exports.init = init;
+exports.set = set;
+exports.get = get;
+exports.ENDED = exports.ENDING = exports.RUNNING = exports.STARTED = exports.STARTING = exports.SCHEDULED = exports.CREATED = void 0;
+
+var _d3Dispatch = require("d3-dispatch");
+
+var _d3Timer = require("d3-timer");
+
+var emptyOn = (0, _d3Dispatch.dispatch)("start", "end", "cancel", "interrupt");
+var emptyTween = [];
+var CREATED = 0;
+exports.CREATED = CREATED;
+var SCHEDULED = 1;
+exports.SCHEDULED = SCHEDULED;
+var STARTING = 2;
+exports.STARTING = STARTING;
+var STARTED = 3;
+exports.STARTED = STARTED;
+var RUNNING = 4;
+exports.RUNNING = RUNNING;
+var ENDING = 5;
+exports.ENDING = ENDING;
+var ENDED = 6;
+exports.ENDED = ENDED;
+
+function _default(node, name, id, index, group, timing) {
+  var schedules = node.__transition;
+  if (!schedules) node.__transition = {};else if (id in schedules) return;
+  create(node, id, {
+    name: name,
+    index: index,
+    // For context during callback.
+    group: group,
+    // For context during callback.
+    on: emptyOn,
+    tween: emptyTween,
+    time: timing.time,
+    delay: timing.delay,
+    duration: timing.duration,
+    ease: timing.ease,
+    timer: null,
+    state: CREATED
+  });
+}
+
+function init(node, id) {
+  var schedule = get(node, id);
+  if (schedule.state > CREATED) throw new Error("too late; already scheduled");
+  return schedule;
+}
+
+function set(node, id) {
+  var schedule = get(node, id);
+  if (schedule.state > STARTED) throw new Error("too late; already running");
+  return schedule;
+}
+
+function get(node, id) {
+  var schedule = node.__transition;
+  if (!schedule || !(schedule = schedule[id])) throw new Error("transition not found");
+  return schedule;
+}
+
+function create(node, id, self) {
+  var schedules = node.__transition,
+      tween; // Initialize the self timer when the transition is created.
+  // Note the actual delay is not known until the first callback!
+
+  schedules[id] = self;
+  self.timer = (0, _d3Timer.timer)(schedule, 0, self.time);
+
+  function schedule(elapsed) {
+    self.state = SCHEDULED;
+    self.timer.restart(start, self.delay, self.time); // If the elapsed delay is less than our first sleep, start immediately.
+
+    if (self.delay <= elapsed) start(elapsed - self.delay);
+  }
+
+  function start(elapsed) {
+    var i, j, n, o; // If the state is not SCHEDULED, then we previously errored on start.
+
+    if (self.state !== SCHEDULED) return stop();
+
+    for (i in schedules) {
+      o = schedules[i];
+      if (o.name !== self.name) continue; // While this element already has a starting transition during this frame,
+      // defer starting an interrupting transition until that transition has a
+      // chance to tick (and possibly end); see d3/d3-transition#54!
+
+      if (o.state === STARTED) return (0, _d3Timer.timeout)(start); // Interrupt the active transition, if any.
+
+      if (o.state === RUNNING) {
+        o.state = ENDED;
+        o.timer.stop();
+        o.on.call("interrupt", node, node.__data__, o.index, o.group);
+        delete schedules[i];
+      } // Cancel any pre-empted transitions.
+      else if (+i < id) {
+        o.state = ENDED;
+        o.timer.stop();
+        o.on.call("cancel", node, node.__data__, o.index, o.group);
+        delete schedules[i];
+      }
+    } // Defer the first tick to end of the current frame; see d3/d3#1576.
+    // Note the transition may be canceled after start and before the first tick!
+    // Note this must be scheduled before the start event; see d3/d3-transition#16!
+    // Assuming this is successful, subsequent callbacks go straight to tick.
+
+
+    (0, _d3Timer.timeout)(function () {
+      if (self.state === STARTED) {
+        self.state = RUNNING;
+        self.timer.restart(tick, self.delay, self.time);
+        tick(elapsed);
+      }
+    }); // Dispatch the start event.
+    // Note this must be done before the tween are initialized.
+
+    self.state = STARTING;
+    self.on.call("start", node, node.__data__, self.index, self.group);
+    if (self.state !== STARTING) return; // interrupted
+
+    self.state = STARTED; // Initialize the tween, deleting null tween.
+
+    tween = new Array(n = self.tween.length);
+
+    for (i = 0, j = -1; i < n; ++i) {
+      if (o = self.tween[i].value.call(node, node.__data__, self.index, self.group)) {
+        tween[++j] = o;
+      }
+    }
+
+    tween.length = j + 1;
+  }
+
+  function tick(elapsed) {
+    var t = elapsed < self.duration ? self.ease.call(null, elapsed / self.duration) : (self.timer.restart(stop), self.state = ENDING, 1),
+        i = -1,
+        n = tween.length;
+
+    while (++i < n) {
+      tween[i].call(node, t);
+    } // Dispatch the end event.
+
+
+    if (self.state === ENDING) {
+      self.on.call("end", node, node.__data__, self.index, self.group);
+      stop();
+    }
+  }
+
+  function stop() {
+    self.state = ENDED;
+    self.timer.stop();
+    delete schedules[id];
+
+    for (var i in schedules) {
+      return;
+    } // eslint-disable-line no-unused-vars
+
+
+    delete node.__transition;
+  }
+}
+},{"d3-dispatch":"node_modules/d3-dispatch/src/index.js","d3-timer":"node_modules/d3-timer/src/index.js"}],"node_modules/d3-transition/src/interrupt.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _schedule = require("./transition/schedule.js");
+
+function _default(node, name) {
+  var schedules = node.__transition,
+      schedule,
+      active,
+      empty = true,
+      i;
+  if (!schedules) return;
+  name = name == null ? null : name + "";
+
+  for (i in schedules) {
+    if ((schedule = schedules[i]).name !== name) {
+      empty = false;
+      continue;
+    }
+
+    active = schedule.state > _schedule.STARTING && schedule.state < _schedule.ENDING;
+    schedule.state = _schedule.ENDED;
+    schedule.timer.stop();
+    schedule.on.call(active ? "interrupt" : "cancel", node, node.__data__, schedule.index, schedule.group);
+    delete schedules[i];
+  }
+
+  if (empty) delete node.__transition;
+}
+},{"./transition/schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/selection/interrupt.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _interrupt = _interopRequireDefault(require("../interrupt.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _default(name) {
+  return this.each(function () {
+    (0, _interrupt.default)(this, name);
+  });
+}
+},{"../interrupt.js":"node_modules/d3-transition/src/interrupt.js"}],"node_modules/d3-transition/src/transition/tween.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+exports.tweenValue = tweenValue;
+
+var _schedule = require("./schedule.js");
+
+function tweenRemove(id, name) {
+  var tween0, tween1;
+  return function () {
+    var schedule = (0, _schedule.set)(this, id),
+        tween = schedule.tween; // If this node shared tween with the previous node,
+    // just assign the updated shared tween and we’re done!
+    // Otherwise, copy-on-write.
+
+    if (tween !== tween0) {
+      tween1 = tween0 = tween;
+
+      for (var i = 0, n = tween1.length; i < n; ++i) {
+        if (tween1[i].name === name) {
+          tween1 = tween1.slice();
+          tween1.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    schedule.tween = tween1;
+  };
+}
+
+function tweenFunction(id, name, value) {
+  var tween0, tween1;
+  if (typeof value !== "function") throw new Error();
+  return function () {
+    var schedule = (0, _schedule.set)(this, id),
+        tween = schedule.tween; // If this node shared tween with the previous node,
+    // just assign the updated shared tween and we’re done!
+    // Otherwise, copy-on-write.
+
+    if (tween !== tween0) {
+      tween1 = (tween0 = tween).slice();
+
+      for (var t = {
+        name: name,
+        value: value
+      }, i = 0, n = tween1.length; i < n; ++i) {
+        if (tween1[i].name === name) {
+          tween1[i] = t;
+          break;
+        }
+      }
+
+      if (i === n) tween1.push(t);
+    }
+
+    schedule.tween = tween1;
+  };
+}
+
+function _default(name, value) {
+  var id = this._id;
+  name += "";
+
+  if (arguments.length < 2) {
+    var tween = (0, _schedule.get)(this.node(), id).tween;
+
+    for (var i = 0, n = tween.length, t; i < n; ++i) {
+      if ((t = tween[i]).name === name) {
+        return t.value;
+      }
+    }
+
+    return null;
+  }
+
+  return this.each((value == null ? tweenRemove : tweenFunction)(id, name, value));
+}
+
+function tweenValue(transition, name, value) {
+  var id = transition._id;
+  transition.each(function () {
+    var schedule = (0, _schedule.set)(this, id);
+    (schedule.value || (schedule.value = {}))[name] = value.apply(this, arguments);
+  });
+  return function (node) {
+    return (0, _schedule.get)(node, id).value[name];
+  };
+}
+},{"./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/interpolate.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _d3Color = require("d3-color");
+
+var _d3Interpolate = require("d3-interpolate");
+
+function _default(a, b) {
+  var c;
+  return (typeof b === "number" ? _d3Interpolate.interpolateNumber : b instanceof _d3Color.color ? _d3Interpolate.interpolateRgb : (c = (0, _d3Color.color)(b)) ? (b = c, _d3Interpolate.interpolateRgb) : _d3Interpolate.interpolateString)(a, b);
+}
+},{"d3-color":"node_modules/d3-color/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js"}],"node_modules/d3-transition/src/transition/attr.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _d3Interpolate = require("d3-interpolate");
+
+var _d3Selection = require("d3-selection");
+
+var _tween = require("./tween.js");
+
+var _interpolate = _interopRequireDefault(require("./interpolate.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function attrRemove(name) {
+  return function () {
+    this.removeAttribute(name);
+  };
+}
+
+function attrRemoveNS(fullname) {
+  return function () {
+    this.removeAttributeNS(fullname.space, fullname.local);
+  };
+}
+
+function attrConstant(name, interpolate, value1) {
+  var string00,
+      string1 = value1 + "",
+      interpolate0;
+  return function () {
+    var string0 = this.getAttribute(name);
+    return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
+  };
+}
+
+function attrConstantNS(fullname, interpolate, value1) {
+  var string00,
+      string1 = value1 + "",
+      interpolate0;
+  return function () {
+    var string0 = this.getAttributeNS(fullname.space, fullname.local);
+    return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
+  };
+}
+
+function attrFunction(name, interpolate, value) {
+  var string00, string10, interpolate0;
+  return function () {
+    var string0,
+        value1 = value(this),
+        string1;
+    if (value1 == null) return void this.removeAttribute(name);
+    string0 = this.getAttribute(name);
+    string1 = value1 + "";
+    return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
+  };
+}
+
+function attrFunctionNS(fullname, interpolate, value) {
+  var string00, string10, interpolate0;
+  return function () {
+    var string0,
+        value1 = value(this),
+        string1;
+    if (value1 == null) return void this.removeAttributeNS(fullname.space, fullname.local);
+    string0 = this.getAttributeNS(fullname.space, fullname.local);
+    string1 = value1 + "";
+    return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
+  };
+}
+
+function _default(name, value) {
+  var fullname = (0, _d3Selection.namespace)(name),
+      i = fullname === "transform" ? _d3Interpolate.interpolateTransformSvg : _interpolate.default;
+  return this.attrTween(name, typeof value === "function" ? (fullname.local ? attrFunctionNS : attrFunction)(fullname, i, (0, _tween.tweenValue)(this, "attr." + name, value)) : value == null ? (fullname.local ? attrRemoveNS : attrRemove)(fullname) : (fullname.local ? attrConstantNS : attrConstant)(fullname, i, value));
+}
+},{"d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./interpolate.js":"node_modules/d3-transition/src/transition/interpolate.js"}],"node_modules/d3-transition/src/transition/attrTween.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _d3Selection = require("d3-selection");
+
+function attrInterpolate(name, i) {
+  return function (t) {
+    this.setAttribute(name, i.call(this, t));
+  };
+}
+
+function attrInterpolateNS(fullname, i) {
+  return function (t) {
+    this.setAttributeNS(fullname.space, fullname.local, i.call(this, t));
+  };
+}
+
+function attrTweenNS(fullname, value) {
+  var t0, i0;
+
+  function tween() {
+    var i = value.apply(this, arguments);
+    if (i !== i0) t0 = (i0 = i) && attrInterpolateNS(fullname, i);
+    return t0;
+  }
+
+  tween._value = value;
+  return tween;
+}
+
+function attrTween(name, value) {
+  var t0, i0;
+
+  function tween() {
+    var i = value.apply(this, arguments);
+    if (i !== i0) t0 = (i0 = i) && attrInterpolate(name, i);
+    return t0;
+  }
+
+  tween._value = value;
+  return tween;
+}
+
+function _default(name, value) {
+  var key = "attr." + name;
+  if (arguments.length < 2) return (key = this.tween(key)) && key._value;
+  if (value == null) return this.tween(key, null);
+  if (typeof value !== "function") throw new Error();
+  var fullname = (0, _d3Selection.namespace)(name);
+  return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value));
+}
+},{"d3-selection":"node_modules/d3-selection/src/index.js"}],"node_modules/d3-transition/src/transition/delay.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _schedule = require("./schedule.js");
+
+function delayFunction(id, value) {
+  return function () {
+    (0, _schedule.init)(this, id).delay = +value.apply(this, arguments);
+  };
+}
+
+function delayConstant(id, value) {
+  return value = +value, function () {
+    (0, _schedule.init)(this, id).delay = value;
+  };
+}
+
+function _default(value) {
+  var id = this._id;
+  return arguments.length ? this.each((typeof value === "function" ? delayFunction : delayConstant)(id, value)) : (0, _schedule.get)(this.node(), id).delay;
+}
+},{"./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/duration.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _schedule = require("./schedule.js");
+
+function durationFunction(id, value) {
+  return function () {
+    (0, _schedule.set)(this, id).duration = +value.apply(this, arguments);
+  };
+}
+
+function durationConstant(id, value) {
+  return value = +value, function () {
+    (0, _schedule.set)(this, id).duration = value;
+  };
+}
+
+function _default(value) {
+  var id = this._id;
+  return arguments.length ? this.each((typeof value === "function" ? durationFunction : durationConstant)(id, value)) : (0, _schedule.get)(this.node(), id).duration;
+}
+},{"./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/ease.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _schedule = require("./schedule.js");
+
+function easeConstant(id, value) {
+  if (typeof value !== "function") throw new Error();
+  return function () {
+    (0, _schedule.set)(this, id).ease = value;
+  };
+}
+
+function _default(value) {
+  var id = this._id;
+  return arguments.length ? this.each(easeConstant(id, value)) : (0, _schedule.get)(this.node(), id).ease;
+}
+},{"./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/easeVarying.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _schedule = require("./schedule.js");
+
+function easeVarying(id, value) {
+  return function () {
+    var v = value.apply(this, arguments);
+    if (typeof v !== "function") throw new Error();
+    (0, _schedule.set)(this, id).ease = v;
+  };
+}
+
+function _default(value) {
+  if (typeof value !== "function") throw new Error();
+  return this.each(easeVarying(this._id, value));
+}
+},{"./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/filter.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _d3Selection = require("d3-selection");
+
+var _index = require("./index.js");
+
+function _default(match) {
+  if (typeof match !== "function") match = (0, _d3Selection.matcher)(match);
+
+  for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
+    for (var group = groups[j], n = group.length, subgroup = subgroups[j] = [], node, i = 0; i < n; ++i) {
+      if ((node = group[i]) && match.call(node, node.__data__, i, group)) {
+        subgroup.push(node);
+      }
+    }
+  }
+
+  return new _index.Transition(subgroups, this._parents, this._name, this._id);
+}
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js"}],"node_modules/d3-transition/src/transition/merge.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _index = require("./index.js");
+
+function _default(transition) {
+  if (transition._id !== this._id) throw new Error();
+
+  for (var groups0 = this._groups, groups1 = transition._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
+    for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge = merges[j] = new Array(n), node, i = 0; i < n; ++i) {
+      if (node = group0[i] || group1[i]) {
+        merge[i] = node;
+      }
+    }
+  }
+
+  for (; j < m0; ++j) {
+    merges[j] = groups0[j];
+  }
+
+  return new _index.Transition(merges, this._parents, this._name, this._id);
+}
+},{"./index.js":"node_modules/d3-transition/src/transition/index.js"}],"node_modules/d3-transition/src/transition/on.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _schedule = require("./schedule.js");
+
+function start(name) {
+  return (name + "").trim().split(/^|\s+/).every(function (t) {
+    var i = t.indexOf(".");
+    if (i >= 0) t = t.slice(0, i);
+    return !t || t === "start";
+  });
+}
+
+function onFunction(id, name, listener) {
+  var on0,
+      on1,
+      sit = start(name) ? _schedule.init : _schedule.set;
+  return function () {
+    var schedule = sit(this, id),
+        on = schedule.on; // If this node shared a dispatch with the previous node,
+    // just assign the updated shared dispatch and we’re done!
+    // Otherwise, copy-on-write.
+
+    if (on !== on0) (on1 = (on0 = on).copy()).on(name, listener);
+    schedule.on = on1;
+  };
+}
+
+function _default(name, listener) {
+  var id = this._id;
+  return arguments.length < 2 ? (0, _schedule.get)(this.node(), id).on.on(name) : this.each(onFunction(id, name, listener));
+}
+},{"./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/remove.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+function removeFunction(id) {
+  return function () {
+    var parent = this.parentNode;
+
+    for (var i in this.__transition) {
+      if (+i !== id) return;
+    }
+
+    if (parent) parent.removeChild(this);
+  };
+}
+
+function _default() {
+  return this.on("end.remove", removeFunction(this._id));
+}
+},{}],"node_modules/d3-transition/src/transition/select.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _d3Selection = require("d3-selection");
+
+var _index = require("./index.js");
+
+var _schedule = _interopRequireWildcard(require("./schedule.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _default(select) {
+  var name = this._name,
+      id = this._id;
+  if (typeof select !== "function") select = (0, _d3Selection.selector)(select);
+
+  for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
+    for (var group = groups[j], n = group.length, subgroup = subgroups[j] = new Array(n), node, subnode, i = 0; i < n; ++i) {
+      if ((node = group[i]) && (subnode = select.call(node, node.__data__, i, group))) {
+        if ("__data__" in node) subnode.__data__ = node.__data__;
+        subgroup[i] = subnode;
+        (0, _schedule.default)(subgroup[i], name, id, i, subgroup, (0, _schedule.get)(node, id));
+      }
+    }
+  }
+
+  return new _index.Transition(subgroups, this._parents, name, id);
+}
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/selectAll.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _d3Selection = require("d3-selection");
+
+var _index = require("./index.js");
+
+var _schedule = _interopRequireWildcard(require("./schedule.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _default(select) {
+  var name = this._name,
+      id = this._id;
+  if (typeof select !== "function") select = (0, _d3Selection.selectorAll)(select);
+
+  for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
+    for (var group = groups[j], n = group.length, node, i = 0; i < n; ++i) {
+      if (node = group[i]) {
+        for (var children = select.call(node, node.__data__, i, group), child, inherit = (0, _schedule.get)(node, id), k = 0, l = children.length; k < l; ++k) {
+          if (child = children[k]) {
+            (0, _schedule.default)(child, name, id, k, children, inherit);
+          }
+        }
+
+        subgroups.push(children);
+        parents.push(node);
+      }
+    }
+  }
+
+  return new _index.Transition(subgroups, parents, name, id);
+}
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/selection.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _d3Selection = require("d3-selection");
+
+var Selection = _d3Selection.selection.prototype.constructor;
+
+function _default() {
+  return new Selection(this._groups, this._parents);
+}
+},{"d3-selection":"node_modules/d3-selection/src/index.js"}],"node_modules/d3-transition/src/transition/style.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _d3Interpolate = require("d3-interpolate");
+
+var _d3Selection = require("d3-selection");
+
+var _schedule = require("./schedule.js");
+
+var _tween = require("./tween.js");
+
+var _interpolate = _interopRequireDefault(require("./interpolate.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function styleNull(name, interpolate) {
+  var string00, string10, interpolate0;
+  return function () {
+    var string0 = (0, _d3Selection.style)(this, name),
+        string1 = (this.style.removeProperty(name), (0, _d3Selection.style)(this, name));
+    return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : interpolate0 = interpolate(string00 = string0, string10 = string1);
+  };
+}
+
+function styleRemove(name) {
+  return function () {
+    this.style.removeProperty(name);
+  };
+}
+
+function styleConstant(name, interpolate, value1) {
+  var string00,
+      string1 = value1 + "",
+      interpolate0;
+  return function () {
+    var string0 = (0, _d3Selection.style)(this, name);
+    return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
+  };
+}
+
+function styleFunction(name, interpolate, value) {
+  var string00, string10, interpolate0;
+  return function () {
+    var string0 = (0, _d3Selection.style)(this, name),
+        value1 = value(this),
+        string1 = value1 + "";
+    if (value1 == null) string1 = value1 = (this.style.removeProperty(name), (0, _d3Selection.style)(this, name));
+    return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
+  };
+}
+
+function styleMaybeRemove(id, name) {
+  var on0,
+      on1,
+      listener0,
+      key = "style." + name,
+      event = "end." + key,
+      remove;
+  return function () {
+    var schedule = (0, _schedule.set)(this, id),
+        on = schedule.on,
+        listener = schedule.value[key] == null ? remove || (remove = styleRemove(name)) : undefined; // If this node shared a dispatch with the previous node,
+    // just assign the updated shared dispatch and we’re done!
+    // Otherwise, copy-on-write.
+
+    if (on !== on0 || listener0 !== listener) (on1 = (on0 = on).copy()).on(event, listener0 = listener);
+    schedule.on = on1;
+  };
+}
+
+function _default(name, value, priority) {
+  var i = (name += "") === "transform" ? _d3Interpolate.interpolateTransformCss : _interpolate.default;
+  return value == null ? this.styleTween(name, styleNull(name, i)).on("end.style." + name, styleRemove(name)) : typeof value === "function" ? this.styleTween(name, styleFunction(name, i, (0, _tween.tweenValue)(this, "style." + name, value))).each(styleMaybeRemove(this._id, name)) : this.styleTween(name, styleConstant(name, i, value), priority).on("end.style." + name, null);
+}
+},{"d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./interpolate.js":"node_modules/d3-transition/src/transition/interpolate.js"}],"node_modules/d3-transition/src/transition/styleTween.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+function styleInterpolate(name, i, priority) {
+  return function (t) {
+    this.style.setProperty(name, i.call(this, t), priority);
+  };
+}
+
+function styleTween(name, value, priority) {
+  var t, i0;
+
+  function tween() {
+    var i = value.apply(this, arguments);
+    if (i !== i0) t = (i0 = i) && styleInterpolate(name, i, priority);
+    return t;
+  }
+
+  tween._value = value;
+  return tween;
+}
+
+function _default(name, value, priority) {
+  var key = "style." + (name += "");
+  if (arguments.length < 2) return (key = this.tween(key)) && key._value;
+  if (value == null) return this.tween(key, null);
+  if (typeof value !== "function") throw new Error();
+  return this.tween(key, styleTween(name, value, priority == null ? "" : priority));
+}
+},{}],"node_modules/d3-transition/src/transition/text.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _tween = require("./tween.js");
+
+function textConstant(value) {
+  return function () {
+    this.textContent = value;
+  };
+}
+
+function textFunction(value) {
+  return function () {
+    var value1 = value(this);
+    this.textContent = value1 == null ? "" : value1;
+  };
+}
+
+function _default(value) {
+  return this.tween("text", typeof value === "function" ? textFunction((0, _tween.tweenValue)(this, "text", value)) : textConstant(value == null ? "" : value + ""));
+}
+},{"./tween.js":"node_modules/d3-transition/src/transition/tween.js"}],"node_modules/d3-transition/src/transition/textTween.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+function textInterpolate(i) {
+  return function (t) {
+    this.textContent = i.call(this, t);
+  };
+}
+
+function textTween(value) {
+  var t0, i0;
+
+  function tween() {
+    var i = value.apply(this, arguments);
+    if (i !== i0) t0 = (i0 = i) && textInterpolate(i);
+    return t0;
+  }
+
+  tween._value = value;
+  return tween;
+}
+
+function _default(value) {
+  var key = "text";
+  if (arguments.length < 1) return (key = this.tween(key)) && key._value;
+  if (value == null) return this.tween(key, null);
+  if (typeof value !== "function") throw new Error();
+  return this.tween(key, textTween(value));
+}
+},{}],"node_modules/d3-transition/src/transition/transition.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _index = require("./index.js");
+
+var _schedule = _interopRequireWildcard(require("./schedule.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _default() {
+  var name = this._name,
+      id0 = this._id,
+      id1 = (0, _index.newId)();
+
+  for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {
+    for (var group = groups[j], n = group.length, node, i = 0; i < n; ++i) {
+      if (node = group[i]) {
+        var inherit = (0, _schedule.get)(node, id0);
+        (0, _schedule.default)(node, name, id1, i, group, {
+          time: inherit.time + inherit.delay + inherit.duration,
+          delay: 0,
+          duration: inherit.duration,
+          ease: inherit.ease
+        });
+      }
+    }
+  }
+
+  return new _index.Transition(groups, this._parents, name, id1);
+}
+},{"./index.js":"node_modules/d3-transition/src/transition/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/end.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _schedule = require("./schedule.js");
+
+function _default() {
+  var on0,
+      on1,
+      that = this,
+      id = that._id,
+      size = that.size();
+  return new Promise(function (resolve, reject) {
+    var cancel = {
+      value: reject
+    },
+        end = {
+      value: function value() {
+        if (--size === 0) resolve();
+      }
+    };
+    that.each(function () {
+      var schedule = (0, _schedule.set)(this, id),
+          on = schedule.on; // If this node shared a dispatch with the previous node,
+      // just assign the updated shared dispatch and we’re done!
+      // Otherwise, copy-on-write.
+
+      if (on !== on0) {
+        on1 = (on0 = on).copy();
+
+        on1._.cancel.push(cancel);
+
+        on1._.interrupt.push(cancel);
+
+        on1._.end.push(end);
+      }
+
+      schedule.on = on1;
+    }); // The selection was empty, resolve end immediately
+
+    if (size === 0) resolve();
+  });
+}
+},{"./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Transition = Transition;
+exports.default = transition;
+exports.newId = newId;
+
+var _d3Selection = require("d3-selection");
+
+var _attr = _interopRequireDefault(require("./attr.js"));
+
+var _attrTween = _interopRequireDefault(require("./attrTween.js"));
+
+var _delay = _interopRequireDefault(require("./delay.js"));
+
+var _duration = _interopRequireDefault(require("./duration.js"));
+
+var _ease = _interopRequireDefault(require("./ease.js"));
+
+var _easeVarying = _interopRequireDefault(require("./easeVarying.js"));
+
+var _filter = _interopRequireDefault(require("./filter.js"));
+
+var _merge = _interopRequireDefault(require("./merge.js"));
+
+var _on = _interopRequireDefault(require("./on.js"));
+
+var _remove = _interopRequireDefault(require("./remove.js"));
+
+var _select = _interopRequireDefault(require("./select.js"));
+
+var _selectAll = _interopRequireDefault(require("./selectAll.js"));
+
+var _selection = _interopRequireDefault(require("./selection.js"));
+
+var _style = _interopRequireDefault(require("./style.js"));
+
+var _styleTween = _interopRequireDefault(require("./styleTween.js"));
+
+var _text = _interopRequireDefault(require("./text.js"));
+
+var _textTween = _interopRequireDefault(require("./textTween.js"));
+
+var _transition = _interopRequireDefault(require("./transition.js"));
+
+var _tween = _interopRequireDefault(require("./tween.js"));
+
+var _end = _interopRequireDefault(require("./end.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var id = 0;
+
+function Transition(groups, parents, name, id) {
+  this._groups = groups;
+  this._parents = parents;
+  this._name = name;
+  this._id = id;
+}
+
+function transition(name) {
+  return (0, _d3Selection.selection)().transition(name);
+}
+
+function newId() {
+  return ++id;
+}
+
+var selection_prototype = _d3Selection.selection.prototype;
+Transition.prototype = transition.prototype = _defineProperty({
+  constructor: Transition,
+  select: _select.default,
+  selectAll: _selectAll.default,
+  selectChild: selection_prototype.selectChild,
+  selectChildren: selection_prototype.selectChildren,
+  filter: _filter.default,
+  merge: _merge.default,
+  selection: _selection.default,
+  transition: _transition.default,
+  call: selection_prototype.call,
+  nodes: selection_prototype.nodes,
+  node: selection_prototype.node,
+  size: selection_prototype.size,
+  empty: selection_prototype.empty,
+  each: selection_prototype.each,
+  on: _on.default,
+  attr: _attr.default,
+  attrTween: _attrTween.default,
+  style: _style.default,
+  styleTween: _styleTween.default,
+  text: _text.default,
+  textTween: _textTween.default,
+  remove: _remove.default,
+  tween: _tween.default,
+  delay: _delay.default,
+  duration: _duration.default,
+  ease: _ease.default,
+  easeVarying: _easeVarying.default,
+  end: _end.default
+}, Symbol.iterator, selection_prototype[Symbol.iterator]);
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./attr.js":"node_modules/d3-transition/src/transition/attr.js","./attrTween.js":"node_modules/d3-transition/src/transition/attrTween.js","./delay.js":"node_modules/d3-transition/src/transition/delay.js","./duration.js":"node_modules/d3-transition/src/transition/duration.js","./ease.js":"node_modules/d3-transition/src/transition/ease.js","./easeVarying.js":"node_modules/d3-transition/src/transition/easeVarying.js","./filter.js":"node_modules/d3-transition/src/transition/filter.js","./merge.js":"node_modules/d3-transition/src/transition/merge.js","./on.js":"node_modules/d3-transition/src/transition/on.js","./remove.js":"node_modules/d3-transition/src/transition/remove.js","./select.js":"node_modules/d3-transition/src/transition/select.js","./selectAll.js":"node_modules/d3-transition/src/transition/selectAll.js","./selection.js":"node_modules/d3-transition/src/transition/selection.js","./style.js":"node_modules/d3-transition/src/transition/style.js","./styleTween.js":"node_modules/d3-transition/src/transition/styleTween.js","./text.js":"node_modules/d3-transition/src/transition/text.js","./textTween.js":"node_modules/d3-transition/src/transition/textTween.js","./transition.js":"node_modules/d3-transition/src/transition/transition.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./end.js":"node_modules/d3-transition/src/transition/end.js"}],"node_modules/d3-ease/src/linear.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.linear = void 0;
+
+var linear = function linear(t) {
+  return +t;
+};
+
+exports.linear = linear;
+},{}],"node_modules/d3-ease/src/quad.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.quadIn = quadIn;
+exports.quadOut = quadOut;
+exports.quadInOut = quadInOut;
+
+function quadIn(t) {
+  return t * t;
+}
+
+function quadOut(t) {
+  return t * (2 - t);
+}
+
+function quadInOut(t) {
+  return ((t *= 2) <= 1 ? t * t : --t * (2 - t) + 1) / 2;
+}
+},{}],"node_modules/d3-ease/src/cubic.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.cubicIn = cubicIn;
+exports.cubicOut = cubicOut;
+exports.cubicInOut = cubicInOut;
+
+function cubicIn(t) {
+  return t * t * t;
+}
+
+function cubicOut(t) {
+  return --t * t * t + 1;
+}
+
+function cubicInOut(t) {
+  return ((t *= 2) <= 1 ? t * t * t : (t -= 2) * t * t + 2) / 2;
+}
+},{}],"node_modules/d3-ease/src/poly.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.polyInOut = exports.polyOut = exports.polyIn = void 0;
+var exponent = 3;
+
+var polyIn = function custom(e) {
+  e = +e;
+
+  function polyIn(t) {
+    return Math.pow(t, e);
+  }
+
+  polyIn.exponent = custom;
+  return polyIn;
+}(exponent);
+
+exports.polyIn = polyIn;
+
+var polyOut = function custom(e) {
+  e = +e;
+
+  function polyOut(t) {
+    return 1 - Math.pow(1 - t, e);
+  }
+
+  polyOut.exponent = custom;
+  return polyOut;
+}(exponent);
+
+exports.polyOut = polyOut;
+
+var polyInOut = function custom(e) {
+  e = +e;
+
+  function polyInOut(t) {
+    return ((t *= 2) <= 1 ? Math.pow(t, e) : 2 - Math.pow(2 - t, e)) / 2;
+  }
+
+  polyInOut.exponent = custom;
+  return polyInOut;
+}(exponent);
+
+exports.polyInOut = polyInOut;
+},{}],"node_modules/d3-ease/src/sin.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.sinIn = sinIn;
+exports.sinOut = sinOut;
+exports.sinInOut = sinInOut;
+var pi = Math.PI,
+    halfPi = pi / 2;
+
+function sinIn(t) {
+  return +t === 1 ? 1 : 1 - Math.cos(t * halfPi);
+}
+
+function sinOut(t) {
+  return Math.sin(t * halfPi);
+}
+
+function sinInOut(t) {
+  return (1 - Math.cos(pi * t)) / 2;
+}
+},{}],"node_modules/d3-ease/src/math.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.tpmt = tpmt;
+
+// tpmt is two power minus ten times t scaled to [0,1]
+function tpmt(x) {
+  return (Math.pow(2, -10 * x) - 0.0009765625) * 1.0009775171065494;
+}
+},{}],"node_modules/d3-ease/src/exp.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.expIn = expIn;
+exports.expOut = expOut;
+exports.expInOut = expInOut;
+
+var _math = require("./math.js");
+
+function expIn(t) {
+  return (0, _math.tpmt)(1 - +t);
+}
+
+function expOut(t) {
+  return 1 - (0, _math.tpmt)(t);
+}
+
+function expInOut(t) {
+  return ((t *= 2) <= 1 ? (0, _math.tpmt)(1 - t) : 2 - (0, _math.tpmt)(t - 1)) / 2;
+}
+},{"./math.js":"node_modules/d3-ease/src/math.js"}],"node_modules/d3-ease/src/circle.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.circleIn = circleIn;
+exports.circleOut = circleOut;
+exports.circleInOut = circleInOut;
+
+function circleIn(t) {
+  return 1 - Math.sqrt(1 - t * t);
+}
+
+function circleOut(t) {
+  return Math.sqrt(1 - --t * t);
+}
+
+function circleInOut(t) {
+  return ((t *= 2) <= 1 ? 1 - Math.sqrt(1 - t * t) : Math.sqrt(1 - (t -= 2) * t) + 1) / 2;
+}
+},{}],"node_modules/d3-ease/src/bounce.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.bounceIn = bounceIn;
+exports.bounceOut = bounceOut;
+exports.bounceInOut = bounceInOut;
+var b1 = 4 / 11,
+    b2 = 6 / 11,
+    b3 = 8 / 11,
+    b4 = 3 / 4,
+    b5 = 9 / 11,
+    b6 = 10 / 11,
+    b7 = 15 / 16,
+    b8 = 21 / 22,
+    b9 = 63 / 64,
+    b0 = 1 / b1 / b1;
+
+function bounceIn(t) {
+  return 1 - bounceOut(1 - t);
+}
+
+function bounceOut(t) {
+  return (t = +t) < b1 ? b0 * t * t : t < b3 ? b0 * (t -= b2) * t + b4 : t < b6 ? b0 * (t -= b5) * t + b7 : b0 * (t -= b8) * t + b9;
+}
+
+function bounceInOut(t) {
+  return ((t *= 2) <= 1 ? 1 - bounceOut(1 - t) : bounceOut(t - 1) + 1) / 2;
+}
+},{}],"node_modules/d3-ease/src/back.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.backInOut = exports.backOut = exports.backIn = void 0;
+var overshoot = 1.70158;
+
+var backIn = function custom(s) {
+  s = +s;
+
+  function backIn(t) {
+    return (t = +t) * t * (s * (t - 1) + t);
+  }
+
+  backIn.overshoot = custom;
+  return backIn;
+}(overshoot);
+
+exports.backIn = backIn;
+
+var backOut = function custom(s) {
+  s = +s;
+
+  function backOut(t) {
+    return --t * t * ((t + 1) * s + t) + 1;
+  }
+
+  backOut.overshoot = custom;
+  return backOut;
+}(overshoot);
+
+exports.backOut = backOut;
+
+var backInOut = function custom(s) {
+  s = +s;
+
+  function backInOut(t) {
+    return ((t *= 2) < 1 ? t * t * ((s + 1) * t - s) : (t -= 2) * t * ((s + 1) * t + s) + 2) / 2;
+  }
+
+  backInOut.overshoot = custom;
+  return backInOut;
+}(overshoot);
+
+exports.backInOut = backInOut;
+},{}],"node_modules/d3-ease/src/elastic.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.elasticInOut = exports.elasticOut = exports.elasticIn = void 0;
+
+var _math = require("./math.js");
+
+var tau = 2 * Math.PI,
+    amplitude = 1,
+    period = 0.3;
+
+var elasticIn = function custom(a, p) {
+  var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
+
+  function elasticIn(t) {
+    return a * (0, _math.tpmt)(- --t) * Math.sin((s - t) / p);
+  }
+
+  elasticIn.amplitude = function (a) {
+    return custom(a, p * tau);
+  };
+
+  elasticIn.period = function (p) {
+    return custom(a, p);
+  };
+
+  return elasticIn;
+}(amplitude, period);
+
+exports.elasticIn = elasticIn;
+
+var elasticOut = function custom(a, p) {
+  var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
+
+  function elasticOut(t) {
+    return 1 - a * (0, _math.tpmt)(t = +t) * Math.sin((t + s) / p);
+  }
+
+  elasticOut.amplitude = function (a) {
+    return custom(a, p * tau);
+  };
+
+  elasticOut.period = function (p) {
+    return custom(a, p);
+  };
+
+  return elasticOut;
+}(amplitude, period);
+
+exports.elasticOut = elasticOut;
+
+var elasticInOut = function custom(a, p) {
+  var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
+
+  function elasticInOut(t) {
+    return ((t = t * 2 - 1) < 0 ? a * (0, _math.tpmt)(-t) * Math.sin((s - t) / p) : 2 - a * (0, _math.tpmt)(t) * Math.sin((s + t) / p)) / 2;
+  }
+
+  elasticInOut.amplitude = function (a) {
+    return custom(a, p * tau);
+  };
+
+  elasticInOut.period = function (p) {
+    return custom(a, p);
+  };
+
+  return elasticInOut;
+}(amplitude, period);
+
+exports.elasticInOut = elasticInOut;
+},{"./math.js":"node_modules/d3-ease/src/math.js"}],"node_modules/d3-ease/src/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "easeLinear", {
+  enumerable: true,
+  get: function () {
+    return _linear.linear;
+  }
+});
+Object.defineProperty(exports, "easeQuad", {
+  enumerable: true,
+  get: function () {
+    return _quad.quadInOut;
+  }
+});
+Object.defineProperty(exports, "easeQuadIn", {
+  enumerable: true,
+  get: function () {
+    return _quad.quadIn;
+  }
+});
+Object.defineProperty(exports, "easeQuadOut", {
+  enumerable: true,
+  get: function () {
+    return _quad.quadOut;
+  }
+});
+Object.defineProperty(exports, "easeQuadInOut", {
+  enumerable: true,
+  get: function () {
+    return _quad.quadInOut;
+  }
+});
+Object.defineProperty(exports, "easeCubic", {
+  enumerable: true,
+  get: function () {
+    return _cubic.cubicInOut;
+  }
+});
+Object.defineProperty(exports, "easeCubicIn", {
+  enumerable: true,
+  get: function () {
+    return _cubic.cubicIn;
+  }
+});
+Object.defineProperty(exports, "easeCubicOut", {
+  enumerable: true,
+  get: function () {
+    return _cubic.cubicOut;
+  }
+});
+Object.defineProperty(exports, "easeCubicInOut", {
+  enumerable: true,
+  get: function () {
+    return _cubic.cubicInOut;
+  }
+});
+Object.defineProperty(exports, "easePoly", {
+  enumerable: true,
+  get: function () {
+    return _poly.polyInOut;
+  }
+});
+Object.defineProperty(exports, "easePolyIn", {
+  enumerable: true,
+  get: function () {
+    return _poly.polyIn;
+  }
+});
+Object.defineProperty(exports, "easePolyOut", {
+  enumerable: true,
+  get: function () {
+    return _poly.polyOut;
+  }
+});
+Object.defineProperty(exports, "easePolyInOut", {
+  enumerable: true,
+  get: function () {
+    return _poly.polyInOut;
+  }
+});
+Object.defineProperty(exports, "easeSin", {
+  enumerable: true,
+  get: function () {
+    return _sin.sinInOut;
+  }
+});
+Object.defineProperty(exports, "easeSinIn", {
+  enumerable: true,
+  get: function () {
+    return _sin.sinIn;
+  }
+});
+Object.defineProperty(exports, "easeSinOut", {
+  enumerable: true,
+  get: function () {
+    return _sin.sinOut;
+  }
+});
+Object.defineProperty(exports, "easeSinInOut", {
+  enumerable: true,
+  get: function () {
+    return _sin.sinInOut;
+  }
+});
+Object.defineProperty(exports, "easeExp", {
+  enumerable: true,
+  get: function () {
+    return _exp.expInOut;
+  }
+});
+Object.defineProperty(exports, "easeExpIn", {
+  enumerable: true,
+  get: function () {
+    return _exp.expIn;
+  }
+});
+Object.defineProperty(exports, "easeExpOut", {
+  enumerable: true,
+  get: function () {
+    return _exp.expOut;
+  }
+});
+Object.defineProperty(exports, "easeExpInOut", {
+  enumerable: true,
+  get: function () {
+    return _exp.expInOut;
+  }
+});
+Object.defineProperty(exports, "easeCircle", {
+  enumerable: true,
+  get: function () {
+    return _circle.circleInOut;
+  }
+});
+Object.defineProperty(exports, "easeCircleIn", {
+  enumerable: true,
+  get: function () {
+    return _circle.circleIn;
+  }
+});
+Object.defineProperty(exports, "easeCircleOut", {
+  enumerable: true,
+  get: function () {
+    return _circle.circleOut;
+  }
+});
+Object.defineProperty(exports, "easeCircleInOut", {
+  enumerable: true,
+  get: function () {
+    return _circle.circleInOut;
+  }
+});
+Object.defineProperty(exports, "easeBounce", {
+  enumerable: true,
+  get: function () {
+    return _bounce.bounceOut;
+  }
+});
+Object.defineProperty(exports, "easeBounceIn", {
+  enumerable: true,
+  get: function () {
+    return _bounce.bounceIn;
+  }
+});
+Object.defineProperty(exports, "easeBounceOut", {
+  enumerable: true,
+  get: function () {
+    return _bounce.bounceOut;
+  }
+});
+Object.defineProperty(exports, "easeBounceInOut", {
+  enumerable: true,
+  get: function () {
+    return _bounce.bounceInOut;
+  }
+});
+Object.defineProperty(exports, "easeBack", {
+  enumerable: true,
+  get: function () {
+    return _back.backInOut;
+  }
+});
+Object.defineProperty(exports, "easeBackIn", {
+  enumerable: true,
+  get: function () {
+    return _back.backIn;
+  }
+});
+Object.defineProperty(exports, "easeBackOut", {
+  enumerable: true,
+  get: function () {
+    return _back.backOut;
+  }
+});
+Object.defineProperty(exports, "easeBackInOut", {
+  enumerable: true,
+  get: function () {
+    return _back.backInOut;
+  }
+});
+Object.defineProperty(exports, "easeElastic", {
+  enumerable: true,
+  get: function () {
+    return _elastic.elasticOut;
+  }
+});
+Object.defineProperty(exports, "easeElasticIn", {
+  enumerable: true,
+  get: function () {
+    return _elastic.elasticIn;
+  }
+});
+Object.defineProperty(exports, "easeElasticOut", {
+  enumerable: true,
+  get: function () {
+    return _elastic.elasticOut;
+  }
+});
+Object.defineProperty(exports, "easeElasticInOut", {
+  enumerable: true,
+  get: function () {
+    return _elastic.elasticInOut;
+  }
+});
+
+var _linear = require("./linear.js");
+
+var _quad = require("./quad.js");
+
+var _cubic = require("./cubic.js");
+
+var _poly = require("./poly.js");
+
+var _sin = require("./sin.js");
+
+var _exp = require("./exp.js");
+
+var _circle = require("./circle.js");
+
+var _bounce = require("./bounce.js");
+
+var _back = require("./back.js");
+
+var _elastic = require("./elastic.js");
+},{"./linear.js":"node_modules/d3-ease/src/linear.js","./quad.js":"node_modules/d3-ease/src/quad.js","./cubic.js":"node_modules/d3-ease/src/cubic.js","./poly.js":"node_modules/d3-ease/src/poly.js","./sin.js":"node_modules/d3-ease/src/sin.js","./exp.js":"node_modules/d3-ease/src/exp.js","./circle.js":"node_modules/d3-ease/src/circle.js","./bounce.js":"node_modules/d3-ease/src/bounce.js","./back.js":"node_modules/d3-ease/src/back.js","./elastic.js":"node_modules/d3-ease/src/elastic.js"}],"node_modules/d3-transition/src/selection/transition.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _index = require("../transition/index.js");
+
+var _schedule = _interopRequireDefault(require("../transition/schedule.js"));
+
+var _d3Ease = require("d3-ease");
+
+var _d3Timer = require("d3-timer");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var defaultTiming = {
+  time: null,
+  // Set on use.
+  delay: 0,
+  duration: 250,
+  ease: _d3Ease.easeCubicInOut
+};
+
+function inherit(node, id) {
+  var timing;
+
+  while (!(timing = node.__transition) || !(timing = timing[id])) {
+    if (!(node = node.parentNode)) {
+      throw new Error("transition ".concat(id, " not found"));
+    }
+  }
+
+  return timing;
+}
+
+function _default(name) {
+  var id, timing;
+
+  if (name instanceof _index.Transition) {
+    id = name._id, name = name._name;
+  } else {
+    id = (0, _index.newId)(), (timing = defaultTiming).time = (0, _d3Timer.now)(), name = name == null ? null : name + "";
+  }
+
+  for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {
+    for (var group = groups[j], n = group.length, node, i = 0; i < n; ++i) {
+      if (node = group[i]) {
+        (0, _schedule.default)(node, name, id, i, group, timing || inherit(node, id));
+      }
+    }
+  }
+
+  return new _index.Transition(groups, this._parents, name, id);
+}
+},{"../transition/index.js":"node_modules/d3-transition/src/transition/index.js","../transition/schedule.js":"node_modules/d3-transition/src/transition/schedule.js","d3-ease":"node_modules/d3-ease/src/index.js","d3-timer":"node_modules/d3-timer/src/index.js"}],"node_modules/d3-transition/src/selection/index.js":[function(require,module,exports) {
+"use strict";
+
+var _d3Selection = require("d3-selection");
+
+var _interrupt = _interopRequireDefault(require("./interrupt.js"));
+
+var _transition = _interopRequireDefault(require("./transition.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_d3Selection.selection.prototype.interrupt = _interrupt.default;
+_d3Selection.selection.prototype.transition = _transition.default;
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./interrupt.js":"node_modules/d3-transition/src/selection/interrupt.js","./transition.js":"node_modules/d3-transition/src/selection/transition.js"}],"node_modules/d3-transition/src/active.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _index = require("./transition/index.js");
+
+var _schedule = require("./transition/schedule.js");
+
+var root = [null];
+
+function _default(node, name) {
+  var schedules = node.__transition,
+      schedule,
+      i;
+
+  if (schedules) {
+    name = name == null ? null : name + "";
+
+    for (i in schedules) {
+      if ((schedule = schedules[i]).state > _schedule.SCHEDULED && schedule.name === name) {
+        return new _index.Transition([[node]], root, name, +i);
+      }
+    }
+  }
+
+  return null;
+}
+},{"./transition/index.js":"node_modules/d3-transition/src/transition/index.js","./transition/schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "transition", {
+  enumerable: true,
+  get: function () {
+    return _index2.default;
+  }
+});
+Object.defineProperty(exports, "active", {
+  enumerable: true,
+  get: function () {
+    return _active.default;
+  }
+});
+Object.defineProperty(exports, "interrupt", {
+  enumerable: true,
+  get: function () {
+    return _interrupt.default;
+  }
+});
+
+require("./selection/index.js");
+
+var _index2 = _interopRequireDefault(require("./transition/index.js"));
+
+var _active = _interopRequireDefault(require("./active.js"));
+
+var _interrupt = _interopRequireDefault(require("./interrupt.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+},{"./selection/index.js":"node_modules/d3-transition/src/selection/index.js","./transition/index.js":"node_modules/d3-transition/src/transition/index.js","./active.js":"node_modules/d3-transition/src/active.js","./interrupt.js":"node_modules/d3-transition/src/interrupt.js"}],"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":[function(require,module,exports) {
 module.exports = "/Sankey data - Moz F&A - Issue Area _ Program _ Output.b5bad402.csv";
 },{}],"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":[function(require,module,exports) {
 module.exports = "/Sankey data - Moz F&A - Output _ Program _ Issue Area.04826edd.csv";
@@ -21000,6 +23215,8 @@ var _d3Color = require("d3-color");
 
 var _d3Collection = require("d3-collection");
 
+var _d3Transition = require("d3-transition");
+
 var slugify = require('slugify');
 
 var realIssuesToEngagement = require("./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv");
@@ -21017,21 +23234,23 @@ var d3 = Object.assign({}, {
   format: _d3Format.format,
   scaleOrdinal: _d3Scale.scaleOrdinal,
   schemeCategory10: _d3ScaleChromatic.schemeCategory10,
-  rgb: _d3Color.rgb
+  rgb: _d3Color.rgb,
+  transition: _d3Transition.transition
 }); // const jsonUrl = `https://gist.githubusercontent.com/tekd/e9d8aee9e059f773aaf52f1130f98c65/raw/4a2af7014f0a8eed1a384f9d3f478fef6f67b218/sankey-test.json`;
 
 /*
   SET UP GRAPH DIMENSIONS
 */
 
+var aspect = 0.8;
 var margin = {
   top: 10,
+  right: 10,
   bottom: 10,
-  left: 10,
-  right: 10
+  left: 10
 };
-var width = 1000;
-var height = 800;
+var height = 600;
+var width = 800 / aspect - margin.left - margin.right;
 /*
   FORMATTING HELPERS
 */
@@ -21044,22 +23263,24 @@ var issuesProgramDetail;
 var programsToOutput;
 var elementClasses = {};
 var outputsToProgram;
+var tooltip;
+var tooltipHtml;
 /*
   APPEND SVG TO PAGE
 */
 
-var svg = d3.select('body').append('svg').attr('width', width).attr('height', height).append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
+var svg = d3.select('#container').append('svg').attr('width', width).attr('height', height).append('g');
 /*
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().nodeWidth(20).nodePadding(5).size([width, height]);
+var sankeyGraph = d3.sankey().nodeWidth(20).nodePadding(10).size([width, height]);
 var path = sankeyGraph.links();
 /**
  *  ADD TOOLTIPS
  */
 
-var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 /* 
   FORMAT DATA
 */
@@ -21186,10 +23407,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
    */
 
   link.on('mouseover', function (event, data) {
-    var tooltipHtml = "\n        <div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.source.name, "\n          </div>\n          <div class=\"total-awards\">\n          ").concat(data.target.name, " - ").concat(data.value, " Awards\n          </div>\n          </div>\n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
+    tooltipHtml = "\n        <div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.source.name, "\n          </div>\n          <div class=\"total-awards\">\n          ").concat(data.target.name, " - ").concat(data.value, " Awards\n          </div>\n          </div>\n        ");
+    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
   }).on('mouseout', function (d) {
-    tooltip.style('opacity', 0);
+    tooltip.transition().duration(500).style('opacity', 0);
   });
   /* ADD NODES */
 
@@ -21228,10 +23449,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).attr('text-anchor', 'start');
   /** HIGHLIGHT ALL RELATED PATHS ON NODE MOUSEOVER */
 
-  d3.selectAll('.node').on('mouseover', function (event, data) {
-    d3.selectAll(".".concat(slugify(data.name).toLowerCase())).style('stroke-opacity', 0.7);
+  d3.selectAll('.issue-area').on('mouseover', function (event, data) {
+    d3.selectAll(".".concat(slugify(data.name).toLowerCase())).transition().duration(200).style('stroke-opacity', 0.7);
   }).on('mouseout', function () {
-    d3.selectAll('.link').style('stroke-opacity', 0.2);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', 0.2);
   });
   /** HIGHLIGHT INDIVIDUAL LINE */
   // ADD TOOLTIPS TO ISSUE AREA NODES
@@ -21247,10 +23468,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       }, "");
     }
 
-    var tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
+    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
+    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
   }).on('mouseout', function () {
-    tooltip.style('opacity', 0);
+    tooltip.transition().duration(200).style('opacity', 0);
   }); // ADD TOOLTIPS TO PROGRAM NODES
 
   d3.selectAll("rect.program").on('mouseover', function (event, data) {
@@ -21260,14 +23481,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     var outputs = data.sourceLinks.map(function (d) {
       return [d.target.name, d.value];
     }).sort();
-    var tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Issues</span>\n                ").concat(data.targetLinks.map(function (d) {
+    tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Issues</span>\n                ").concat(data.targetLinks.map(function (d) {
       return d.source.name;
     }).sort().join('</br>'), "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Outputs</span>\n                  ").concat(outputs.map(function (output) {
       return "".concat(output[1], " ").concat(output[0]);
     }).join('</br>'), "\n              </div>\n            </div>\n          ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
+    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 50 + 'px').transition().duration(200).style('opacity', 1);
   }).on('mouseout', function () {
-    tooltip.style('opacity', 0);
+    tooltip.transition().duration(200).style('opacity', 0);
   }); // ADD TOOLTIPS TO OUTPUT NODES
 
   d3.selectAll(".output").on('mouseover', function (event, data) {
@@ -21277,13 +23498,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     var outputPrograms = nodeData.values.reduce(function (acc, program) {
       return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
     }, "");
-    var tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Programs creating this output</span>\n                  ").concat(outputPrograms, "\n              </div>\n            </div>\n          ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').style('opacity', 1);
+    tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Programs creating this output</span>\n                  ").concat(outputPrograms, "\n              </div>\n            </div>\n          ");
+    tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(200).style('opacity', 1);
   }).on('mouseout', function () {
-    tooltip.style('opacity', 0);
+    tooltip.transition().duration(200).style('opacity', 0);
   });
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -21311,7 +23532,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61707" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59927" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

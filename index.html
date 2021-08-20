@@ -10,14 +10,10 @@
     :root {
       --mo-gray-05: #f2f2f2;
     }
+    #container { margin: 4rem;}
     .node rect {
       fill-opacity: .9;
       shape-rendering: crispEdges;
-    }
-
-    .node text {
-      pointer-events: none;
-      text-shadow: 0 1px 0 #fff;
     }
 
     .link {
@@ -35,7 +31,6 @@
      background-color:var(--mo-gray-05);
      width: 20rem;
      padding: 8px;
-     transition: opacity 4ms;
      font-family: sans-serif;
     }
     .issue-title, .detail-heading { font-size: 1rem;font-weight: 700; display: block;}
@@ -50,6 +45,9 @@
 </head>
 
 <body>
+  <div id='container'>
+
+  </div>
   <script src="./scripts.js"></script>
 </body>
 
