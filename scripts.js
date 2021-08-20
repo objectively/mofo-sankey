@@ -41,8 +41,8 @@ const aspect = 0.8;
 
 var margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
-var height = 500/aspect;
-var width = 800/aspect;
+var height = 500 / aspect;
+var width = 800 / aspect;
 
 /*
   FORMATTING HELPERS
@@ -222,13 +222,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     link
       .on('mouseover', function (event, data) {
         tooltipHtml = `
-        <div class="details">
-          <div class="issue-title">
-          ${data.source.name}
-          </div>
-          <div class="total-awards">
-          ${data.target.name} - ${data.value} Awards
-          </div>
+          <div class="details">
+            <div class="issue-title">
+              ${data.source.name}
+            </div>
+            <div class="total-awards">
+              ${data.target.name} - ${data.value} Awards
+            </div>
           </div>
         `;
 
@@ -236,7 +236,9 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .html(tooltipHtml)
           .style('left', event.pageX + 'px')
           .style('top', event.pageY + 'px')
-          .transition().duration(200).style('opacity', 1);
+          .transition()
+          .duration(200)
+          .style('opacity', 1)
       })
       .on('mouseout', function (d) {
         tooltip.transition().duration(500).style('opacity', 0);
@@ -288,13 +290,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     /** HIGHLIGHT ALL RELATED PATHS ON NODE MOUSEOVER */
     d3.selectAll('.issue-area')
       .on('mouseover', (event, data) => {
-        d3.selectAll(`.${slugify(data.name).toLowerCase()}`).transition().duration(200).style(
-          'stroke-opacity',
-          0.7
-        );
+        d3.selectAll(`.${slugify(data.name).toLowerCase()}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', 0.7);
       })
       .on('mouseout', () => {
-        d3.selectAll('.link').transition().duration(200).style('stroke-opacity', 0.2);
+        d3.selectAll('.link')
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', 0.2);
       });
 
     /** HIGHLIGHT INDIVIDUAL LINE */
@@ -328,9 +333,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         `;
         tooltip
           .html(tooltipHtml)
-          .style('left', (event.pageX + 50) + 'px')
+          .style('left', event.pageX + 50 + 'px')
           .style('top', event.pageY + 'px')
-          .transition().duration(200).style('opacity', 1);
+          .transition()
+          .duration(200)
+          .style('opacity', 1);
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
@@ -368,9 +375,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           `;
         tooltip
           .html(tooltipHtml)
-          .style('left', (event.pageX - 150) + 'px')
-          .style('top', (event.pageY + 50)+ 'px')
-          .transition().duration(200).style('opacity', 1);
+          .style('left', event.pageX - 150 + 'px')
+          .style('top', event.pageY + 50 + 'px')
+          .transition()
+          .duration(200)
+          .style('opacity', 1);
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
@@ -400,9 +409,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           `;
         tooltip
           .html(tooltipHtml)
-          .style('left', (event.pageX - 350)+ 'px')
-          .style('top', (event.pageY - 25) + 'px')
-          .transition().duration(200).style('opacity', 1);
+          .style('left', event.pageX - 350 + 'px')
+          .style('top', event.pageY - 25 + 'px')
+          .transition()
+          .duration(200)
+          .style('opacity', 1);
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);

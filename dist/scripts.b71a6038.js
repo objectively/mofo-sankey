@@ -23407,7 +23407,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
    */
 
   link.on('mouseover', function (event, data) {
-    tooltipHtml = "\n        <div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.source.name, "\n          </div>\n          <div class=\"total-awards\">\n          ").concat(data.target.name, " - ").concat(data.value, " Awards\n          </div>\n          </div>\n        ");
+    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.value, " Awards\n            </div>\n          </div>\n        ");
     tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
   }).on('mouseout', function (d) {
     tooltip.transition().duration(500).style('opacity', 0);
@@ -23532,7 +23532,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65174" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50518" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
