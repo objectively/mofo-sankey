@@ -238,7 +238,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('top', event.pageY + 'px')
           .transition()
           .duration(200)
-          .style('opacity', 1)
+          .style('opacity', 1);
       })
       .on('mouseout', function (d) {
         tooltip.transition().duration(500).style('opacity', 0);
