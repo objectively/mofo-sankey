@@ -39,10 +39,10 @@ const d3 = Object.assign(
 
 const aspect = 0.8;
 
-var margin = { top: 10, right: 10, bottom: 10, left: 10 };
+var margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
-var height = 600;
-var width = 800 / aspect - margin.left - margin.right;
+var height = 500/aspect;
+var width = 800/aspect;
 
 /*
   FORMATTING HELPERS

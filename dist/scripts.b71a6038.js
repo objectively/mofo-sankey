@@ -23244,13 +23244,13 @@ var d3 = Object.assign({}, {
 
 var aspect = 0.8;
 var margin = {
-  top: 10,
-  right: 10,
-  bottom: 10,
-  left: 10
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0
 };
-var height = 600;
-var width = 800 / aspect - margin.left - margin.right;
+var height = 500 / aspect;
+var width = 800 / aspect;
 /*
   FORMATTING HELPERS
 */
@@ -23532,7 +23532,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59927" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62454" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
