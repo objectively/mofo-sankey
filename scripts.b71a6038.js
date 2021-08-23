@@ -23395,7 +23395,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   var link = svg.append('g').selectAll('.link').data(function () {
     return chart.links;
   }).enter().append('path').attr('class', function (d) {
-    return "link ".concat(slugify(d.source.name).toLowerCase());
+    return "link ".concat(slugify(d.source.name).toLowerCase(), " source-").concat(slugify(d.source.name, {
+      lower: true
+    }), " target-").concat(slugify(d.target.name, {
+      lower: true
+    }));
   }).attr('d', d3.sankeyLinkHorizontal()).attr('stroke-width', function (d) {
     return d.width;
   });
@@ -23407,6 +23411,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
    */
 
   link.on('mouseover', function (event, data) {
+    // console.log('link hover', data)
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.value, " Awards\n            </div>\n          </div>\n        ");
     tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
   }).on('mouseout', function (d) {
@@ -23447,13 +23452,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).attr('x', function (d) {
     return d.x1 + 6;
   }).attr('text-anchor', 'start');
-  /** HIGHLIGHT ALL RELATED PATHS ON NODE MOUSEOVER */
-
-  d3.selectAll('.issue-area').on('mouseover', function (event, data) {
-    d3.selectAll(".".concat(slugify(data.name).toLowerCase())).transition().duration(200).style('stroke-opacity', 0.7);
-  }).on('mouseout', function () {
-    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', 0.2);
-  });
   /** HIGHLIGHT INDIVIDUAL LINE */
   // ADD TOOLTIPS TO ISSUE AREA NODES
 
@@ -23469,9 +23467,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }
 
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
+    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1); // highlight all related lines (TODO: privacy + security is not working)
+
+    d3.selectAll(".link.".concat(slugify(data.name, {
+      lower: true
+    }))).transition().duration(200).style('stroke-opacity', 0.7);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', 0.2);
   }); // ADD TOOLTIPS TO PROGRAM NODES
 
   d3.selectAll("rect.program").on('mouseover', function (event, data) {
@@ -23486,9 +23489,19 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }).sort().join('</br>'), "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Outputs</span>\n                  ").concat(outputs.map(function (output) {
       return "".concat(output[1], " ").concat(output[0]);
     }).join('</br>'), "\n              </div>\n            </div>\n          ");
-    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 50 + 'px').transition().duration(200).style('opacity', 1);
+    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 50 + 'px').transition().duration(200).style('opacity', 1); // issue links
+    // sourceLinks
+
+    d3.selectAll(".link.source-".concat(slugify(data.name, {
+      lower: true
+    }))).style('stroke-opacity', 1); // targetLinks
+
+    d3.selectAll(".link.target-".concat(slugify(data.name, {
+      lower: true
+    }))).style('stroke-opacity', 1);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
+    d3.selectAll('.link').style('stroke-opacity', 0.2);
   }); // ADD TOOLTIPS TO OUTPUT NODES
 
   d3.selectAll(".output").on('mouseover', function (event, data) {
@@ -23532,7 +23545,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52997" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57249" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
