@@ -393,7 +393,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link').style('stroke-opacity', 0.2)
+        d3.selectAll('.link').style('stroke-opacity', 0.2);
       });
 
     // ADD TOOLTIPS TO OUTPUT NODES
@@ -425,8 +425,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .transition()
           .duration(200)
           .style('opacity', 1);
+
+        d3.selectAll(
+          `.link.target-${slugify(data.name, { lower: true })}`
+        ).style('stroke-opacity', 1);
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
+        d3.selectAll('.link').style('stroke-opacity', 0.2);
       });
   });
