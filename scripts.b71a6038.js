@@ -23513,8 +23513,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }, "");
     tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Programs creating this output</span>\n                  ").concat(outputPrograms, "\n              </div>\n            </div>\n          ");
     tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(200).style('opacity', 1);
+    d3.selectAll(".link.target-".concat(slugify(data.name, {
+      lower: true
+    }))).style('stroke-opacity', 1);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
+    d3.selectAll('.link').style('stroke-opacity', 0.2);
   });
 });
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
