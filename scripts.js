@@ -209,7 +209,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .enter()
       .append('path')
       .attr('class', (d) => {
-        return `link ${slugify(d.source.name).toLowerCase()}`;
+        return `link ${slugify(d.source.name).toLowerCase()} source-${slugify(
+          d.source.name,
+          { lower: true }
+        )} target-${slugify(d.target.name, { lower: true })}`;
       })
       .attr('d', d3.sankeyLinkHorizontal())
       .attr('stroke-width', (d) => d.width);
@@ -221,6 +224,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
      */
     link
       .on('mouseover', function (event, data) {
+        // console.log('link hover', data)
         tooltipHtml = `
           <div class="details">
             <div class="issue-title">
@@ -287,21 +291,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('x', (d) => d.x1 + 6)
       .attr('text-anchor', 'start');
 
-    /** HIGHLIGHT ALL RELATED PATHS ON NODE MOUSEOVER */
-    d3.selectAll('.issue-area')
-      .on('mouseover', (event, data) => {
-        d3.selectAll(`.${slugify(data.name).toLowerCase()}`)
-          .transition()
-          .duration(200)
-          .style('stroke-opacity', 0.7);
-      })
-      .on('mouseout', () => {
-        d3.selectAll('.link')
-          .transition()
-          .duration(200)
-          .style('stroke-opacity', 0.2);
-      });
-
     /** HIGHLIGHT INDIVIDUAL LINE */
 
     // ADD TOOLTIPS TO ISSUE AREA NODES
@@ -338,9 +327,19 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .transition()
           .duration(200)
           .style('opacity', 1);
+
+        // highlight all related lines (TODO: privacy + security is not working)
+        d3.selectAll(`.link.${slugify(data.name, { lower: true })}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', 0.7);
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
+        d3.selectAll('.link')
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', 0.2);
       });
 
     // ADD TOOLTIPS TO PROGRAM NODES
@@ -380,9 +379,21 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .transition()
           .duration(200)
           .style('opacity', 1);
+
+        // issue links
+        // sourceLinks
+        d3.selectAll(
+          `.link.source-${slugify(data.name, { lower: true })}`
+        ).style('stroke-opacity', 1);
+
+        // targetLinks
+        d3.selectAll(
+          `.link.target-${slugify(data.name, { lower: true })}`
+        ).style('stroke-opacity', 1);
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
+        d3.selectAll('.link').style('stroke-opacity', 0.2);
       });
 
     // ADD TOOLTIPS TO OUTPUT NODES
@@ -414,8 +425,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .transition()
           .duration(200)
           .style('opacity', 1);
+
+        d3.selectAll(
+          `.link.target-${slugify(data.name, { lower: true })}`
+        ).style('stroke-opacity', 1);
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
+        d3.selectAll('.link').style('stroke-opacity', 0.2);
       });
   });
