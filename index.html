@@ -1,71 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MO-FO Sankey</title>
-  <style>:root {
-      --mo-gray-05: #f2f2f2;
-    }
-
-    #container {
-      display: flex;
-      justify-content: center;
-      margin: 4rem;
-
-    }
-
-    .node rect {
-      fill-opacity: .9;
-      shape-rendering: crispEdges;
-    }
-
-    .link {
-      fill: none;
-      stroke: #000;
-      stroke-opacity: .2;
-    }
-
-    .link:hover {
-      stroke-opacity: .5;
-    }
-
-    .tooltip {
-      position: absolute;
-      background-color: var(--mo-gray-05);
-      width: 20rem;
-      padding: 8px;
-      font-family: sans-serif;
-    }
-
-    .issue-title,
-    .detail-heading {
-      font-size: 1rem;
-      font-weight: 700;
-      display: block;
-    }
-
-    .total-programs,
-    .total-awards {
-      font-size: .8rem;
-    }
-
-    .total-programs {
-      font-weight: 700;
-    }
-
-    .node {
-      border: purple solid 1px;
-    }</style>
-</head>
-
+  <link rel="stylesheet" href="/foundation.min.98a51405.css">
+  <link rel="stylesheet" href="/styles.8986bff4.css">
+  <title>Sunburst</title>
+<script src="/foundation.min.98a51405.js"></script><script src="/styles.8986bff4.js"></script></head>
 <body>
-  <div id="container">
-
-  </div>
-  <script src="/scripts.b71a6038.js"></script>
+  <main>
+    <section class="page-section page-section--sunburst">
+      <div class="row expanded section-container">
+        <div class="columns large-6 medium-6 small-12">
+          <div class="column small-text">
+            <h2>Lorem Ipsum</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sollicitudin nibh sit amet commodo nulla facilisi nullam vehicula ipsum. Ultricies lacus sed turpis tincidunt id aliquet. Vulputate dignissim suspendisse in est ante in.</p>
+          </div>
+          <div class="suburst-container">
+            <svg id="sunburst"></svg>
+          </div>
+        </div>
+        <div class="columns large-6 medium-6 small-12 text-column">
+          <div class="sunburst-text">
+            <div class="large-text">
+              <h2>Lorem Ipsum</h2>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sollicitudin nibh sit amet commodo nulla facilisi nullam vehicula ipsum. Ultricies lacus sed turpis tincidunt id aliquet. Vulputate dignissim suspendisse in est ante in.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/sunburst.07c45d53.js"></script>
 </body>
-
 </html>
