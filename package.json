@@ -9,12 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-<<<<<<< HEAD
     "d3": "^7.0.0",
     "d3-array": "^3.0.2",
-=======
-    "d3": "^7.0.1",
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
     "d3-collection": "^1.0.7",
     "d3-color": "^3.0.1",
     "d3-dsv": "^3.0.1",
