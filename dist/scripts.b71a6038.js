@@ -874,69 +874,4010 @@ try {
   }
 }
 
-},{}],"node_modules/slugify/slugify.js":[function(require,module,exports) {
-var define;
+},{}],"node_modules/lodash.kebabcase/index.js":[function(require,module,exports) {
+var global = arguments[3];
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/** Used to match words composed of alphanumeric characters. */
+var reAsciiWord = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g;
+
+/** Used to match Latin Unicode letters (excluding mathematical operators). */
+var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
+
+/** Used to compose unicode character classes. */
+var rsAstralRange = '\\ud800-\\udfff',
+    rsComboMarksRange = '\\u0300-\\u036f\\ufe20-\\ufe23',
+    rsComboSymbolsRange = '\\u20d0-\\u20f0',
+    rsDingbatRange = '\\u2700-\\u27bf',
+    rsLowerRange = 'a-z\\xdf-\\xf6\\xf8-\\xff',
+    rsMathOpRange = '\\xac\\xb1\\xd7\\xf7',
+    rsNonCharRange = '\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf',
+    rsPunctuationRange = '\\u2000-\\u206f',
+    rsSpaceRange = ' \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000',
+    rsUpperRange = 'A-Z\\xc0-\\xd6\\xd8-\\xde',
+    rsVarRange = '\\ufe0e\\ufe0f',
+    rsBreakRange = rsMathOpRange + rsNonCharRange + rsPunctuationRange + rsSpaceRange;
+
+/** Used to compose unicode capture groups. */
+var rsApos = "['\u2019]",
+    rsBreak = '[' + rsBreakRange + ']',
+    rsCombo = '[' + rsComboMarksRange + rsComboSymbolsRange + ']',
+    rsDigits = '\\d+',
+    rsDingbat = '[' + rsDingbatRange + ']',
+    rsLower = '[' + rsLowerRange + ']',
+    rsMisc = '[^' + rsAstralRange + rsBreakRange + rsDigits + rsDingbatRange + rsLowerRange + rsUpperRange + ']',
+    rsFitz = '\\ud83c[\\udffb-\\udfff]',
+    rsModifier = '(?:' + rsCombo + '|' + rsFitz + ')',
+    rsNonAstral = '[^' + rsAstralRange + ']',
+    rsRegional = '(?:\\ud83c[\\udde6-\\uddff]){2}',
+    rsSurrPair = '[\\ud800-\\udbff][\\udc00-\\udfff]',
+    rsUpper = '[' + rsUpperRange + ']',
+    rsZWJ = '\\u200d';
+
+/** Used to compose unicode regexes. */
+var rsLowerMisc = '(?:' + rsLower + '|' + rsMisc + ')',
+    rsUpperMisc = '(?:' + rsUpper + '|' + rsMisc + ')',
+    rsOptLowerContr = '(?:' + rsApos + '(?:d|ll|m|re|s|t|ve))?',
+    rsOptUpperContr = '(?:' + rsApos + '(?:D|LL|M|RE|S|T|VE))?',
+    reOptMod = rsModifier + '?',
+    rsOptVar = '[' + rsVarRange + ']?',
+    rsOptJoin = '(?:' + rsZWJ + '(?:' + [rsNonAstral, rsRegional, rsSurrPair].join('|') + ')' + rsOptVar + reOptMod + ')*',
+    rsSeq = rsOptVar + reOptMod + rsOptJoin,
+    rsEmoji = '(?:' + [rsDingbat, rsRegional, rsSurrPair].join('|') + ')' + rsSeq;
+
+/** Used to match apostrophes. */
+var reApos = RegExp(rsApos, 'g');
+
+/**
+ * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
+ * [combining diacritical marks for symbols](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks_for_Symbols).
+ */
+var reComboMark = RegExp(rsCombo, 'g');
+
+/** Used to match complex or compound words. */
+var reUnicodeWord = RegExp([
+  rsUpper + '?' + rsLower + '+' + rsOptLowerContr + '(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
+  rsUpperMisc + '+' + rsOptUpperContr + '(?=' + [rsBreak, rsUpper + rsLowerMisc, '$'].join('|') + ')',
+  rsUpper + '?' + rsLowerMisc + '+' + rsOptLowerContr,
+  rsUpper + '+' + rsOptUpperContr,
+  rsDigits,
+  rsEmoji
+].join('|'), 'g');
+
+/** Used to detect strings that need a more robust regexp to match words. */
+var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+
+/** Used to map Latin Unicode letters to basic Latin letters. */
+var deburredLetters = {
+  // Latin-1 Supplement block.
+  '\xc0': 'A',  '\xc1': 'A', '\xc2': 'A', '\xc3': 'A', '\xc4': 'A', '\xc5': 'A',
+  '\xe0': 'a',  '\xe1': 'a', '\xe2': 'a', '\xe3': 'a', '\xe4': 'a', '\xe5': 'a',
+  '\xc7': 'C',  '\xe7': 'c',
+  '\xd0': 'D',  '\xf0': 'd',
+  '\xc8': 'E',  '\xc9': 'E', '\xca': 'E', '\xcb': 'E',
+  '\xe8': 'e',  '\xe9': 'e', '\xea': 'e', '\xeb': 'e',
+  '\xcc': 'I',  '\xcd': 'I', '\xce': 'I', '\xcf': 'I',
+  '\xec': 'i',  '\xed': 'i', '\xee': 'i', '\xef': 'i',
+  '\xd1': 'N',  '\xf1': 'n',
+  '\xd2': 'O',  '\xd3': 'O', '\xd4': 'O', '\xd5': 'O', '\xd6': 'O', '\xd8': 'O',
+  '\xf2': 'o',  '\xf3': 'o', '\xf4': 'o', '\xf5': 'o', '\xf6': 'o', '\xf8': 'o',
+  '\xd9': 'U',  '\xda': 'U', '\xdb': 'U', '\xdc': 'U',
+  '\xf9': 'u',  '\xfa': 'u', '\xfb': 'u', '\xfc': 'u',
+  '\xdd': 'Y',  '\xfd': 'y', '\xff': 'y',
+  '\xc6': 'Ae', '\xe6': 'ae',
+  '\xde': 'Th', '\xfe': 'th',
+  '\xdf': 'ss',
+  // Latin Extended-A block.
+  '\u0100': 'A',  '\u0102': 'A', '\u0104': 'A',
+  '\u0101': 'a',  '\u0103': 'a', '\u0105': 'a',
+  '\u0106': 'C',  '\u0108': 'C', '\u010a': 'C', '\u010c': 'C',
+  '\u0107': 'c',  '\u0109': 'c', '\u010b': 'c', '\u010d': 'c',
+  '\u010e': 'D',  '\u0110': 'D', '\u010f': 'd', '\u0111': 'd',
+  '\u0112': 'E',  '\u0114': 'E', '\u0116': 'E', '\u0118': 'E', '\u011a': 'E',
+  '\u0113': 'e',  '\u0115': 'e', '\u0117': 'e', '\u0119': 'e', '\u011b': 'e',
+  '\u011c': 'G',  '\u011e': 'G', '\u0120': 'G', '\u0122': 'G',
+  '\u011d': 'g',  '\u011f': 'g', '\u0121': 'g', '\u0123': 'g',
+  '\u0124': 'H',  '\u0126': 'H', '\u0125': 'h', '\u0127': 'h',
+  '\u0128': 'I',  '\u012a': 'I', '\u012c': 'I', '\u012e': 'I', '\u0130': 'I',
+  '\u0129': 'i',  '\u012b': 'i', '\u012d': 'i', '\u012f': 'i', '\u0131': 'i',
+  '\u0134': 'J',  '\u0135': 'j',
+  '\u0136': 'K',  '\u0137': 'k', '\u0138': 'k',
+  '\u0139': 'L',  '\u013b': 'L', '\u013d': 'L', '\u013f': 'L', '\u0141': 'L',
+  '\u013a': 'l',  '\u013c': 'l', '\u013e': 'l', '\u0140': 'l', '\u0142': 'l',
+  '\u0143': 'N',  '\u0145': 'N', '\u0147': 'N', '\u014a': 'N',
+  '\u0144': 'n',  '\u0146': 'n', '\u0148': 'n', '\u014b': 'n',
+  '\u014c': 'O',  '\u014e': 'O', '\u0150': 'O',
+  '\u014d': 'o',  '\u014f': 'o', '\u0151': 'o',
+  '\u0154': 'R',  '\u0156': 'R', '\u0158': 'R',
+  '\u0155': 'r',  '\u0157': 'r', '\u0159': 'r',
+  '\u015a': 'S',  '\u015c': 'S', '\u015e': 'S', '\u0160': 'S',
+  '\u015b': 's',  '\u015d': 's', '\u015f': 's', '\u0161': 's',
+  '\u0162': 'T',  '\u0164': 'T', '\u0166': 'T',
+  '\u0163': 't',  '\u0165': 't', '\u0167': 't',
+  '\u0168': 'U',  '\u016a': 'U', '\u016c': 'U', '\u016e': 'U', '\u0170': 'U', '\u0172': 'U',
+  '\u0169': 'u',  '\u016b': 'u', '\u016d': 'u', '\u016f': 'u', '\u0171': 'u', '\u0173': 'u',
+  '\u0174': 'W',  '\u0175': 'w',
+  '\u0176': 'Y',  '\u0177': 'y', '\u0178': 'Y',
+  '\u0179': 'Z',  '\u017b': 'Z', '\u017d': 'Z',
+  '\u017a': 'z',  '\u017c': 'z', '\u017e': 'z',
+  '\u0132': 'IJ', '\u0133': 'ij',
+  '\u0152': 'Oe', '\u0153': 'oe',
+  '\u0149': "'n", '\u017f': 'ss'
+};
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+/**
+ * A specialized version of `_.reduce` for arrays without support for
+ * iteratee shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {*} [accumulator] The initial value.
+ * @param {boolean} [initAccum] Specify using the first element of `array` as
+ *  the initial value.
+ * @returns {*} Returns the accumulated value.
+ */
+function arrayReduce(array, iteratee, accumulator, initAccum) {
+  var index = -1,
+      length = array ? array.length : 0;
+
+  if (initAccum && length) {
+    accumulator = array[++index];
+  }
+  while (++index < length) {
+    accumulator = iteratee(accumulator, array[index], index, array);
+  }
+  return accumulator;
+}
+
+/**
+ * Splits an ASCII `string` into an array of its words.
+ *
+ * @private
+ * @param {string} The string to inspect.
+ * @returns {Array} Returns the words of `string`.
+ */
+function asciiWords(string) {
+  return string.match(reAsciiWord) || [];
+}
+
+/**
+ * The base implementation of `_.propertyOf` without support for deep paths.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Function} Returns the new accessor function.
+ */
+function basePropertyOf(object) {
+  return function(key) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+/**
+ * Used by `_.deburr` to convert Latin-1 Supplement and Latin Extended-A
+ * letters to basic Latin letters.
+ *
+ * @private
+ * @param {string} letter The matched letter to deburr.
+ * @returns {string} Returns the deburred letter.
+ */
+var deburrLetter = basePropertyOf(deburredLetters);
+
+/**
+ * Checks if `string` contains a word composed of Unicode symbols.
+ *
+ * @private
+ * @param {string} string The string to inspect.
+ * @returns {boolean} Returns `true` if a word is found, else `false`.
+ */
+function hasUnicodeWord(string) {
+  return reHasUnicodeWord.test(string);
+}
+
+/**
+ * Splits a Unicode `string` into an array of its words.
+ *
+ * @private
+ * @param {string} The string to inspect.
+ * @returns {Array} Returns the words of `string`.
+ */
+function unicodeWords(string) {
+  return string.match(reUnicodeWord) || [];
+}
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/** Built-in value references. */
+var Symbol = root.Symbol;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+/**
+ * The base implementation of `_.toString` which doesn't convert nullish
+ * values to empty strings.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return symbolToString ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+/**
+ * Creates a function like `_.camelCase`.
+ *
+ * @private
+ * @param {Function} callback The function to combine each word.
+ * @returns {Function} Returns the new compounder function.
+ */
+function createCompounder(callback) {
+  return function(string) {
+    return arrayReduce(words(deburr(string).replace(reApos, '')), callback, '');
+  };
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a string. An empty string is returned for `null`
+ * and `undefined` values. The sign of `-0` is preserved.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ * @example
+ *
+ * _.toString(null);
+ * // => ''
+ *
+ * _.toString(-0);
+ * // => '-0'
+ *
+ * _.toString([1, 2, 3]);
+ * // => '1,2,3'
+ */
+function toString(value) {
+  return value == null ? '' : baseToString(value);
+}
+
+/**
+ * Deburrs `string` by converting
+ * [Latin-1 Supplement](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
+ * and [Latin Extended-A](https://en.wikipedia.org/wiki/Latin_Extended-A)
+ * letters to basic Latin letters and removing
+ * [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to deburr.
+ * @returns {string} Returns the deburred string.
+ * @example
+ *
+ * _.deburr('déjà vu');
+ * // => 'deja vu'
+ */
+function deburr(string) {
+  string = toString(string);
+  return string && string.replace(reLatin, deburrLetter).replace(reComboMark, '');
+}
+
+/**
+ * Converts `string` to
+ * [kebab case](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the kebab cased string.
+ * @example
+ *
+ * _.kebabCase('Foo Bar');
+ * // => 'foo-bar'
+ *
+ * _.kebabCase('fooBar');
+ * // => 'foo-bar'
+ *
+ * _.kebabCase('__FOO_BAR__');
+ * // => 'foo-bar'
+ */
+var kebabCase = createCompounder(function(result, word, index) {
+  return result + (index ? '-' : '') + word.toLowerCase();
+});
+
+/**
+ * Splits `string` into an array of its words.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to inspect.
+ * @param {RegExp|string} [pattern] The pattern to match words.
+ * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
+ * @returns {Array} Returns the words of `string`.
+ * @example
+ *
+ * _.words('fred, barney, & pebbles');
+ * // => ['fred', 'barney', 'pebbles']
+ *
+ * _.words('fred, barney, & pebbles', /[^, ]+/g);
+ * // => ['fred', 'barney', '&', 'pebbles']
+ */
+function words(string, pattern, guard) {
+  string = toString(string);
+  pattern = guard ? undefined : pattern;
+
+  if (pattern === undefined) {
+    return hasUnicodeWord(string) ? unicodeWords(string) : asciiWords(string);
+  }
+  return string.match(pattern) || [];
+}
+
+module.exports = kebabCase;
+
+},{}],"node_modules/d3-array/src/ascending.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ascending;
+
+function ascending(a, b) {
+  return a == null || b == null ? NaN : a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
+}
+},{}],"node_modules/d3-array/src/bisector.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = bisector;
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function bisector(f) {
+  var delta = f;
+  var compare1 = f;
+  var compare2 = f;
+
+  if (f.length === 1) {
+    delta = function delta(d, x) {
+      return f(d) - x;
+    };
+
+    compare1 = _ascending.default;
+
+    compare2 = function compare2(d, x) {
+      return (0, _ascending.default)(f(d), x);
+    };
+  }
+
+  function left(a, x) {
+    var lo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var hi = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : a.length;
+
+    if (lo < hi) {
+      if (compare1(x, x) !== 0) return hi;
+
+      do {
+        var mid = lo + hi >>> 1;
+        if (compare2(a[mid], x) < 0) lo = mid + 1;else hi = mid;
+      } while (lo < hi);
+    }
+
+    return lo;
+  }
+
+  function right(a, x) {
+    var lo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var hi = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : a.length;
+
+    if (lo < hi) {
+      if (compare1(x, x) !== 0) return hi;
+
+      do {
+        var mid = lo + hi >>> 1;
+        if (compare2(a[mid], x) <= 0) lo = mid + 1;else hi = mid;
+      } while (lo < hi);
+    }
+
+    return lo;
+  }
+
+  function center(a, x) {
+    var lo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var hi = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : a.length;
+    var i = left(a, x, lo, hi - 1);
+    return i > lo && delta(a[i - 1], x) > -delta(a[i], x) ? i - 1 : i;
+  }
+
+  return {
+    left: left,
+    center: center,
+    right: right
+  };
+}
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/number.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = number;
+exports.numbers = numbers;
+
+var _marked = /*#__PURE__*/regeneratorRuntime.mark(numbers);
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function number(x) {
+  return x === null ? NaN : +x;
+}
+
+function numbers(values, valueof) {
+  var _iterator, _step, value, index, _iterator2, _step2, _value;
+
+  return regeneratorRuntime.wrap(function numbers$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          if (!(valueof === undefined)) {
+            _context.next = 21;
+            break;
+          }
+
+          _iterator = _createForOfIteratorHelper(values);
+          _context.prev = 2;
+
+          _iterator.s();
+
+        case 4:
+          if ((_step = _iterator.n()).done) {
+            _context.next = 11;
+            break;
+          }
+
+          value = _step.value;
+
+          if (!(value != null && (value = +value) >= value)) {
+            _context.next = 9;
+            break;
+          }
+
+          _context.next = 9;
+          return value;
+
+        case 9:
+          _context.next = 4;
+          break;
+
+        case 11:
+          _context.next = 16;
+          break;
+
+        case 13:
+          _context.prev = 13;
+          _context.t0 = _context["catch"](2);
+
+          _iterator.e(_context.t0);
+
+        case 16:
+          _context.prev = 16;
+
+          _iterator.f();
+
+          return _context.finish(16);
+
+        case 19:
+          _context.next = 40;
+          break;
+
+        case 21:
+          index = -1;
+          _iterator2 = _createForOfIteratorHelper(values);
+          _context.prev = 23;
+
+          _iterator2.s();
+
+        case 25:
+          if ((_step2 = _iterator2.n()).done) {
+            _context.next = 32;
+            break;
+          }
+
+          _value = _step2.value;
+
+          if (!((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value)) {
+            _context.next = 30;
+            break;
+          }
+
+          _context.next = 30;
+          return _value;
+
+        case 30:
+          _context.next = 25;
+          break;
+
+        case 32:
+          _context.next = 37;
+          break;
+
+        case 34:
+          _context.prev = 34;
+          _context.t1 = _context["catch"](23);
+
+          _iterator2.e(_context.t1);
+
+        case 37:
+          _context.prev = 37;
+
+          _iterator2.f();
+
+          return _context.finish(37);
+
+        case 40:
+        case "end":
+          return _context.stop();
+      }
+    }
+  }, _marked, null, [[2, 13, 16, 19], [23, 34, 37, 40]]);
+}
+},{}],"node_modules/d3-array/src/bisect.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.bisectCenter = exports.bisectLeft = exports.bisectRight = void 0;
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+var _bisector = _interopRequireDefault(require("./bisector.js"));
+
+var _number = _interopRequireDefault(require("./number.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var ascendingBisect = (0, _bisector.default)(_ascending.default);
+var bisectRight = ascendingBisect.right;
+exports.bisectRight = bisectRight;
+var bisectLeft = ascendingBisect.left;
+exports.bisectLeft = bisectLeft;
+var bisectCenter = (0, _bisector.default)(_number.default).center;
+exports.bisectCenter = bisectCenter;
+var _default = bisectRight;
+exports.default = _default;
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./bisector.js":"node_modules/d3-array/src/bisector.js","./number.js":"node_modules/d3-array/src/number.js"}],"node_modules/d3-array/src/count.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = count;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function count(values, valueof) {
+  var count = 0;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value != null && (value = +value) >= value) {
+          ++count;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var index = -1;
+
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value) {
+          ++count;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return count;
+}
+},{}],"node_modules/d3-array/src/cross.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = cross;
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-;
+function length(array) {
+  return array.length | 0;
+}
 
-(function (name, root, factory) {
-  if ((typeof exports === "undefined" ? "undefined" : _typeof(exports)) === 'object') {
-    module.exports = factory();
-    module.exports['default'] = factory();
+function empty(length) {
+  return !(length > 0);
+}
+
+function arrayify(values) {
+  return _typeof(values) !== "object" || "length" in values ? values : Array.from(values);
+}
+
+function reducer(reduce) {
+  return function (values) {
+    return reduce.apply(void 0, _toConsumableArray(values));
+  };
+}
+
+function cross() {
+  for (var _len = arguments.length, values = new Array(_len), _key = 0; _key < _len; _key++) {
+    values[_key] = arguments[_key];
   }
-  /* istanbul ignore next */
-  else if (typeof define === 'function' && define.amd) {
-    define(factory);
+
+  var reduce = typeof values[values.length - 1] === "function" && reducer(values.pop());
+  values = values.map(arrayify);
+  var lengths = values.map(length);
+  var j = values.length - 1;
+  var index = new Array(j + 1).fill(0);
+  var product = [];
+  if (j < 0 || lengths.some(empty)) return product;
+
+  while (true) {
+    product.push(index.map(function (j, i) {
+      return values[i][j];
+    }));
+    var i = j;
+
+    while (++index[i] === lengths[i]) {
+      if (i === 0) return reduce ? product.map(reduce) : product;
+      index[i--] = 0;
+    }
+  }
+}
+},{}],"node_modules/d3-array/src/cumsum.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = cumsum;
+
+function cumsum(values, valueof) {
+  var sum = 0,
+      index = 0;
+  return Float64Array.from(values, valueof === undefined ? function (v) {
+    return sum += +v || 0;
+  } : function (v) {
+    return sum += +valueof(v, index++, values) || 0;
+  });
+}
+},{}],"node_modules/d3-array/src/descending.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = descending;
+
+function descending(a, b) {
+  return a == null || b == null ? NaN : b < a ? -1 : b > a ? 1 : b >= a ? 0 : NaN;
+}
+},{}],"node_modules/d3-array/src/variance.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = variance;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function variance(values, valueof) {
+  var count = 0;
+  var delta;
+  var mean = 0;
+  var sum = 0;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value != null && (value = +value) >= value) {
+          delta = value - mean;
+          mean += delta / ++count;
+          sum += delta * (value - mean);
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
   } else {
-    root[name] = factory();
-  }
-})('slugify', this, function () {
-  var charMap = JSON.parse('{"$":"dollar","%":"percent","&":"and","<":"less",">":"greater","|":"or","¢":"cent","£":"pound","¤":"currency","¥":"yen","©":"(c)","ª":"a","®":"(r)","º":"o","À":"A","Á":"A","Â":"A","Ã":"A","Ä":"A","Å":"A","Æ":"AE","Ç":"C","È":"E","É":"E","Ê":"E","Ë":"E","Ì":"I","Í":"I","Î":"I","Ï":"I","Ð":"D","Ñ":"N","Ò":"O","Ó":"O","Ô":"O","Õ":"O","Ö":"O","Ø":"O","Ù":"U","Ú":"U","Û":"U","Ü":"U","Ý":"Y","Þ":"TH","ß":"ss","à":"a","á":"a","â":"a","ã":"a","ä":"a","å":"a","æ":"ae","ç":"c","è":"e","é":"e","ê":"e","ë":"e","ì":"i","í":"i","î":"i","ï":"i","ð":"d","ñ":"n","ò":"o","ó":"o","ô":"o","õ":"o","ö":"o","ø":"o","ù":"u","ú":"u","û":"u","ü":"u","ý":"y","þ":"th","ÿ":"y","Ā":"A","ā":"a","Ă":"A","ă":"a","Ą":"A","ą":"a","Ć":"C","ć":"c","Č":"C","č":"c","Ď":"D","ď":"d","Đ":"DJ","đ":"dj","Ē":"E","ē":"e","Ė":"E","ė":"e","Ę":"e","ę":"e","Ě":"E","ě":"e","Ğ":"G","ğ":"g","Ģ":"G","ģ":"g","Ĩ":"I","ĩ":"i","Ī":"i","ī":"i","Į":"I","į":"i","İ":"I","ı":"i","Ķ":"k","ķ":"k","Ļ":"L","ļ":"l","Ľ":"L","ľ":"l","Ł":"L","ł":"l","Ń":"N","ń":"n","Ņ":"N","ņ":"n","Ň":"N","ň":"n","Ō":"O","ō":"o","Ő":"O","ő":"o","Œ":"OE","œ":"oe","Ŕ":"R","ŕ":"r","Ř":"R","ř":"r","Ś":"S","ś":"s","Ş":"S","ş":"s","Š":"S","š":"s","Ţ":"T","ţ":"t","Ť":"T","ť":"t","Ũ":"U","ũ":"u","Ū":"u","ū":"u","Ů":"U","ů":"u","Ű":"U","ű":"u","Ų":"U","ų":"u","Ŵ":"W","ŵ":"w","Ŷ":"Y","ŷ":"y","Ÿ":"Y","Ź":"Z","ź":"z","Ż":"Z","ż":"z","Ž":"Z","ž":"z","Ə":"E","ƒ":"f","Ơ":"O","ơ":"o","Ư":"U","ư":"u","ǈ":"LJ","ǉ":"lj","ǋ":"NJ","ǌ":"nj","Ș":"S","ș":"s","Ț":"T","ț":"t","ə":"e","˚":"o","Ά":"A","Έ":"E","Ή":"H","Ί":"I","Ό":"O","Ύ":"Y","Ώ":"W","ΐ":"i","Α":"A","Β":"B","Γ":"G","Δ":"D","Ε":"E","Ζ":"Z","Η":"H","Θ":"8","Ι":"I","Κ":"K","Λ":"L","Μ":"M","Ν":"N","Ξ":"3","Ο":"O","Π":"P","Ρ":"R","Σ":"S","Τ":"T","Υ":"Y","Φ":"F","Χ":"X","Ψ":"PS","Ω":"W","Ϊ":"I","Ϋ":"Y","ά":"a","έ":"e","ή":"h","ί":"i","ΰ":"y","α":"a","β":"b","γ":"g","δ":"d","ε":"e","ζ":"z","η":"h","θ":"8","ι":"i","κ":"k","λ":"l","μ":"m","ν":"n","ξ":"3","ο":"o","π":"p","ρ":"r","ς":"s","σ":"s","τ":"t","υ":"y","φ":"f","χ":"x","ψ":"ps","ω":"w","ϊ":"i","ϋ":"y","ό":"o","ύ":"y","ώ":"w","Ё":"Yo","Ђ":"DJ","Є":"Ye","І":"I","Ї":"Yi","Ј":"J","Љ":"LJ","Њ":"NJ","Ћ":"C","Џ":"DZ","А":"A","Б":"B","В":"V","Г":"G","Д":"D","Е":"E","Ж":"Zh","З":"Z","И":"I","Й":"J","К":"K","Л":"L","М":"M","Н":"N","О":"O","П":"P","Р":"R","С":"S","Т":"T","У":"U","Ф":"F","Х":"H","Ц":"C","Ч":"Ch","Ш":"Sh","Щ":"Sh","Ъ":"U","Ы":"Y","Ь":"","Э":"E","Ю":"Yu","Я":"Ya","а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ж":"zh","з":"z","и":"i","й":"j","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"h","ц":"c","ч":"ch","ш":"sh","щ":"sh","ъ":"u","ы":"y","ь":"","э":"e","ю":"yu","я":"ya","ё":"yo","ђ":"dj","є":"ye","і":"i","ї":"yi","ј":"j","љ":"lj","њ":"nj","ћ":"c","ѝ":"u","џ":"dz","Ґ":"G","ґ":"g","Ғ":"GH","ғ":"gh","Қ":"KH","қ":"kh","Ң":"NG","ң":"ng","Ү":"UE","ү":"ue","Ұ":"U","ұ":"u","Һ":"H","һ":"h","Ә":"AE","ә":"ae","Ө":"OE","ө":"oe","Ա":"A","Բ":"B","Գ":"G","Դ":"D","Ե":"E","Զ":"Z","Է":"E\'","Ը":"Y\'","Թ":"T\'","Ժ":"JH","Ի":"I","Լ":"L","Խ":"X","Ծ":"C\'","Կ":"K","Հ":"H","Ձ":"D\'","Ղ":"GH","Ճ":"TW","Մ":"M","Յ":"Y","Ն":"N","Շ":"SH","Չ":"CH","Պ":"P","Ջ":"J","Ռ":"R\'","Ս":"S","Վ":"V","Տ":"T","Ր":"R","Ց":"C","Փ":"P\'","Ք":"Q\'","Օ":"O\'\'","Ֆ":"F","և":"EV","฿":"baht","ა":"a","ბ":"b","გ":"g","დ":"d","ე":"e","ვ":"v","ზ":"z","თ":"t","ი":"i","კ":"k","ლ":"l","მ":"m","ნ":"n","ო":"o","პ":"p","ჟ":"zh","რ":"r","ს":"s","ტ":"t","უ":"u","ფ":"f","ქ":"k","ღ":"gh","ყ":"q","შ":"sh","ჩ":"ch","ც":"ts","ძ":"dz","წ":"ts","ჭ":"ch","ხ":"kh","ჯ":"j","ჰ":"h","Ẁ":"W","ẁ":"w","Ẃ":"W","ẃ":"w","Ẅ":"W","ẅ":"w","ẞ":"SS","Ạ":"A","ạ":"a","Ả":"A","ả":"a","Ấ":"A","ấ":"a","Ầ":"A","ầ":"a","Ẩ":"A","ẩ":"a","Ẫ":"A","ẫ":"a","Ậ":"A","ậ":"a","Ắ":"A","ắ":"a","Ằ":"A","ằ":"a","Ẳ":"A","ẳ":"a","Ẵ":"A","ẵ":"a","Ặ":"A","ặ":"a","Ẹ":"E","ẹ":"e","Ẻ":"E","ẻ":"e","Ẽ":"E","ẽ":"e","Ế":"E","ế":"e","Ề":"E","ề":"e","Ể":"E","ể":"e","Ễ":"E","ễ":"e","Ệ":"E","ệ":"e","Ỉ":"I","ỉ":"i","Ị":"I","ị":"i","Ọ":"O","ọ":"o","Ỏ":"O","ỏ":"o","Ố":"O","ố":"o","Ồ":"O","ồ":"o","Ổ":"O","ổ":"o","Ỗ":"O","ỗ":"o","Ộ":"O","ộ":"o","Ớ":"O","ớ":"o","Ờ":"O","ờ":"o","Ở":"O","ở":"o","Ỡ":"O","ỡ":"o","Ợ":"O","ợ":"o","Ụ":"U","ụ":"u","Ủ":"U","ủ":"u","Ứ":"U","ứ":"u","Ừ":"U","ừ":"u","Ử":"U","ử":"u","Ữ":"U","ữ":"u","Ự":"U","ự":"u","Ỳ":"Y","ỳ":"y","Ỵ":"Y","ỵ":"y","Ỷ":"Y","ỷ":"y","Ỹ":"Y","ỹ":"y","–":"-","‘":"\'","’":"\'","“":"\\\"","”":"\\\"","„":"\\\"","†":"+","•":"*","…":"...","₠":"ecu","₢":"cruzeiro","₣":"french franc","₤":"lira","₥":"mill","₦":"naira","₧":"peseta","₨":"rupee","₩":"won","₪":"new shequel","₫":"dong","€":"euro","₭":"kip","₮":"tugrik","₯":"drachma","₰":"penny","₱":"peso","₲":"guarani","₳":"austral","₴":"hryvnia","₵":"cedi","₸":"kazakhstani tenge","₹":"indian rupee","₺":"turkish lira","₽":"russian ruble","₿":"bitcoin","℠":"sm","™":"tm","∂":"d","∆":"delta","∑":"sum","∞":"infinity","♥":"love","元":"yuan","円":"yen","﷼":"rial"}');
-  var locales = JSON.parse('{"de":{"Ä":"AE","ä":"ae","Ö":"OE","ö":"oe","Ü":"UE","ü":"ue","%":"prozent","&":"und","|":"oder","∑":"summe","∞":"unendlich","♥":"liebe"},"es":{"%":"por ciento","&":"y","<":"menor que",">":"mayor que","|":"o","¢":"centavos","£":"libras","¤":"moneda","₣":"francos","∑":"suma","∞":"infinito","♥":"amor"},"fr":{"%":"pourcent","&":"et","<":"plus petit",">":"plus grand","|":"ou","¢":"centime","£":"livre","¤":"devise","₣":"franc","∑":"somme","∞":"infini","♥":"amour"},"pt":{"%":"porcento","&":"e","<":"menor",">":"maior","|":"ou","¢":"centavo","∑":"soma","£":"libra","∞":"infinito","♥":"amor"},"uk":{"И":"Y","и":"y","Й":"Y","й":"y","Ц":"Ts","ц":"ts","Х":"Kh","х":"kh","Щ":"Shch","щ":"shch","Г":"H","г":"h"},"vi":{"Đ":"D","đ":"d"}}');
+    var index = -1;
 
-  function replace(string, options) {
-    if (typeof string !== 'string') {
-      throw new Error('slugify: string argument expected');
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value) {
+          delta = _value - mean;
+          mean += delta / ++count;
+          sum += delta * (_value - mean);
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
     }
-
-    options = typeof options === 'string' ? {
-      replacement: options
-    } : options || {};
-    var locale = locales[options.locale] || {};
-    var replacement = options.replacement === undefined ? '-' : options.replacement;
-    var trim = options.trim === undefined ? true : options.trim;
-    var slug = string.normalize().split('') // replace characters based on charMap
-    .reduce(function (result, ch) {
-      return result + (locale[ch] || charMap[ch] || (ch === replacement ? ' ' : ch)).replace(options.remove || /[^\w\s$*_+~.()'"!\-:@]+/g, '');
-    }, '');
-
-    if (options.strict) {
-      slug = slug.replace(/[^A-Za-z0-9\s]/g, '');
-    }
-
-    if (trim) {
-      slug = slug.trim();
-    } // Replace spaces with replacement character, treating multiple consecutive
-    // spaces as a single space.
-
-
-    slug = slug.replace(/\s+/g, replacement);
-
-    if (options.lower) {
-      slug = slug.toLowerCase();
-    }
-
-    return slug;
   }
 
-  replace.extend = function (customMap) {
-    Object.assign(charMap, customMap);
+  if (count > 1) return sum / (count - 1);
+}
+},{}],"node_modules/d3-array/src/deviation.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = deviation;
+
+var _variance = _interopRequireDefault(require("./variance.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function deviation(values, valueof) {
+  var v = (0, _variance.default)(values, valueof);
+  return v ? Math.sqrt(v) : v;
+}
+},{"./variance.js":"node_modules/d3-array/src/variance.js"}],"node_modules/d3-array/src/extent.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = extent;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function extent(values, valueof) {
+  var min;
+  var max;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value != null) {
+          if (min === undefined) {
+            if (value >= value) min = max = value;
+          } else {
+            if (min > value) min = value;
+            if (max < value) max = value;
+          }
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var index = -1;
+
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null) {
+          if (min === undefined) {
+            if (_value >= _value) min = max = _value;
+          } else {
+            if (min > _value) min = _value;
+            if (max < _value) max = _value;
+          }
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return [min, max];
+}
+},{}],"node_modules/d3-array/src/fsum.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.fsum = fsum;
+exports.fcumsum = fcumsum;
+exports.Adder = void 0;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+// https://github.com/python/cpython/blob/a74eea238f5baba15797e2e8b570d153bc8690a7/Modules/mathmodule.c#L1423
+var Adder = /*#__PURE__*/function () {
+  function Adder() {
+    _classCallCheck(this, Adder);
+
+    this._partials = new Float64Array(32);
+    this._n = 0;
+  }
+
+  _createClass(Adder, [{
+    key: "add",
+    value: function add(x) {
+      var p = this._partials;
+      var i = 0;
+
+      for (var j = 0; j < this._n && j < 32; j++) {
+        var y = p[j],
+            hi = x + y,
+            lo = Math.abs(x) < Math.abs(y) ? x - (hi - y) : y - (hi - x);
+        if (lo) p[i++] = lo;
+        x = hi;
+      }
+
+      p[i] = x;
+      this._n = i + 1;
+      return this;
+    }
+  }, {
+    key: "valueOf",
+    value: function valueOf() {
+      var p = this._partials;
+      var n = this._n,
+          x,
+          y,
+          lo,
+          hi = 0;
+
+      if (n > 0) {
+        hi = p[--n];
+
+        while (n > 0) {
+          x = hi;
+          y = p[--n];
+          hi = x + y;
+          lo = y - (hi - x);
+          if (lo) break;
+        }
+
+        if (n > 0 && (lo < 0 && p[n - 1] < 0 || lo > 0 && p[n - 1] > 0)) {
+          y = lo * 2;
+          x = hi + y;
+          if (y == x - hi) hi = x;
+        }
+      }
+
+      return hi;
+    }
+  }]);
+
+  return Adder;
+}();
+
+exports.Adder = Adder;
+
+function fsum(values, valueof) {
+  var adder = new Adder();
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value = +value) {
+          adder.add(value);
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var index = -1;
+
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if (_value = +valueof(_value, ++index, values)) {
+          adder.add(_value);
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return +adder;
+}
+
+function fcumsum(values, valueof) {
+  var adder = new Adder();
+  var index = -1;
+  return Float64Array.from(values, valueof === undefined ? function (v) {
+    return adder.add(+v || 0);
+  } : function (v) {
+    return adder.add(+valueof(v, ++index, values) || 0);
+  });
+}
+},{}],"node_modules/internmap/src/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.InternSet = exports.InternMap = void 0;
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+
+function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var InternMap = /*#__PURE__*/function (_Map) {
+  _inherits(InternMap, _Map);
+
+  var _super = _createSuper(InternMap);
+
+  function InternMap(entries) {
+    var _this;
+
+    var key = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : keyof;
+
+    _classCallCheck(this, InternMap);
+
+    _this = _super.call(this);
+    Object.defineProperties(_assertThisInitialized(_this), {
+      _intern: {
+        value: new Map()
+      },
+      _key: {
+        value: key
+      }
+    });
+
+    if (entries != null) {
+      var _iterator = _createForOfIteratorHelper(entries),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var _step$value = _slicedToArray(_step.value, 2),
+              _key2 = _step$value[0],
+              value = _step$value[1];
+
+          _this.set(_key2, value);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+
+    return _this;
+  }
+
+  _createClass(InternMap, [{
+    key: "get",
+    value: function get(key) {
+      return _get(_getPrototypeOf(InternMap.prototype), "get", this).call(this, intern_get(this, key));
+    }
+  }, {
+    key: "has",
+    value: function has(key) {
+      return _get(_getPrototypeOf(InternMap.prototype), "has", this).call(this, intern_get(this, key));
+    }
+  }, {
+    key: "set",
+    value: function set(key, value) {
+      return _get(_getPrototypeOf(InternMap.prototype), "set", this).call(this, intern_set(this, key), value);
+    }
+  }, {
+    key: "delete",
+    value: function _delete(key) {
+      return _get(_getPrototypeOf(InternMap.prototype), "delete", this).call(this, intern_delete(this, key));
+    }
+  }]);
+
+  return InternMap;
+}( /*#__PURE__*/_wrapNativeSuper(Map));
+
+exports.InternMap = InternMap;
+
+var InternSet = /*#__PURE__*/function (_Set) {
+  _inherits(InternSet, _Set);
+
+  var _super2 = _createSuper(InternSet);
+
+  function InternSet(values) {
+    var _this2;
+
+    var key = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : keyof;
+
+    _classCallCheck(this, InternSet);
+
+    _this2 = _super2.call(this);
+    Object.defineProperties(_assertThisInitialized(_this2), {
+      _intern: {
+        value: new Map()
+      },
+      _key: {
+        value: key
+      }
+    });
+
+    if (values != null) {
+      var _iterator2 = _createForOfIteratorHelper(values),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var value = _step2.value;
+
+          _this2.add(value);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+
+    return _this2;
+  }
+
+  _createClass(InternSet, [{
+    key: "has",
+    value: function has(value) {
+      return _get(_getPrototypeOf(InternSet.prototype), "has", this).call(this, intern_get(this, value));
+    }
+  }, {
+    key: "add",
+    value: function add(value) {
+      return _get(_getPrototypeOf(InternSet.prototype), "add", this).call(this, intern_set(this, value));
+    }
+  }, {
+    key: "delete",
+    value: function _delete(value) {
+      return _get(_getPrototypeOf(InternSet.prototype), "delete", this).call(this, intern_delete(this, value));
+    }
+  }]);
+
+  return InternSet;
+}( /*#__PURE__*/_wrapNativeSuper(Set));
+
+exports.InternSet = InternSet;
+
+function intern_get(_ref, value) {
+  var _intern = _ref._intern,
+      _key = _ref._key;
+
+  var key = _key(value);
+
+  return _intern.has(key) ? _intern.get(key) : value;
+}
+
+function intern_set(_ref2, value) {
+  var _intern = _ref2._intern,
+      _key = _ref2._key;
+
+  var key = _key(value);
+
+  if (_intern.has(key)) return _intern.get(key);
+
+  _intern.set(key, value);
+
+  return value;
+}
+
+function intern_delete(_ref3, value) {
+  var _intern = _ref3._intern,
+      _key = _ref3._key;
+
+  var key = _key(value);
+
+  if (_intern.has(key)) {
+    value = _intern.get(value);
+
+    _intern.delete(key);
+  }
+
+  return value;
+}
+
+function keyof(value) {
+  return value !== null && _typeof(value) === "object" ? value.valueOf() : value;
+}
+},{}],"node_modules/d3-array/src/identity.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = identity;
+
+function identity(x) {
+  return x;
+}
+},{}],"node_modules/d3-array/src/group.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = group;
+exports.groups = groups;
+exports.flatGroup = flatGroup;
+exports.flatRollup = flatRollup;
+exports.rollup = rollup;
+exports.rollups = rollups;
+exports.index = index;
+exports.indexes = indexes;
+
+var _internmap = require("internmap");
+
+var _identity = _interopRequireDefault(require("./identity.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function group(values) {
+  for (var _len = arguments.length, keys = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    keys[_key - 1] = arguments[_key];
+  }
+
+  return nest(values, _identity.default, _identity.default, keys);
+}
+
+function groups(values) {
+  for (var _len2 = arguments.length, keys = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+    keys[_key2 - 1] = arguments[_key2];
+  }
+
+  return nest(values, Array.from, _identity.default, keys);
+}
+
+function flatten(groups, keys) {
+  for (var i = 1, n = keys.length; i < n; ++i) {
+    groups = groups.flatMap(function (g) {
+      return g.pop().map(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            key = _ref2[0],
+            value = _ref2[1];
+
+        return [].concat(_toConsumableArray(g), [key, value]);
+      });
+    });
+  }
+
+  return groups;
+}
+
+function flatGroup(values) {
+  for (var _len3 = arguments.length, keys = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+    keys[_key3 - 1] = arguments[_key3];
+  }
+
+  return flatten(groups.apply(void 0, [values].concat(keys)), keys);
+}
+
+function flatRollup(values, reduce) {
+  for (var _len4 = arguments.length, keys = new Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+    keys[_key4 - 2] = arguments[_key4];
+  }
+
+  return flatten(rollups.apply(void 0, [values, reduce].concat(keys)), keys);
+}
+
+function rollup(values, reduce) {
+  for (var _len5 = arguments.length, keys = new Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
+    keys[_key5 - 2] = arguments[_key5];
+  }
+
+  return nest(values, _identity.default, reduce, keys);
+}
+
+function rollups(values, reduce) {
+  for (var _len6 = arguments.length, keys = new Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
+    keys[_key6 - 2] = arguments[_key6];
+  }
+
+  return nest(values, Array.from, reduce, keys);
+}
+
+function index(values) {
+  for (var _len7 = arguments.length, keys = new Array(_len7 > 1 ? _len7 - 1 : 0), _key7 = 1; _key7 < _len7; _key7++) {
+    keys[_key7 - 1] = arguments[_key7];
+  }
+
+  return nest(values, _identity.default, unique, keys);
+}
+
+function indexes(values) {
+  for (var _len8 = arguments.length, keys = new Array(_len8 > 1 ? _len8 - 1 : 0), _key8 = 1; _key8 < _len8; _key8++) {
+    keys[_key8 - 1] = arguments[_key8];
+  }
+
+  return nest(values, Array.from, unique, keys);
+}
+
+function unique(values) {
+  if (values.length !== 1) throw new Error("duplicate key");
+  return values[0];
+}
+
+function nest(values, map, reduce, keys) {
+  return function regroup(values, i) {
+    if (i >= keys.length) return reduce(values);
+    var groups = new _internmap.InternMap();
+    var keyof = keys[i++];
+    var index = -1;
+
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+        var key = keyof(value, ++index, values);
+
+        var _group = groups.get(key);
+
+        if (_group) _group.push(value);else groups.set(key, [value]);
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+
+    var _iterator2 = _createForOfIteratorHelper(groups),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _step2$value = _slicedToArray(_step2.value, 2),
+            _key9 = _step2$value[0],
+            _values = _step2$value[1];
+
+        groups.set(_key9, regroup(_values, i));
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+
+    return map(groups);
+  }(values, 0);
+}
+},{"internmap":"node_modules/internmap/src/index.js","./identity.js":"node_modules/d3-array/src/identity.js"}],"node_modules/d3-array/src/permute.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = permute;
+
+function permute(source, keys) {
+  return Array.from(keys, function (key) {
+    return source[key];
+  });
+}
+},{}],"node_modules/d3-array/src/sort.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = sort;
+exports.compareDefined = compareDefined;
+exports.ascendingDefined = ascendingDefined;
+
+var _permute = _interopRequireDefault(require("./permute.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function sort(values) {
+  for (var _len = arguments.length, F = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    F[_key - 1] = arguments[_key];
+  }
+
+  if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
+  values = Array.from(values);
+
+  var _F = F,
+      _F2 = _slicedToArray(_F, 1),
+      f = _F2[0];
+
+  if (f && f.length === 1 || F.length > 1) {
+    var index = Uint32Array.from(values, function (d, i) {
+      return i;
+    });
+
+    if (F.length > 1) {
+      F = F.map(function (f) {
+        return values.map(f);
+      });
+      index.sort(function (i, j) {
+        var _iterator = _createForOfIteratorHelper(F),
+            _step;
+
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var _f = _step.value;
+            var c = ascendingDefined(_f[i], _f[j]);
+            if (c) return c;
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      });
+    } else {
+      f = values.map(f);
+      index.sort(function (i, j) {
+        return ascendingDefined(f[i], f[j]);
+      });
+    }
+
+    return (0, _permute.default)(values, index);
+  }
+
+  return values.sort(f === undefined ? ascendingDefined : compareDefined(f));
+}
+
+function compareDefined(compare) {
+  if (typeof compare !== "function") throw new TypeError("compare is not a function");
+  return function (a, b) {
+    var x = compare(a, b);
+    if (x || x === 0) return x;
+    return (compare(b, b) === 0) - (compare(a, a) === 0);
+  };
+}
+
+function ascendingDefined(a, b) {
+  return (a == null || !(a >= a)) - (b == null || !(b >= b)) || (a < b ? -1 : a > b ? 1 : 0);
+}
+},{"./permute.js":"node_modules/d3-array/src/permute.js"}],"node_modules/d3-array/src/groupSort.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = groupSort;
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+var _group = _interopRequireWildcard(require("./group.js"));
+
+var _sort = _interopRequireDefault(require("./sort.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function groupSort(values, reduce, key) {
+  return (reduce.length === 1 ? (0, _sort.default)((0, _group.rollup)(values, reduce, key), function (_ref, _ref2) {
+    var _ref3 = _slicedToArray(_ref, 2),
+        ak = _ref3[0],
+        av = _ref3[1];
+
+    var _ref4 = _slicedToArray(_ref2, 2),
+        bk = _ref4[0],
+        bv = _ref4[1];
+
+    return (0, _ascending.default)(av, bv) || (0, _ascending.default)(ak, bk);
+  }) : (0, _sort.default)((0, _group.default)(values, key), function (_ref5, _ref6) {
+    var _ref7 = _slicedToArray(_ref5, 2),
+        ak = _ref7[0],
+        av = _ref7[1];
+
+    var _ref8 = _slicedToArray(_ref6, 2),
+        bk = _ref8[0],
+        bv = _ref8[1];
+
+    return reduce(av, bv) || (0, _ascending.default)(ak, bk);
+  })).map(function (_ref9) {
+    var _ref10 = _slicedToArray(_ref9, 1),
+        key = _ref10[0];
+
+    return key;
+  });
+}
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./group.js":"node_modules/d3-array/src/group.js","./sort.js":"node_modules/d3-array/src/sort.js"}],"node_modules/d3-array/src/array.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.map = exports.slice = void 0;
+var array = Array.prototype;
+var slice = array.slice;
+exports.slice = slice;
+var map = array.map;
+exports.map = map;
+},{}],"node_modules/d3-array/src/constant.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = constant;
+
+function constant(x) {
+  return function () {
+    return x;
+  };
+}
+},{}],"node_modules/d3-array/src/ticks.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ticks;
+exports.tickIncrement = tickIncrement;
+exports.tickStep = tickStep;
+var e10 = Math.sqrt(50),
+    e5 = Math.sqrt(10),
+    e2 = Math.sqrt(2);
+
+function ticks(start, stop, count) {
+  var reverse,
+      i = -1,
+      n,
+      ticks,
+      step;
+  stop = +stop, start = +start, count = +count;
+  if (start === stop && count > 0) return [start];
+  if (reverse = stop < start) n = start, start = stop, stop = n;
+  if ((step = tickIncrement(start, stop, count)) === 0 || !isFinite(step)) return [];
+
+  if (step > 0) {
+    var r0 = Math.round(start / step),
+        r1 = Math.round(stop / step);
+    if (r0 * step < start) ++r0;
+    if (r1 * step > stop) --r1;
+    ticks = new Array(n = r1 - r0 + 1);
+
+    while (++i < n) {
+      ticks[i] = (r0 + i) * step;
+    }
+  } else {
+    step = -step;
+
+    var _r = Math.round(start * step),
+        _r2 = Math.round(stop * step);
+
+    if (_r / step < start) ++_r;
+    if (_r2 / step > stop) --_r2;
+    ticks = new Array(n = _r2 - _r + 1);
+
+    while (++i < n) {
+      ticks[i] = (_r + i) / step;
+    }
+  }
+
+  if (reverse) ticks.reverse();
+  return ticks;
+}
+
+function tickIncrement(start, stop, count) {
+  var step = (stop - start) / Math.max(0, count),
+      power = Math.floor(Math.log(step) / Math.LN10),
+      error = step / Math.pow(10, power);
+  return power >= 0 ? (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1) * Math.pow(10, power) : -Math.pow(10, -power) / (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1);
+}
+
+function tickStep(start, stop, count) {
+  var step0 = Math.abs(stop - start) / Math.max(0, count),
+      step1 = Math.pow(10, Math.floor(Math.log(step0) / Math.LN10)),
+      error = step0 / step1;
+  if (error >= e10) step1 *= 10;else if (error >= e5) step1 *= 5;else if (error >= e2) step1 *= 2;
+  return stop < start ? -step1 : step1;
+}
+},{}],"node_modules/d3-array/src/nice.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = nice;
+
+var _ticks = require("./ticks.js");
+
+function nice(start, stop, count) {
+  var prestep;
+
+  while (true) {
+    var step = (0, _ticks.tickIncrement)(start, stop, count);
+
+    if (step === prestep || step === 0 || !isFinite(step)) {
+      return [start, stop];
+    } else if (step > 0) {
+      start = Math.floor(start / step) * step;
+      stop = Math.ceil(stop / step) * step;
+    } else if (step < 0) {
+      start = Math.ceil(start * step) / step;
+      stop = Math.floor(stop * step) / step;
+    }
+
+    prestep = step;
+  }
+}
+},{"./ticks.js":"node_modules/d3-array/src/ticks.js"}],"node_modules/d3-array/src/threshold/sturges.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = thresholdSturges;
+
+var _count = _interopRequireDefault(require("../count.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function thresholdSturges(values) {
+  return Math.ceil(Math.log((0, _count.default)(values)) / Math.LN2) + 1;
+}
+},{"../count.js":"node_modules/d3-array/src/count.js"}],"node_modules/d3-array/src/bin.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = bin;
+
+var _array = require("./array.js");
+
+var _bisect = _interopRequireDefault(require("./bisect.js"));
+
+var _constant = _interopRequireDefault(require("./constant.js"));
+
+var _extent = _interopRequireDefault(require("./extent.js"));
+
+var _identity = _interopRequireDefault(require("./identity.js"));
+
+var _nice3 = _interopRequireDefault(require("./nice.js"));
+
+var _ticks = _interopRequireWildcard(require("./ticks.js"));
+
+var _sturges = _interopRequireDefault(require("./threshold/sturges.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function bin() {
+  var value = _identity.default,
+      domain = _extent.default,
+      threshold = _sturges.default;
+
+  function histogram(data) {
+    if (!Array.isArray(data)) data = Array.from(data);
+    var i,
+        n = data.length,
+        x,
+        values = new Array(n);
+
+    for (i = 0; i < n; ++i) {
+      values[i] = value(data[i], i, data);
+    }
+
+    var xz = domain(values),
+        x0 = xz[0],
+        x1 = xz[1],
+        tz = threshold(values, x0, x1); // Convert number of thresholds into uniform thresholds, and nice the
+    // default domain accordingly.
+
+    if (!Array.isArray(tz)) {
+      var max = x1,
+          tn = +tz;
+
+      if (domain === _extent.default) {
+        var _nice = (0, _nice3.default)(x0, x1, tn);
+
+        var _nice2 = _slicedToArray(_nice, 2);
+
+        x0 = _nice2[0];
+        x1 = _nice2[1];
+      }
+
+      tz = (0, _ticks.default)(x0, x1, tn); // If the last threshold is coincident with the domain’s upper bound, the
+      // last bin will be zero-width. If the default domain is used, and this
+      // last threshold is coincident with the maximum input value, we can
+      // extend the niced upper bound by one tick to ensure uniform bin widths;
+      // otherwise, we simply remove the last threshold. Note that we don’t
+      // coerce values or the domain to numbers, and thus must be careful to
+      // compare order (>=) rather than strict equality (===)!
+
+      if (tz[tz.length - 1] >= x1) {
+        if (max >= x1 && domain === _extent.default) {
+          var step = (0, _ticks.tickIncrement)(x0, x1, tn);
+
+          if (isFinite(step)) {
+            if (step > 0) {
+              x1 = (Math.floor(x1 / step) + 1) * step;
+            } else if (step < 0) {
+              x1 = (Math.ceil(x1 * -step) + 1) / -step;
+            }
+          }
+        } else {
+          tz.pop();
+        }
+      }
+    } // Remove any thresholds outside the domain.
+
+
+    var m = tz.length;
+
+    while (tz[0] <= x0) {
+      tz.shift(), --m;
+    }
+
+    while (tz[m - 1] > x1) {
+      tz.pop(), --m;
+    }
+
+    var bins = new Array(m + 1),
+        bin; // Initialize bins.
+
+    for (i = 0; i <= m; ++i) {
+      bin = bins[i] = [];
+      bin.x0 = i > 0 ? tz[i - 1] : x0;
+      bin.x1 = i < m ? tz[i] : x1;
+    } // Assign data to bins by value, ignoring any outside the domain.
+
+
+    for (i = 0; i < n; ++i) {
+      x = values[i];
+
+      if (x != null && x0 <= x && x <= x1) {
+        bins[(0, _bisect.default)(tz, x, 0, m)].push(data[i]);
+      }
+    }
+
+    return bins;
+  }
+
+  histogram.value = function (_) {
+    return arguments.length ? (value = typeof _ === "function" ? _ : (0, _constant.default)(_), histogram) : value;
   };
 
-  return replace;
+  histogram.domain = function (_) {
+    return arguments.length ? (domain = typeof _ === "function" ? _ : (0, _constant.default)([_[0], _[1]]), histogram) : domain;
+  };
+
+  histogram.thresholds = function (_) {
+    return arguments.length ? (threshold = typeof _ === "function" ? _ : Array.isArray(_) ? (0, _constant.default)(_array.slice.call(_)) : (0, _constant.default)(_), histogram) : threshold;
+  };
+
+  return histogram;
+}
+},{"./array.js":"node_modules/d3-array/src/array.js","./bisect.js":"node_modules/d3-array/src/bisect.js","./constant.js":"node_modules/d3-array/src/constant.js","./extent.js":"node_modules/d3-array/src/extent.js","./identity.js":"node_modules/d3-array/src/identity.js","./nice.js":"node_modules/d3-array/src/nice.js","./ticks.js":"node_modules/d3-array/src/ticks.js","./threshold/sturges.js":"node_modules/d3-array/src/threshold/sturges.js"}],"node_modules/d3-array/src/max.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
-},{}],"node_modules/d3-selection/src/namespaces.js":[function(require,module,exports) {
+exports.default = max;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function max(values, valueof) {
+  var max;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value != null && (max < value || max === undefined && value >= value)) {
+          max = value;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var index = -1;
+
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null && (max < _value || max === undefined && _value >= _value)) {
+          max = _value;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return max;
+}
+},{}],"node_modules/d3-array/src/min.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = min;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function min(values, valueof) {
+  var min;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value != null && (min > value || min === undefined && value >= value)) {
+          min = value;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var index = -1;
+
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null && (min > _value || min === undefined && _value >= _value)) {
+          min = _value;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return min;
+}
+},{}],"node_modules/d3-array/src/quickselect.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = quickselect;
+
+var _sort = require("./sort.js");
+
+// Based on https://github.com/mourner/quickselect
+// ISC license, Copyright 2018 Vladimir Agafonkin.
+function quickselect(array, k) {
+  var left = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+  var right = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : array.length - 1;
+  var compare = arguments.length > 4 ? arguments[4] : undefined;
+  compare = compare === undefined ? _sort.ascendingDefined : (0, _sort.compareDefined)(compare);
+
+  while (right > left) {
+    if (right - left > 600) {
+      var n = right - left + 1;
+      var m = k - left + 1;
+      var z = Math.log(n);
+      var s = 0.5 * Math.exp(2 * z / 3);
+      var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+      var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+      var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+      quickselect(array, k, newLeft, newRight, compare);
+    }
+
+    var t = array[k];
+    var i = left;
+    var j = right;
+    swap(array, left, k);
+    if (compare(array[right], t) > 0) swap(array, left, right);
+
+    while (i < j) {
+      swap(array, i, j), ++i, --j;
+
+      while (compare(array[i], t) < 0) {
+        ++i;
+      }
+
+      while (compare(array[j], t) > 0) {
+        --j;
+      }
+    }
+
+    if (compare(array[left], t) === 0) swap(array, left, j);else ++j, swap(array, j, right);
+    if (j <= k) left = j + 1;
+    if (k <= j) right = j - 1;
+  }
+
+  return array;
+}
+
+function swap(array, i, j) {
+  var t = array[i];
+  array[i] = array[j];
+  array[j] = t;
+}
+},{"./sort.js":"node_modules/d3-array/src/sort.js"}],"node_modules/d3-array/src/quantile.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = quantile;
+exports.quantileSorted = quantileSorted;
+
+var _max = _interopRequireDefault(require("./max.js"));
+
+var _min = _interopRequireDefault(require("./min.js"));
+
+var _quickselect = _interopRequireDefault(require("./quickselect.js"));
+
+var _number = _interopRequireWildcard(require("./number.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function quantile(values, p, valueof) {
+  values = Float64Array.from((0, _number.numbers)(values, valueof));
+  if (!(n = values.length)) return;
+  if ((p = +p) <= 0 || n < 2) return (0, _min.default)(values);
+  if (p >= 1) return (0, _max.default)(values);
+  var n,
+      i = (n - 1) * p,
+      i0 = Math.floor(i),
+      value0 = (0, _max.default)((0, _quickselect.default)(values, i0).subarray(0, i0 + 1)),
+      value1 = (0, _min.default)(values.subarray(i0 + 1));
+  return value0 + (value1 - value0) * (i - i0);
+}
+
+function quantileSorted(values, p) {
+  var valueof = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _number.default;
+  if (!(n = values.length)) return;
+  if ((p = +p) <= 0 || n < 2) return +valueof(values[0], 0, values);
+  if (p >= 1) return +valueof(values[n - 1], n - 1, values);
+  var n,
+      i = (n - 1) * p,
+      i0 = Math.floor(i),
+      value0 = +valueof(values[i0], i0, values),
+      value1 = +valueof(values[i0 + 1], i0 + 1, values);
+  return value0 + (value1 - value0) * (i - i0);
+}
+},{"./max.js":"node_modules/d3-array/src/max.js","./min.js":"node_modules/d3-array/src/min.js","./quickselect.js":"node_modules/d3-array/src/quickselect.js","./number.js":"node_modules/d3-array/src/number.js"}],"node_modules/d3-array/src/threshold/freedmanDiaconis.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = thresholdFreedmanDiaconis;
+
+var _count = _interopRequireDefault(require("../count.js"));
+
+var _quantile = _interopRequireDefault(require("../quantile.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function thresholdFreedmanDiaconis(values, min, max) {
+  return Math.ceil((max - min) / (2 * ((0, _quantile.default)(values, 0.75) - (0, _quantile.default)(values, 0.25)) * Math.pow((0, _count.default)(values), -1 / 3)));
+}
+},{"../count.js":"node_modules/d3-array/src/count.js","../quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/threshold/scott.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = thresholdScott;
+
+var _count = _interopRequireDefault(require("../count.js"));
+
+var _deviation = _interopRequireDefault(require("../deviation.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function thresholdScott(values, min, max) {
+  return Math.ceil((max - min) / (3.5 * (0, _deviation.default)(values) * Math.pow((0, _count.default)(values), -1 / 3)));
+}
+},{"../count.js":"node_modules/d3-array/src/count.js","../deviation.js":"node_modules/d3-array/src/deviation.js"}],"node_modules/d3-array/src/maxIndex.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = maxIndex;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function maxIndex(values, valueof) {
+  var max;
+  var maxIndex = -1;
+  var index = -1;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+        ++index;
+
+        if (value != null && (max < value || max === undefined && value >= value)) {
+          max = value, maxIndex = index;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null && (max < _value || max === undefined && _value >= _value)) {
+          max = _value, maxIndex = index;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return maxIndex;
+}
+},{}],"node_modules/d3-array/src/mean.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = mean;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function mean(values, valueof) {
+  var count = 0;
+  var sum = 0;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value != null && (value = +value) >= value) {
+          ++count, sum += value;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var index = -1;
+
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value) {
+          ++count, sum += _value;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  if (count) return sum / count;
+}
+},{}],"node_modules/d3-array/src/median.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = median;
+
+var _quantile = _interopRequireDefault(require("./quantile.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function median(values, valueof) {
+  return (0, _quantile.default)(values, 0.5, valueof);
+}
+},{"./quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/merge.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = merge;
+
+var _marked = /*#__PURE__*/regeneratorRuntime.mark(flatten);
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function flatten(arrays) {
+  var _iterator, _step, array;
+
+  return regeneratorRuntime.wrap(function flatten$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          _iterator = _createForOfIteratorHelper(arrays);
+          _context.prev = 1;
+
+          _iterator.s();
+
+        case 3:
+          if ((_step = _iterator.n()).done) {
+            _context.next = 8;
+            break;
+          }
+
+          array = _step.value;
+          return _context.delegateYield(array, "t0", 6);
+
+        case 6:
+          _context.next = 3;
+          break;
+
+        case 8:
+          _context.next = 13;
+          break;
+
+        case 10:
+          _context.prev = 10;
+          _context.t1 = _context["catch"](1);
+
+          _iterator.e(_context.t1);
+
+        case 13:
+          _context.prev = 13;
+
+          _iterator.f();
+
+          return _context.finish(13);
+
+        case 16:
+        case "end":
+          return _context.stop();
+      }
+    }
+  }, _marked, null, [[1, 10, 13, 16]]);
+}
+
+function merge(arrays) {
+  return Array.from(flatten(arrays));
+}
+},{}],"node_modules/d3-array/src/minIndex.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = minIndex;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function minIndex(values, valueof) {
+  var min;
+  var minIndex = -1;
+  var index = -1;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+        ++index;
+
+        if (value != null && (min > value || min === undefined && value >= value)) {
+          min = value, minIndex = index;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null && (min > _value || min === undefined && _value >= _value)) {
+          min = _value, minIndex = index;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return minIndex;
+}
+},{}],"node_modules/d3-array/src/mode.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = mode;
+
+var _internmap = require("internmap");
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function mode(values, valueof) {
+  var counts = new _internmap.InternMap();
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value != null && value >= value) {
+          counts.set(value, (counts.get(value) || 0) + 1);
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var index = -1;
+
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if ((_value = valueof(_value, ++index, values)) != null && _value >= _value) {
+          counts.set(_value, (counts.get(_value) || 0) + 1);
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  var modeValue;
+  var modeCount = 0;
+
+  var _iterator3 = _createForOfIteratorHelper(counts),
+      _step3;
+
+  try {
+    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+      var _step3$value = _slicedToArray(_step3.value, 2),
+          _value2 = _step3$value[0],
+          count = _step3$value[1];
+
+      if (count > modeCount) {
+        modeCount = count;
+        modeValue = _value2;
+      }
+    }
+  } catch (err) {
+    _iterator3.e(err);
+  } finally {
+    _iterator3.f();
+  }
+
+  return modeValue;
+}
+},{"internmap":"node_modules/internmap/src/index.js"}],"node_modules/d3-array/src/pairs.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = pairs;
+exports.pair = pair;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function pairs(values) {
+  var pairof = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : pair;
+  var pairs = [];
+  var previous;
+  var first = false;
+
+  var _iterator = _createForOfIteratorHelper(values),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var value = _step.value;
+      if (first) pairs.push(pairof(previous, value));
+      previous = value;
+      first = true;
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return pairs;
+}
+
+function pair(a, b) {
+  return [a, b];
+}
+},{}],"node_modules/d3-array/src/range.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = range;
+
+function range(start, stop, step) {
+  start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
+  var i = -1,
+      n = Math.max(0, Math.ceil((stop - start) / step)) | 0,
+      range = new Array(n);
+
+  while (++i < n) {
+    range[i] = start + i * step;
+  }
+
+  return range;
+}
+},{}],"node_modules/d3-array/src/least.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = least;
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function least(values) {
+  var compare = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _ascending.default;
+  var min;
+  var defined = false;
+
+  if (compare.length === 1) {
+    var minValue;
+
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var element = _step.value;
+        var value = compare(element);
+
+        if (defined ? (0, _ascending.default)(value, minValue) < 0 : (0, _ascending.default)(value, value) === 0) {
+          min = element;
+          minValue = value;
+          defined = true;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if (defined ? compare(_value, min) < 0 : compare(_value, _value) === 0) {
+          min = _value;
+          defined = true;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return min;
+}
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/leastIndex.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = leastIndex;
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+var _minIndex = _interopRequireDefault(require("./minIndex.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function leastIndex(values) {
+  var compare = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _ascending.default;
+  if (compare.length === 1) return (0, _minIndex.default)(values, compare);
+  var minValue;
+  var min = -1;
+  var index = -1;
+
+  var _iterator = _createForOfIteratorHelper(values),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var value = _step.value;
+      ++index;
+
+      if (min < 0 ? compare(value, value) === 0 : compare(value, minValue) < 0) {
+        minValue = value;
+        min = index;
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return min;
+}
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./minIndex.js":"node_modules/d3-array/src/minIndex.js"}],"node_modules/d3-array/src/greatest.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = greatest;
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function greatest(values) {
+  var compare = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _ascending.default;
+  var max;
+  var defined = false;
+
+  if (compare.length === 1) {
+    var maxValue;
+
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var element = _step.value;
+        var value = compare(element);
+
+        if (defined ? (0, _ascending.default)(value, maxValue) > 0 : (0, _ascending.default)(value, value) === 0) {
+          max = element;
+          maxValue = value;
+          defined = true;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if (defined ? compare(_value, max) > 0 : compare(_value, _value) === 0) {
+          max = _value;
+          defined = true;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return max;
+}
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/greatestIndex.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = greatestIndex;
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+var _maxIndex = _interopRequireDefault(require("./maxIndex.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function greatestIndex(values) {
+  var compare = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _ascending.default;
+  if (compare.length === 1) return (0, _maxIndex.default)(values, compare);
+  var maxValue;
+  var max = -1;
+  var index = -1;
+
+  var _iterator = _createForOfIteratorHelper(values),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var value = _step.value;
+      ++index;
+
+      if (max < 0 ? compare(value, value) === 0 : compare(value, maxValue) > 0) {
+        maxValue = value;
+        max = index;
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return max;
+}
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./maxIndex.js":"node_modules/d3-array/src/maxIndex.js"}],"node_modules/d3-array/src/scan.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = scan;
+
+var _leastIndex = _interopRequireDefault(require("./leastIndex.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function scan(values, compare) {
+  var index = (0, _leastIndex.default)(values, compare);
+  return index < 0 ? undefined : index;
+}
+},{"./leastIndex.js":"node_modules/d3-array/src/leastIndex.js"}],"node_modules/d3-array/src/shuffle.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.shuffler = shuffler;
+exports.default = void 0;
+
+var _default = shuffler(Math.random);
+
+exports.default = _default;
+
+function shuffler(random) {
+  return function shuffle(array) {
+    var i0 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var i1 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : array.length;
+    var m = i1 - (i0 = +i0);
+
+    while (m) {
+      var i = random() * m-- | 0,
+          t = array[m + i0];
+      array[m + i0] = array[i + i0];
+      array[i + i0] = t;
+    }
+
+    return array;
+  };
+}
+},{}],"node_modules/d3-array/src/sum.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = sum;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function sum(values, valueof) {
+  var sum = 0;
+
+  if (valueof === undefined) {
+    var _iterator = _createForOfIteratorHelper(values),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+
+        if (value = +value) {
+          sum += value;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  } else {
+    var index = -1;
+
+    var _iterator2 = _createForOfIteratorHelper(values),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _value = _step2.value;
+
+        if (_value = +valueof(_value, ++index, values)) {
+          sum += _value;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+
+  return sum;
+}
+},{}],"node_modules/d3-array/src/transpose.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = transpose;
+
+var _min = _interopRequireDefault(require("./min.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function transpose(matrix) {
+  if (!(n = matrix.length)) return [];
+
+  for (var i = -1, m = (0, _min.default)(matrix, length), transpose = new Array(m); ++i < m;) {
+    for (var j = -1, n, row = transpose[i] = new Array(n); ++j < n;) {
+      row[j] = matrix[j][i];
+    }
+  }
+
+  return transpose;
+}
+
+function length(d) {
+  return d.length;
+}
+},{"./min.js":"node_modules/d3-array/src/min.js"}],"node_modules/d3-array/src/zip.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = zip;
+
+var _transpose = _interopRequireDefault(require("./transpose.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function zip() {
+  return (0, _transpose.default)(arguments);
+}
+},{"./transpose.js":"node_modules/d3-array/src/transpose.js"}],"node_modules/d3-array/src/every.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = every;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function every(values, test) {
+  if (typeof test !== "function") throw new TypeError("test is not a function");
+  var index = -1;
+
+  var _iterator = _createForOfIteratorHelper(values),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var value = _step.value;
+
+      if (!test(value, ++index, values)) {
+        return false;
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return true;
+}
+},{}],"node_modules/d3-array/src/some.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = some;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function some(values, test) {
+  if (typeof test !== "function") throw new TypeError("test is not a function");
+  var index = -1;
+
+  var _iterator = _createForOfIteratorHelper(values),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var value = _step.value;
+
+      if (test(value, ++index, values)) {
+        return true;
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return false;
+}
+},{}],"node_modules/d3-array/src/filter.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = filter;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function filter(values, test) {
+  if (typeof test !== "function") throw new TypeError("test is not a function");
+  var array = [];
+  var index = -1;
+
+  var _iterator = _createForOfIteratorHelper(values),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var value = _step.value;
+
+      if (test(value, ++index, values)) {
+        array.push(value);
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return array;
+}
+},{}],"node_modules/d3-array/src/map.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = map;
+
+function map(values, mapper) {
+  if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
+  if (typeof mapper !== "function") throw new TypeError("mapper is not a function");
+  return Array.from(values, function (value, index) {
+    return mapper(value, index, values);
+  });
+}
+},{}],"node_modules/d3-array/src/reduce.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = reduce;
+
+function reduce(values, reducer, value) {
+  if (typeof reducer !== "function") throw new TypeError("reducer is not a function");
+  var iterator = values[Symbol.iterator]();
+  var done,
+      next,
+      index = -1;
+
+  if (arguments.length < 3) {
+    var _iterator$next = iterator.next();
+
+    done = _iterator$next.done;
+    value = _iterator$next.value;
+    if (done) return;
+    ++index;
+  }
+
+  while ((_iterator$next2 = iterator.next(), done = _iterator$next2.done, next = _iterator$next2.value, _iterator$next2), !done) {
+    var _iterator$next2;
+
+    value = reducer(value, next, ++index, values);
+  }
+
+  return value;
+}
+},{}],"node_modules/d3-array/src/reverse.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = reverse;
+
+function reverse(values) {
+  if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
+  return Array.from(values).reverse();
+}
+},{}],"node_modules/d3-array/src/difference.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = difference;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function difference(values) {
+  values = new Set(values);
+
+  for (var _len = arguments.length, others = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    others[_key - 1] = arguments[_key];
+  }
+
+  for (var _i = 0, _others = others; _i < _others.length; _i++) {
+    var other = _others[_i];
+
+    var _iterator = _createForOfIteratorHelper(other),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var value = _step.value;
+        values.delete(value);
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+
+  return values;
+}
+},{}],"node_modules/d3-array/src/disjoint.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = disjoint;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function disjoint(values, other) {
+  var iterator = other[Symbol.iterator](),
+      set = new Set();
+
+  var _iterator = _createForOfIteratorHelper(values),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var v = _step.value;
+      if (set.has(v)) return false;
+      var value = void 0,
+          done = void 0;
+
+      while (_iterator$next = iterator.next(), value = _iterator$next.value, done = _iterator$next.done, _iterator$next) {
+        var _iterator$next;
+
+        if (done) break;
+        if (Object.is(v, value)) return false;
+        set.add(value);
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return true;
+}
+},{}],"node_modules/d3-array/src/set.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = set;
+
+function set(values) {
+  return values instanceof Set ? values : new Set(values);
+}
+},{}],"node_modules/d3-array/src/intersection.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = intersection;
+
+var _set = _interopRequireDefault(require("./set.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function intersection(values) {
+  for (var _len = arguments.length, others = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    others[_key - 1] = arguments[_key];
+  }
+
+  values = new Set(values);
+  others = others.map(_set.default);
+
+  var _iterator = _createForOfIteratorHelper(values),
+      _step;
+
+  try {
+    out: for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var value = _step.value;
+
+      var _iterator2 = _createForOfIteratorHelper(others),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var other = _step2.value;
+
+          if (!other.has(value)) {
+            values.delete(value);
+            continue out;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return values;
+}
+},{"./set.js":"node_modules/d3-array/src/set.js"}],"node_modules/d3-array/src/superset.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = superset;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function superset(values, other) {
+  var iterator = values[Symbol.iterator](),
+      set = new Set();
+
+  var _iterator = _createForOfIteratorHelper(other),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var o = _step.value;
+      if (set.has(o)) continue;
+      var value = void 0,
+          done = void 0;
+
+      while (_iterator$next = iterator.next(), value = _iterator$next.value, done = _iterator$next.done, _iterator$next) {
+        var _iterator$next;
+
+        if (done) return false;
+        set.add(value);
+        if (Object.is(o, value)) break;
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return true;
+}
+},{}],"node_modules/d3-array/src/subset.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = subset;
+
+var _superset = _interopRequireDefault(require("./superset.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function subset(values, other) {
+  return (0, _superset.default)(other, values);
+}
+},{"./superset.js":"node_modules/d3-array/src/superset.js"}],"node_modules/d3-array/src/union.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = union;
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function union() {
+  var set = new Set();
+
+  for (var _len = arguments.length, others = new Array(_len), _key = 0; _key < _len; _key++) {
+    others[_key] = arguments[_key];
+  }
+
+  for (var _i = 0, _others = others; _i < _others.length; _i++) {
+    var other = _others[_i];
+
+    var _iterator = _createForOfIteratorHelper(other),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var o = _step.value;
+        set.add(o);
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+
+  return set;
+}
+},{}],"node_modules/d3-array/src/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "bisect", {
+  enumerable: true,
+  get: function () {
+    return _bisect.default;
+  }
+});
+Object.defineProperty(exports, "bisectRight", {
+  enumerable: true,
+  get: function () {
+    return _bisect.bisectRight;
+  }
+});
+Object.defineProperty(exports, "bisectLeft", {
+  enumerable: true,
+  get: function () {
+    return _bisect.bisectLeft;
+  }
+});
+Object.defineProperty(exports, "bisectCenter", {
+  enumerable: true,
+  get: function () {
+    return _bisect.bisectCenter;
+  }
+});
+Object.defineProperty(exports, "ascending", {
+  enumerable: true,
+  get: function () {
+    return _ascending.default;
+  }
+});
+Object.defineProperty(exports, "bisector", {
+  enumerable: true,
+  get: function () {
+    return _bisector.default;
+  }
+});
+Object.defineProperty(exports, "count", {
+  enumerable: true,
+  get: function () {
+    return _count.default;
+  }
+});
+Object.defineProperty(exports, "cross", {
+  enumerable: true,
+  get: function () {
+    return _cross.default;
+  }
+});
+Object.defineProperty(exports, "cumsum", {
+  enumerable: true,
+  get: function () {
+    return _cumsum.default;
+  }
+});
+Object.defineProperty(exports, "descending", {
+  enumerable: true,
+  get: function () {
+    return _descending.default;
+  }
+});
+Object.defineProperty(exports, "deviation", {
+  enumerable: true,
+  get: function () {
+    return _deviation.default;
+  }
+});
+Object.defineProperty(exports, "extent", {
+  enumerable: true,
+  get: function () {
+    return _extent.default;
+  }
+});
+Object.defineProperty(exports, "Adder", {
+  enumerable: true,
+  get: function () {
+    return _fsum.Adder;
+  }
+});
+Object.defineProperty(exports, "fsum", {
+  enumerable: true,
+  get: function () {
+    return _fsum.fsum;
+  }
+});
+Object.defineProperty(exports, "fcumsum", {
+  enumerable: true,
+  get: function () {
+    return _fsum.fcumsum;
+  }
+});
+Object.defineProperty(exports, "group", {
+  enumerable: true,
+  get: function () {
+    return _group.default;
+  }
+});
+Object.defineProperty(exports, "flatGroup", {
+  enumerable: true,
+  get: function () {
+    return _group.flatGroup;
+  }
+});
+Object.defineProperty(exports, "flatRollup", {
+  enumerable: true,
+  get: function () {
+    return _group.flatRollup;
+  }
+});
+Object.defineProperty(exports, "groups", {
+  enumerable: true,
+  get: function () {
+    return _group.groups;
+  }
+});
+Object.defineProperty(exports, "index", {
+  enumerable: true,
+  get: function () {
+    return _group.index;
+  }
+});
+Object.defineProperty(exports, "indexes", {
+  enumerable: true,
+  get: function () {
+    return _group.indexes;
+  }
+});
+Object.defineProperty(exports, "rollup", {
+  enumerable: true,
+  get: function () {
+    return _group.rollup;
+  }
+});
+Object.defineProperty(exports, "rollups", {
+  enumerable: true,
+  get: function () {
+    return _group.rollups;
+  }
+});
+Object.defineProperty(exports, "groupSort", {
+  enumerable: true,
+  get: function () {
+    return _groupSort.default;
+  }
+});
+Object.defineProperty(exports, "bin", {
+  enumerable: true,
+  get: function () {
+    return _bin.default;
+  }
+});
+Object.defineProperty(exports, "histogram", {
+  enumerable: true,
+  get: function () {
+    return _bin.default;
+  }
+});
+Object.defineProperty(exports, "thresholdFreedmanDiaconis", {
+  enumerable: true,
+  get: function () {
+    return _freedmanDiaconis.default;
+  }
+});
+Object.defineProperty(exports, "thresholdScott", {
+  enumerable: true,
+  get: function () {
+    return _scott.default;
+  }
+});
+Object.defineProperty(exports, "thresholdSturges", {
+  enumerable: true,
+  get: function () {
+    return _sturges.default;
+  }
+});
+Object.defineProperty(exports, "max", {
+  enumerable: true,
+  get: function () {
+    return _max.default;
+  }
+});
+Object.defineProperty(exports, "maxIndex", {
+  enumerable: true,
+  get: function () {
+    return _maxIndex.default;
+  }
+});
+Object.defineProperty(exports, "mean", {
+  enumerable: true,
+  get: function () {
+    return _mean.default;
+  }
+});
+Object.defineProperty(exports, "median", {
+  enumerable: true,
+  get: function () {
+    return _median.default;
+  }
+});
+Object.defineProperty(exports, "merge", {
+  enumerable: true,
+  get: function () {
+    return _merge.default;
+  }
+});
+Object.defineProperty(exports, "min", {
+  enumerable: true,
+  get: function () {
+    return _min.default;
+  }
+});
+Object.defineProperty(exports, "minIndex", {
+  enumerable: true,
+  get: function () {
+    return _minIndex.default;
+  }
+});
+Object.defineProperty(exports, "mode", {
+  enumerable: true,
+  get: function () {
+    return _mode.default;
+  }
+});
+Object.defineProperty(exports, "nice", {
+  enumerable: true,
+  get: function () {
+    return _nice.default;
+  }
+});
+Object.defineProperty(exports, "pairs", {
+  enumerable: true,
+  get: function () {
+    return _pairs.default;
+  }
+});
+Object.defineProperty(exports, "permute", {
+  enumerable: true,
+  get: function () {
+    return _permute.default;
+  }
+});
+Object.defineProperty(exports, "quantile", {
+  enumerable: true,
+  get: function () {
+    return _quantile.default;
+  }
+});
+Object.defineProperty(exports, "quantileSorted", {
+  enumerable: true,
+  get: function () {
+    return _quantile.quantileSorted;
+  }
+});
+Object.defineProperty(exports, "quickselect", {
+  enumerable: true,
+  get: function () {
+    return _quickselect.default;
+  }
+});
+Object.defineProperty(exports, "range", {
+  enumerable: true,
+  get: function () {
+    return _range.default;
+  }
+});
+Object.defineProperty(exports, "least", {
+  enumerable: true,
+  get: function () {
+    return _least.default;
+  }
+});
+Object.defineProperty(exports, "leastIndex", {
+  enumerable: true,
+  get: function () {
+    return _leastIndex.default;
+  }
+});
+Object.defineProperty(exports, "greatest", {
+  enumerable: true,
+  get: function () {
+    return _greatest.default;
+  }
+});
+Object.defineProperty(exports, "greatestIndex", {
+  enumerable: true,
+  get: function () {
+    return _greatestIndex.default;
+  }
+});
+Object.defineProperty(exports, "scan", {
+  enumerable: true,
+  get: function () {
+    return _scan.default;
+  }
+});
+Object.defineProperty(exports, "shuffle", {
+  enumerable: true,
+  get: function () {
+    return _shuffle.default;
+  }
+});
+Object.defineProperty(exports, "shuffler", {
+  enumerable: true,
+  get: function () {
+    return _shuffle.shuffler;
+  }
+});
+Object.defineProperty(exports, "sum", {
+  enumerable: true,
+  get: function () {
+    return _sum.default;
+  }
+});
+Object.defineProperty(exports, "ticks", {
+  enumerable: true,
+  get: function () {
+    return _ticks.default;
+  }
+});
+Object.defineProperty(exports, "tickIncrement", {
+  enumerable: true,
+  get: function () {
+    return _ticks.tickIncrement;
+  }
+});
+Object.defineProperty(exports, "tickStep", {
+  enumerable: true,
+  get: function () {
+    return _ticks.tickStep;
+  }
+});
+Object.defineProperty(exports, "transpose", {
+  enumerable: true,
+  get: function () {
+    return _transpose.default;
+  }
+});
+Object.defineProperty(exports, "variance", {
+  enumerable: true,
+  get: function () {
+    return _variance.default;
+  }
+});
+Object.defineProperty(exports, "zip", {
+  enumerable: true,
+  get: function () {
+    return _zip.default;
+  }
+});
+Object.defineProperty(exports, "every", {
+  enumerable: true,
+  get: function () {
+    return _every.default;
+  }
+});
+Object.defineProperty(exports, "some", {
+  enumerable: true,
+  get: function () {
+    return _some.default;
+  }
+});
+Object.defineProperty(exports, "filter", {
+  enumerable: true,
+  get: function () {
+    return _filter.default;
+  }
+});
+Object.defineProperty(exports, "map", {
+  enumerable: true,
+  get: function () {
+    return _map.default;
+  }
+});
+Object.defineProperty(exports, "reduce", {
+  enumerable: true,
+  get: function () {
+    return _reduce.default;
+  }
+});
+Object.defineProperty(exports, "reverse", {
+  enumerable: true,
+  get: function () {
+    return _reverse.default;
+  }
+});
+Object.defineProperty(exports, "sort", {
+  enumerable: true,
+  get: function () {
+    return _sort.default;
+  }
+});
+Object.defineProperty(exports, "difference", {
+  enumerable: true,
+  get: function () {
+    return _difference.default;
+  }
+});
+Object.defineProperty(exports, "disjoint", {
+  enumerable: true,
+  get: function () {
+    return _disjoint.default;
+  }
+});
+Object.defineProperty(exports, "intersection", {
+  enumerable: true,
+  get: function () {
+    return _intersection.default;
+  }
+});
+Object.defineProperty(exports, "subset", {
+  enumerable: true,
+  get: function () {
+    return _subset.default;
+  }
+});
+Object.defineProperty(exports, "superset", {
+  enumerable: true,
+  get: function () {
+    return _superset.default;
+  }
+});
+Object.defineProperty(exports, "union", {
+  enumerable: true,
+  get: function () {
+    return _union.default;
+  }
+});
+Object.defineProperty(exports, "InternMap", {
+  enumerable: true,
+  get: function () {
+    return _internmap.InternMap;
+  }
+});
+Object.defineProperty(exports, "InternSet", {
+  enumerable: true,
+  get: function () {
+    return _internmap.InternSet;
+  }
+});
+
+var _bisect = _interopRequireWildcard(require("./bisect.js"));
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+var _bisector = _interopRequireDefault(require("./bisector.js"));
+
+var _count = _interopRequireDefault(require("./count.js"));
+
+var _cross = _interopRequireDefault(require("./cross.js"));
+
+var _cumsum = _interopRequireDefault(require("./cumsum.js"));
+
+var _descending = _interopRequireDefault(require("./descending.js"));
+
+var _deviation = _interopRequireDefault(require("./deviation.js"));
+
+var _extent = _interopRequireDefault(require("./extent.js"));
+
+var _fsum = require("./fsum.js");
+
+var _group = _interopRequireWildcard(require("./group.js"));
+
+var _groupSort = _interopRequireDefault(require("./groupSort.js"));
+
+var _bin = _interopRequireDefault(require("./bin.js"));
+
+var _freedmanDiaconis = _interopRequireDefault(require("./threshold/freedmanDiaconis.js"));
+
+var _scott = _interopRequireDefault(require("./threshold/scott.js"));
+
+var _sturges = _interopRequireDefault(require("./threshold/sturges.js"));
+
+var _max = _interopRequireDefault(require("./max.js"));
+
+var _maxIndex = _interopRequireDefault(require("./maxIndex.js"));
+
+var _mean = _interopRequireDefault(require("./mean.js"));
+
+var _median = _interopRequireDefault(require("./median.js"));
+
+var _merge = _interopRequireDefault(require("./merge.js"));
+
+var _min = _interopRequireDefault(require("./min.js"));
+
+var _minIndex = _interopRequireDefault(require("./minIndex.js"));
+
+var _mode = _interopRequireDefault(require("./mode.js"));
+
+var _nice = _interopRequireDefault(require("./nice.js"));
+
+var _pairs = _interopRequireDefault(require("./pairs.js"));
+
+var _permute = _interopRequireDefault(require("./permute.js"));
+
+var _quantile = _interopRequireWildcard(require("./quantile.js"));
+
+var _quickselect = _interopRequireDefault(require("./quickselect.js"));
+
+var _range = _interopRequireDefault(require("./range.js"));
+
+var _least = _interopRequireDefault(require("./least.js"));
+
+var _leastIndex = _interopRequireDefault(require("./leastIndex.js"));
+
+var _greatest = _interopRequireDefault(require("./greatest.js"));
+
+var _greatestIndex = _interopRequireDefault(require("./greatestIndex.js"));
+
+var _scan = _interopRequireDefault(require("./scan.js"));
+
+var _shuffle = _interopRequireWildcard(require("./shuffle.js"));
+
+var _sum = _interopRequireDefault(require("./sum.js"));
+
+var _ticks = _interopRequireWildcard(require("./ticks.js"));
+
+var _transpose = _interopRequireDefault(require("./transpose.js"));
+
+var _variance = _interopRequireDefault(require("./variance.js"));
+
+var _zip = _interopRequireDefault(require("./zip.js"));
+
+var _every = _interopRequireDefault(require("./every.js"));
+
+var _some = _interopRequireDefault(require("./some.js"));
+
+var _filter = _interopRequireDefault(require("./filter.js"));
+
+var _map = _interopRequireDefault(require("./map.js"));
+
+var _reduce = _interopRequireDefault(require("./reduce.js"));
+
+var _reverse = _interopRequireDefault(require("./reverse.js"));
+
+var _sort = _interopRequireDefault(require("./sort.js"));
+
+var _difference = _interopRequireDefault(require("./difference.js"));
+
+var _disjoint = _interopRequireDefault(require("./disjoint.js"));
+
+var _intersection = _interopRequireDefault(require("./intersection.js"));
+
+var _subset = _interopRequireDefault(require("./subset.js"));
+
+var _superset = _interopRequireDefault(require("./superset.js"));
+
+var _union = _interopRequireDefault(require("./union.js"));
+
+var _internmap = require("internmap");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+},{"./bisect.js":"node_modules/d3-array/src/bisect.js","./ascending.js":"node_modules/d3-array/src/ascending.js","./bisector.js":"node_modules/d3-array/src/bisector.js","./count.js":"node_modules/d3-array/src/count.js","./cross.js":"node_modules/d3-array/src/cross.js","./cumsum.js":"node_modules/d3-array/src/cumsum.js","./descending.js":"node_modules/d3-array/src/descending.js","./deviation.js":"node_modules/d3-array/src/deviation.js","./extent.js":"node_modules/d3-array/src/extent.js","./fsum.js":"node_modules/d3-array/src/fsum.js","./group.js":"node_modules/d3-array/src/group.js","./groupSort.js":"node_modules/d3-array/src/groupSort.js","./bin.js":"node_modules/d3-array/src/bin.js","./threshold/freedmanDiaconis.js":"node_modules/d3-array/src/threshold/freedmanDiaconis.js","./threshold/scott.js":"node_modules/d3-array/src/threshold/scott.js","./threshold/sturges.js":"node_modules/d3-array/src/threshold/sturges.js","./max.js":"node_modules/d3-array/src/max.js","./maxIndex.js":"node_modules/d3-array/src/maxIndex.js","./mean.js":"node_modules/d3-array/src/mean.js","./median.js":"node_modules/d3-array/src/median.js","./merge.js":"node_modules/d3-array/src/merge.js","./min.js":"node_modules/d3-array/src/min.js","./minIndex.js":"node_modules/d3-array/src/minIndex.js","./mode.js":"node_modules/d3-array/src/mode.js","./nice.js":"node_modules/d3-array/src/nice.js","./pairs.js":"node_modules/d3-array/src/pairs.js","./permute.js":"node_modules/d3-array/src/permute.js","./quantile.js":"node_modules/d3-array/src/quantile.js","./quickselect.js":"node_modules/d3-array/src/quickselect.js","./range.js":"node_modules/d3-array/src/range.js","./least.js":"node_modules/d3-array/src/least.js","./leastIndex.js":"node_modules/d3-array/src/leastIndex.js","./greatest.js":"node_modules/d3-array/src/greatest.js","./greatestIndex.js":"node_modules/d3-array/src/greatestIndex.js","./scan.js":"node_modules/d3-array/src/scan.js","./shuffle.js":"node_modules/d3-array/src/shuffle.js","./sum.js":"node_modules/d3-array/src/sum.js","./ticks.js":"node_modules/d3-array/src/ticks.js","./transpose.js":"node_modules/d3-array/src/transpose.js","./variance.js":"node_modules/d3-array/src/variance.js","./zip.js":"node_modules/d3-array/src/zip.js","./every.js":"node_modules/d3-array/src/every.js","./some.js":"node_modules/d3-array/src/some.js","./filter.js":"node_modules/d3-array/src/filter.js","./map.js":"node_modules/d3-array/src/map.js","./reduce.js":"node_modules/d3-array/src/reduce.js","./reverse.js":"node_modules/d3-array/src/reverse.js","./sort.js":"node_modules/d3-array/src/sort.js","./difference.js":"node_modules/d3-array/src/difference.js","./disjoint.js":"node_modules/d3-array/src/disjoint.js","./intersection.js":"node_modules/d3-array/src/intersection.js","./subset.js":"node_modules/d3-array/src/subset.js","./superset.js":"node_modules/d3-array/src/superset.js","./union.js":"node_modules/d3-array/src/union.js","internmap":"node_modules/internmap/src/index.js"}],"node_modules/d3-selection/src/namespaces.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10067,3554 +14008,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-},{"./defaultLocale.js":"node_modules/d3-format/src/defaultLocale.js","./locale.js":"node_modules/d3-format/src/locale.js","./formatSpecifier.js":"node_modules/d3-format/src/formatSpecifier.js","./precisionFixed.js":"node_modules/d3-format/src/precisionFixed.js","./precisionPrefix.js":"node_modules/d3-format/src/precisionPrefix.js","./precisionRound.js":"node_modules/d3-format/src/precisionRound.js"}],"node_modules/d3-array/src/ascending.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(a, b) {
-  return a == null || b == null ? NaN : a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
-}
-},{}],"node_modules/d3-array/src/bisector.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(f) {
-  var delta = f;
-  var compare = f;
-
-  if (f.length === 1) {
-    delta = function delta(d, x) {
-      return f(d) - x;
-    };
-
-    compare = ascendingComparator(f);
-  }
-
-  function left(a, x, lo, hi) {
-    if (lo == null) lo = 0;
-    if (hi == null) hi = a.length;
-
-    while (lo < hi) {
-      var mid = lo + hi >>> 1;
-      if (compare(a[mid], x) < 0) lo = mid + 1;else hi = mid;
-    }
-
-    return lo;
-  }
-
-  function right(a, x, lo, hi) {
-    if (lo == null) lo = 0;
-    if (hi == null) hi = a.length;
-
-    while (lo < hi) {
-      var mid = lo + hi >>> 1;
-      if (compare(a[mid], x) > 0) hi = mid;else lo = mid + 1;
-    }
-
-    return lo;
-  }
-
-  function center(a, x, lo, hi) {
-    if (lo == null) lo = 0;
-    if (hi == null) hi = a.length;
-    var i = left(a, x, lo, hi - 1);
-    return i > lo && delta(a[i - 1], x) > -delta(a[i], x) ? i - 1 : i;
-  }
-
-  return {
-    left: left,
-    center: center,
-    right: right
-  };
-}
-
-function ascendingComparator(f) {
-  return function (d, x) {
-    return (0, _ascending.default)(f(d), x);
-  };
-}
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/number.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-exports.numbers = numbers;
-
-var _marked = /*#__PURE__*/regeneratorRuntime.mark(numbers);
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _default(x) {
-  return x === null ? NaN : +x;
-}
-
-function numbers(values, valueof) {
-  var _iterator, _step, value, index, _iterator2, _step2, _value;
-
-  return regeneratorRuntime.wrap(function numbers$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          if (!(valueof === undefined)) {
-            _context.next = 21;
-            break;
-          }
-
-          _iterator = _createForOfIteratorHelper(values);
-          _context.prev = 2;
-
-          _iterator.s();
-
-        case 4:
-          if ((_step = _iterator.n()).done) {
-            _context.next = 11;
-            break;
-          }
-
-          value = _step.value;
-
-          if (!(value != null && (value = +value) >= value)) {
-            _context.next = 9;
-            break;
-          }
-
-          _context.next = 9;
-          return value;
-
-        case 9:
-          _context.next = 4;
-          break;
-
-        case 11:
-          _context.next = 16;
-          break;
-
-        case 13:
-          _context.prev = 13;
-          _context.t0 = _context["catch"](2);
-
-          _iterator.e(_context.t0);
-
-        case 16:
-          _context.prev = 16;
-
-          _iterator.f();
-
-          return _context.finish(16);
-
-        case 19:
-          _context.next = 40;
-          break;
-
-        case 21:
-          index = -1;
-          _iterator2 = _createForOfIteratorHelper(values);
-          _context.prev = 23;
-
-          _iterator2.s();
-
-        case 25:
-          if ((_step2 = _iterator2.n()).done) {
-            _context.next = 32;
-            break;
-          }
-
-          _value = _step2.value;
-
-          if (!((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value)) {
-            _context.next = 30;
-            break;
-          }
-
-          _context.next = 30;
-          return _value;
-
-        case 30:
-          _context.next = 25;
-          break;
-
-        case 32:
-          _context.next = 37;
-          break;
-
-        case 34:
-          _context.prev = 34;
-          _context.t1 = _context["catch"](23);
-
-          _iterator2.e(_context.t1);
-
-        case 37:
-          _context.prev = 37;
-
-          _iterator2.f();
-
-          return _context.finish(37);
-
-        case 40:
-        case "end":
-          return _context.stop();
-      }
-    }
-  }, _marked, null, [[2, 13, 16, 19], [23, 34, 37, 40]]);
-}
-},{}],"node_modules/d3-array/src/bisect.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.bisectCenter = exports.bisectLeft = exports.bisectRight = void 0;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-var _bisector = _interopRequireDefault(require("./bisector.js"));
-
-var _number = _interopRequireDefault(require("./number.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var ascendingBisect = (0, _bisector.default)(_ascending.default);
-var bisectRight = ascendingBisect.right;
-exports.bisectRight = bisectRight;
-var bisectLeft = ascendingBisect.left;
-exports.bisectLeft = bisectLeft;
-var bisectCenter = (0, _bisector.default)(_number.default).center;
-exports.bisectCenter = bisectCenter;
-var _default = bisectRight;
-exports.default = _default;
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./bisector.js":"node_modules/d3-array/src/bisector.js","./number.js":"node_modules/d3-array/src/number.js"}],"node_modules/d3-array/src/count.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = count;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function count(values, valueof) {
-  var count = 0;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value != null && (value = +value) >= value) {
-          ++count;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value) {
-          ++count;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return count;
-}
-},{}],"node_modules/d3-array/src/cross.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = cross;
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function length(array) {
-  return array.length | 0;
-}
-
-function empty(length) {
-  return !(length > 0);
-}
-
-function arrayify(values) {
-  return _typeof(values) !== "object" || "length" in values ? values : Array.from(values);
-}
-
-function reducer(reduce) {
-  return function (values) {
-    return reduce.apply(void 0, _toConsumableArray(values));
-  };
-}
-
-function cross() {
-  for (var _len = arguments.length, values = new Array(_len), _key = 0; _key < _len; _key++) {
-    values[_key] = arguments[_key];
-  }
-
-  var reduce = typeof values[values.length - 1] === "function" && reducer(values.pop());
-  values = values.map(arrayify);
-  var lengths = values.map(length);
-  var j = values.length - 1;
-  var index = new Array(j + 1).fill(0);
-  var product = [];
-  if (j < 0 || lengths.some(empty)) return product;
-
-  while (true) {
-    product.push(index.map(function (j, i) {
-      return values[i][j];
-    }));
-    var i = j;
-
-    while (++index[i] === lengths[i]) {
-      if (i === 0) return reduce ? product.map(reduce) : product;
-      index[i--] = 0;
-    }
-  }
-}
-},{}],"node_modules/d3-array/src/cumsum.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = cumsum;
-
-function cumsum(values, valueof) {
-  var sum = 0,
-      index = 0;
-  return Float64Array.from(values, valueof === undefined ? function (v) {
-    return sum += +v || 0;
-  } : function (v) {
-    return sum += +valueof(v, index++, values) || 0;
-  });
-}
-},{}],"node_modules/d3-array/src/descending.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(a, b) {
-  return a == null || b == null ? NaN : b < a ? -1 : b > a ? 1 : b >= a ? 0 : NaN;
-}
-},{}],"node_modules/d3-array/src/variance.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = variance;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function variance(values, valueof) {
-  var count = 0;
-  var delta;
-  var mean = 0;
-  var sum = 0;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value != null && (value = +value) >= value) {
-          delta = value - mean;
-          mean += delta / ++count;
-          sum += delta * (value - mean);
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value) {
-          delta = _value - mean;
-          mean += delta / ++count;
-          sum += delta * (_value - mean);
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  if (count > 1) return sum / (count - 1);
-}
-},{}],"node_modules/d3-array/src/deviation.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = deviation;
-
-var _variance = _interopRequireDefault(require("./variance.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function deviation(values, valueof) {
-  var v = (0, _variance.default)(values, valueof);
-  return v ? Math.sqrt(v) : v;
-}
-},{"./variance.js":"node_modules/d3-array/src/variance.js"}],"node_modules/d3-array/src/extent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _default(values, valueof) {
-  var min;
-  var max;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value != null) {
-          if (min === undefined) {
-            if (value >= value) min = max = value;
-          } else {
-            if (min > value) min = value;
-            if (max < value) max = value;
-          }
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null) {
-          if (min === undefined) {
-            if (_value >= _value) min = max = _value;
-          } else {
-            if (min > _value) min = _value;
-            if (max < _value) max = _value;
-          }
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return [min, max];
-}
-},{}],"node_modules/d3-array/src/fsum.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.fsum = fsum;
-exports.fcumsum = fcumsum;
-exports.Adder = void 0;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-// https://github.com/python/cpython/blob/a74eea238f5baba15797e2e8b570d153bc8690a7/Modules/mathmodule.c#L1423
-var Adder = /*#__PURE__*/function () {
-  function Adder() {
-    _classCallCheck(this, Adder);
-
-    this._partials = new Float64Array(32);
-    this._n = 0;
-  }
-
-  _createClass(Adder, [{
-    key: "add",
-    value: function add(x) {
-      var p = this._partials;
-      var i = 0;
-
-      for (var j = 0; j < this._n && j < 32; j++) {
-        var y = p[j],
-            hi = x + y,
-            lo = Math.abs(x) < Math.abs(y) ? x - (hi - y) : y - (hi - x);
-        if (lo) p[i++] = lo;
-        x = hi;
-      }
-
-      p[i] = x;
-      this._n = i + 1;
-      return this;
-    }
-  }, {
-    key: "valueOf",
-    value: function valueOf() {
-      var p = this._partials;
-      var n = this._n,
-          x,
-          y,
-          lo,
-          hi = 0;
-
-      if (n > 0) {
-        hi = p[--n];
-
-        while (n > 0) {
-          x = hi;
-          y = p[--n];
-          hi = x + y;
-          lo = y - (hi - x);
-          if (lo) break;
-        }
-
-        if (n > 0 && (lo < 0 && p[n - 1] < 0 || lo > 0 && p[n - 1] > 0)) {
-          y = lo * 2;
-          x = hi + y;
-          if (y == x - hi) hi = x;
-        }
-      }
-
-      return hi;
-    }
-  }]);
-
-  return Adder;
-}();
-
-exports.Adder = Adder;
-
-function fsum(values, valueof) {
-  var adder = new Adder();
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value = +value) {
-          adder.add(value);
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if (_value = +valueof(_value, ++index, values)) {
-          adder.add(_value);
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return +adder;
-}
-
-function fcumsum(values, valueof) {
-  var adder = new Adder();
-  var index = -1;
-  return Float64Array.from(values, valueof === undefined ? function (v) {
-    return adder.add(+v || 0);
-  } : function (v) {
-    return adder.add(+valueof(v, ++index, values) || 0);
-  });
-}
-},{}],"node_modules/internmap/src/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.InternSet = exports.InternMap = void 0;
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-var InternMap = /*#__PURE__*/function (_Map) {
-  _inherits(InternMap, _Map);
-
-  var _super = _createSuper(InternMap);
-
-  function InternMap(entries) {
-    var _this;
-
-    var key = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : keyof;
-
-    _classCallCheck(this, InternMap);
-
-    _this = _super.call(this);
-    Object.defineProperties(_assertThisInitialized(_this), {
-      _intern: {
-        value: new Map()
-      },
-      _key: {
-        value: key
-      }
-    });
-
-    if (entries != null) {
-      var _iterator = _createForOfIteratorHelper(entries),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var _step$value = _slicedToArray(_step.value, 2),
-              _key2 = _step$value[0],
-              value = _step$value[1];
-
-          _this.set(_key2, value);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-    }
-
-    return _this;
-  }
-
-  _createClass(InternMap, [{
-    key: "get",
-    value: function get(key) {
-      return _get(_getPrototypeOf(InternMap.prototype), "get", this).call(this, intern_get(this, key));
-    }
-  }, {
-    key: "has",
-    value: function has(key) {
-      return _get(_getPrototypeOf(InternMap.prototype), "has", this).call(this, intern_get(this, key));
-    }
-  }, {
-    key: "set",
-    value: function set(key, value) {
-      return _get(_getPrototypeOf(InternMap.prototype), "set", this).call(this, intern_set(this, key), value);
-    }
-  }, {
-    key: "delete",
-    value: function _delete(key) {
-      return _get(_getPrototypeOf(InternMap.prototype), "delete", this).call(this, intern_delete(this, key));
-    }
-  }]);
-
-  return InternMap;
-}( /*#__PURE__*/_wrapNativeSuper(Map));
-
-exports.InternMap = InternMap;
-
-var InternSet = /*#__PURE__*/function (_Set) {
-  _inherits(InternSet, _Set);
-
-  var _super2 = _createSuper(InternSet);
-
-  function InternSet(values) {
-    var _this2;
-
-    var key = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : keyof;
-
-    _classCallCheck(this, InternSet);
-
-    _this2 = _super2.call(this);
-    Object.defineProperties(_assertThisInitialized(_this2), {
-      _intern: {
-        value: new Map()
-      },
-      _key: {
-        value: key
-      }
-    });
-
-    if (values != null) {
-      var _iterator2 = _createForOfIteratorHelper(values),
-          _step2;
-
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var value = _step2.value;
-
-          _this2.add(value);
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-    }
-
-    return _this2;
-  }
-
-  _createClass(InternSet, [{
-    key: "has",
-    value: function has(value) {
-      return _get(_getPrototypeOf(InternSet.prototype), "has", this).call(this, intern_get(this, value));
-    }
-  }, {
-    key: "add",
-    value: function add(value) {
-      return _get(_getPrototypeOf(InternSet.prototype), "add", this).call(this, intern_set(this, value));
-    }
-  }, {
-    key: "delete",
-    value: function _delete(value) {
-      return _get(_getPrototypeOf(InternSet.prototype), "delete", this).call(this, intern_delete(this, value));
-    }
-  }]);
-
-  return InternSet;
-}( /*#__PURE__*/_wrapNativeSuper(Set));
-
-exports.InternSet = InternSet;
-
-function intern_get(_ref, value) {
-  var _intern = _ref._intern,
-      _key = _ref._key;
-
-  var key = _key(value);
-
-  return _intern.has(key) ? _intern.get(key) : value;
-}
-
-function intern_set(_ref2, value) {
-  var _intern = _ref2._intern,
-      _key = _ref2._key;
-
-  var key = _key(value);
-
-  if (_intern.has(key)) return _intern.get(key);
-
-  _intern.set(key, value);
-
-  return value;
-}
-
-function intern_delete(_ref3, value) {
-  var _intern = _ref3._intern,
-      _key = _ref3._key;
-
-  var key = _key(value);
-
-  if (_intern.has(key)) {
-    value = _intern.get(value);
-
-    _intern.delete(key);
-  }
-
-  return value;
-}
-
-function keyof(value) {
-  return value !== null && _typeof(value) === "object" ? value.valueOf() : value;
-}
-},{}],"node_modules/d3-array/src/identity.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return x;
-}
-},{}],"node_modules/d3-array/src/group.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = group;
-exports.groups = groups;
-exports.flatGroup = flatGroup;
-exports.flatRollup = flatRollup;
-exports.rollup = rollup;
-exports.rollups = rollups;
-exports.index = index;
-exports.indexes = indexes;
-
-var _internmap = require("internmap");
-
-var _identity = _interopRequireDefault(require("./identity.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function group(values) {
-  for (var _len = arguments.length, keys = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    keys[_key - 1] = arguments[_key];
-  }
-
-  return nest(values, _identity.default, _identity.default, keys);
-}
-
-function groups(values) {
-  for (var _len2 = arguments.length, keys = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-    keys[_key2 - 1] = arguments[_key2];
-  }
-
-  return nest(values, Array.from, _identity.default, keys);
-}
-
-function flatten(groups, keys) {
-  for (var i = 1, n = keys.length; i < n; ++i) {
-    groups = groups.flatMap(function (g) {
-      return g.pop().map(function (_ref) {
-        var _ref2 = _slicedToArray(_ref, 2),
-            key = _ref2[0],
-            value = _ref2[1];
-
-        return [].concat(_toConsumableArray(g), [key, value]);
-      });
-    });
-  }
-
-  return groups;
-}
-
-function flatGroup(values) {
-  for (var _len3 = arguments.length, keys = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-    keys[_key3 - 1] = arguments[_key3];
-  }
-
-  return flatten(groups.apply(void 0, [values].concat(keys)), keys);
-}
-
-function flatRollup(values, reduce) {
-  for (var _len4 = arguments.length, keys = new Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
-    keys[_key4 - 2] = arguments[_key4];
-  }
-
-  return flatten(rollups.apply(void 0, [values, reduce].concat(keys)), keys);
-}
-
-function rollup(values, reduce) {
-  for (var _len5 = arguments.length, keys = new Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
-    keys[_key5 - 2] = arguments[_key5];
-  }
-
-  return nest(values, _identity.default, reduce, keys);
-}
-
-function rollups(values, reduce) {
-  for (var _len6 = arguments.length, keys = new Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
-    keys[_key6 - 2] = arguments[_key6];
-  }
-
-  return nest(values, Array.from, reduce, keys);
-}
-
-function index(values) {
-  for (var _len7 = arguments.length, keys = new Array(_len7 > 1 ? _len7 - 1 : 0), _key7 = 1; _key7 < _len7; _key7++) {
-    keys[_key7 - 1] = arguments[_key7];
-  }
-
-  return nest(values, _identity.default, unique, keys);
-}
-
-function indexes(values) {
-  for (var _len8 = arguments.length, keys = new Array(_len8 > 1 ? _len8 - 1 : 0), _key8 = 1; _key8 < _len8; _key8++) {
-    keys[_key8 - 1] = arguments[_key8];
-  }
-
-  return nest(values, Array.from, unique, keys);
-}
-
-function unique(values) {
-  if (values.length !== 1) throw new Error("duplicate key");
-  return values[0];
-}
-
-function nest(values, map, reduce, keys) {
-  return function regroup(values, i) {
-    if (i >= keys.length) return reduce(values);
-    var groups = new _internmap.InternMap();
-    var keyof = keys[i++];
-    var index = -1;
-
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-        var key = keyof(value, ++index, values);
-
-        var _group = groups.get(key);
-
-        if (_group) _group.push(value);else groups.set(key, [value]);
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-
-    var _iterator2 = _createForOfIteratorHelper(groups),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _step2$value = _slicedToArray(_step2.value, 2),
-            _key9 = _step2$value[0],
-            _values = _step2$value[1];
-
-        groups.set(_key9, regroup(_values, i));
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-
-    return map(groups);
-  }(values, 0);
-}
-},{"internmap":"node_modules/internmap/src/index.js","./identity.js":"node_modules/d3-array/src/identity.js"}],"node_modules/d3-array/src/permute.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(source, keys) {
-  return Array.from(keys, function (key) {
-    return source[key];
-  });
-}
-},{}],"node_modules/d3-array/src/sort.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = sort;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-var _permute = _interopRequireDefault(require("./permute.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function sort(values) {
-  for (var _len = arguments.length, F = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    F[_key - 1] = arguments[_key];
-  }
-
-  if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
-  values = Array.from(values);
-
-  var _F = F,
-      _F2 = _slicedToArray(_F, 1),
-      _F2$ = _F2[0],
-      f = _F2$ === void 0 ? _ascending.default : _F2$;
-
-  if (f.length === 1 || F.length > 1) {
-    var index = Uint32Array.from(values, function (d, i) {
-      return i;
-    });
-
-    if (F.length > 1) {
-      F = F.map(function (f) {
-        return values.map(f);
-      });
-      index.sort(function (i, j) {
-        var _iterator = _createForOfIteratorHelper(F),
-            _step;
-
-        try {
-          for (_iterator.s(); !(_step = _iterator.n()).done;) {
-            var _f = _step.value;
-            var c = (0, _ascending.default)(_f[i], _f[j]);
-            if (c) return c;
-          }
-        } catch (err) {
-          _iterator.e(err);
-        } finally {
-          _iterator.f();
-        }
-      });
-    } else {
-      f = values.map(f);
-      index.sort(function (i, j) {
-        return (0, _ascending.default)(f[i], f[j]);
-      });
-    }
-
-    return (0, _permute.default)(values, index);
-  }
-
-  return values.sort(f);
-}
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./permute.js":"node_modules/d3-array/src/permute.js"}],"node_modules/d3-array/src/groupSort.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = groupSort;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-var _group = _interopRequireWildcard(require("./group.js"));
-
-var _sort = _interopRequireDefault(require("./sort.js"));
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function groupSort(values, reduce, key) {
-  return (reduce.length === 1 ? (0, _sort.default)((0, _group.rollup)(values, reduce, key), function (_ref, _ref2) {
-    var _ref3 = _slicedToArray(_ref, 2),
-        ak = _ref3[0],
-        av = _ref3[1];
-
-    var _ref4 = _slicedToArray(_ref2, 2),
-        bk = _ref4[0],
-        bv = _ref4[1];
-
-    return (0, _ascending.default)(av, bv) || (0, _ascending.default)(ak, bk);
-  }) : (0, _sort.default)((0, _group.default)(values, key), function (_ref5, _ref6) {
-    var _ref7 = _slicedToArray(_ref5, 2),
-        ak = _ref7[0],
-        av = _ref7[1];
-
-    var _ref8 = _slicedToArray(_ref6, 2),
-        bk = _ref8[0],
-        bv = _ref8[1];
-
-    return reduce(av, bv) || (0, _ascending.default)(ak, bk);
-  })).map(function (_ref9) {
-    var _ref10 = _slicedToArray(_ref9, 1),
-        key = _ref10[0];
-
-    return key;
-  });
-}
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./group.js":"node_modules/d3-array/src/group.js","./sort.js":"node_modules/d3-array/src/sort.js"}],"node_modules/d3-array/src/array.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.map = exports.slice = void 0;
-var array = Array.prototype;
-var slice = array.slice;
-exports.slice = slice;
-var map = array.map;
-exports.map = map;
-},{}],"node_modules/d3-array/src/constant.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return function () {
-    return x;
-  };
-}
-},{}],"node_modules/d3-array/src/ticks.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-exports.tickIncrement = tickIncrement;
-exports.tickStep = tickStep;
-var e10 = Math.sqrt(50),
-    e5 = Math.sqrt(10),
-    e2 = Math.sqrt(2);
-
-function _default(start, stop, count) {
-  var reverse,
-      i = -1,
-      n,
-      ticks,
-      step;
-  stop = +stop, start = +start, count = +count;
-  if (start === stop && count > 0) return [start];
-  if (reverse = stop < start) n = start, start = stop, stop = n;
-  if ((step = tickIncrement(start, stop, count)) === 0 || !isFinite(step)) return [];
-
-  if (step > 0) {
-    var r0 = Math.round(start / step),
-        r1 = Math.round(stop / step);
-    if (r0 * step < start) ++r0;
-    if (r1 * step > stop) --r1;
-    ticks = new Array(n = r1 - r0 + 1);
-
-    while (++i < n) {
-      ticks[i] = (r0 + i) * step;
-    }
-  } else {
-    step = -step;
-
-    var _r = Math.round(start * step),
-        _r2 = Math.round(stop * step);
-
-    if (_r / step < start) ++_r;
-    if (_r2 / step > stop) --_r2;
-    ticks = new Array(n = _r2 - _r + 1);
-
-    while (++i < n) {
-      ticks[i] = (_r + i) / step;
-    }
-  }
-
-  if (reverse) ticks.reverse();
-  return ticks;
-}
-
-function tickIncrement(start, stop, count) {
-  var step = (stop - start) / Math.max(0, count),
-      power = Math.floor(Math.log(step) / Math.LN10),
-      error = step / Math.pow(10, power);
-  return power >= 0 ? (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1) * Math.pow(10, power) : -Math.pow(10, -power) / (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1);
-}
-
-function tickStep(start, stop, count) {
-  var step0 = Math.abs(stop - start) / Math.max(0, count),
-      step1 = Math.pow(10, Math.floor(Math.log(step0) / Math.LN10)),
-      error = step0 / step1;
-  if (error >= e10) step1 *= 10;else if (error >= e5) step1 *= 5;else if (error >= e2) step1 *= 2;
-  return stop < start ? -step1 : step1;
-}
-},{}],"node_modules/d3-array/src/nice.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = nice;
-
-var _ticks = require("./ticks.js");
-
-function nice(start, stop, count) {
-  var prestep;
-
-  while (true) {
-    var step = (0, _ticks.tickIncrement)(start, stop, count);
-
-    if (step === prestep || step === 0 || !isFinite(step)) {
-      return [start, stop];
-    } else if (step > 0) {
-      start = Math.floor(start / step) * step;
-      stop = Math.ceil(stop / step) * step;
-    } else if (step < 0) {
-      start = Math.ceil(start * step) / step;
-      stop = Math.floor(stop * step) / step;
-    }
-
-    prestep = step;
-  }
-}
-},{"./ticks.js":"node_modules/d3-array/src/ticks.js"}],"node_modules/d3-array/src/threshold/sturges.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _count = _interopRequireDefault(require("../count.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(values) {
-  return Math.ceil(Math.log((0, _count.default)(values)) / Math.LN2) + 1;
-}
-},{"../count.js":"node_modules/d3-array/src/count.js"}],"node_modules/d3-array/src/bin.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _array = require("./array.js");
-
-var _bisect = _interopRequireDefault(require("./bisect.js"));
-
-var _constant = _interopRequireDefault(require("./constant.js"));
-
-var _extent = _interopRequireDefault(require("./extent.js"));
-
-var _identity = _interopRequireDefault(require("./identity.js"));
-
-var _nice3 = _interopRequireDefault(require("./nice.js"));
-
-var _ticks = _interopRequireWildcard(require("./ticks.js"));
-
-var _sturges = _interopRequireDefault(require("./threshold/sturges.js"));
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _default() {
-  var value = _identity.default,
-      domain = _extent.default,
-      threshold = _sturges.default;
-
-  function histogram(data) {
-    if (!Array.isArray(data)) data = Array.from(data);
-    var i,
-        n = data.length,
-        x,
-        values = new Array(n);
-
-    for (i = 0; i < n; ++i) {
-      values[i] = value(data[i], i, data);
-    }
-
-    var xz = domain(values),
-        x0 = xz[0],
-        x1 = xz[1],
-        tz = threshold(values, x0, x1); // Convert number of thresholds into uniform thresholds, and nice the
-    // default domain accordingly.
-
-    if (!Array.isArray(tz)) {
-      var max = x1,
-          tn = +tz;
-
-      if (domain === _extent.default) {
-        var _nice = (0, _nice3.default)(x0, x1, tn);
-
-        var _nice2 = _slicedToArray(_nice, 2);
-
-        x0 = _nice2[0];
-        x1 = _nice2[1];
-      }
-
-      tz = (0, _ticks.default)(x0, x1, tn); // If the last threshold is coincident with the domain’s upper bound, the
-      // last bin will be zero-width. If the default domain is used, and this
-      // last threshold is coincident with the maximum input value, we can
-      // extend the niced upper bound by one tick to ensure uniform bin widths;
-      // otherwise, we simply remove the last threshold. Note that we don’t
-      // coerce values or the domain to numbers, and thus must be careful to
-      // compare order (>=) rather than strict equality (===)!
-
-      if (tz[tz.length - 1] >= x1) {
-        if (max >= x1 && domain === _extent.default) {
-          var step = (0, _ticks.tickIncrement)(x0, x1, tn);
-
-          if (isFinite(step)) {
-            if (step > 0) {
-              x1 = (Math.floor(x1 / step) + 1) * step;
-            } else if (step < 0) {
-              x1 = (Math.ceil(x1 * -step) + 1) / -step;
-            }
-          }
-        } else {
-          tz.pop();
-        }
-      }
-    } // Remove any thresholds outside the domain.
-
-
-    var m = tz.length;
-
-    while (tz[0] <= x0) {
-      tz.shift(), --m;
-    }
-
-    while (tz[m - 1] > x1) {
-      tz.pop(), --m;
-    }
-
-    var bins = new Array(m + 1),
-        bin; // Initialize bins.
-
-    for (i = 0; i <= m; ++i) {
-      bin = bins[i] = [];
-      bin.x0 = i > 0 ? tz[i - 1] : x0;
-      bin.x1 = i < m ? tz[i] : x1;
-    } // Assign data to bins by value, ignoring any outside the domain.
-
-
-    for (i = 0; i < n; ++i) {
-      x = values[i];
-
-      if (x != null && x0 <= x && x <= x1) {
-        bins[(0, _bisect.default)(tz, x, 0, m)].push(data[i]);
-      }
-    }
-
-    return bins;
-  }
-
-  histogram.value = function (_) {
-    return arguments.length ? (value = typeof _ === "function" ? _ : (0, _constant.default)(_), histogram) : value;
-  };
-
-  histogram.domain = function (_) {
-    return arguments.length ? (domain = typeof _ === "function" ? _ : (0, _constant.default)([_[0], _[1]]), histogram) : domain;
-  };
-
-  histogram.thresholds = function (_) {
-    return arguments.length ? (threshold = typeof _ === "function" ? _ : Array.isArray(_) ? (0, _constant.default)(_array.slice.call(_)) : (0, _constant.default)(_), histogram) : threshold;
-  };
-
-  return histogram;
-}
-},{"./array.js":"node_modules/d3-array/src/array.js","./bisect.js":"node_modules/d3-array/src/bisect.js","./constant.js":"node_modules/d3-array/src/constant.js","./extent.js":"node_modules/d3-array/src/extent.js","./identity.js":"node_modules/d3-array/src/identity.js","./nice.js":"node_modules/d3-array/src/nice.js","./ticks.js":"node_modules/d3-array/src/ticks.js","./threshold/sturges.js":"node_modules/d3-array/src/threshold/sturges.js"}],"node_modules/d3-array/src/max.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = max;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function max(values, valueof) {
-  var max;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value != null && (max < value || max === undefined && value >= value)) {
-          max = value;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null && (max < _value || max === undefined && _value >= _value)) {
-          max = _value;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return max;
-}
-},{}],"node_modules/d3-array/src/min.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = min;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function min(values, valueof) {
-  var min;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value != null && (min > value || min === undefined && value >= value)) {
-          min = value;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null && (min > _value || min === undefined && _value >= _value)) {
-          min = _value;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return min;
-}
-},{}],"node_modules/d3-array/src/quickselect.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = quickselect;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Based on https://github.com/mourner/quickselect
-// ISC license, Copyright 2018 Vladimir Agafonkin.
-function quickselect(array, k) {
-  var left = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-  var right = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : array.length - 1;
-  var compare = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : _ascending.default;
-
-  while (right > left) {
-    if (right - left > 600) {
-      var n = right - left + 1;
-      var m = k - left + 1;
-      var z = Math.log(n);
-      var s = 0.5 * Math.exp(2 * z / 3);
-      var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
-      var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
-      var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
-      quickselect(array, k, newLeft, newRight, compare);
-    }
-
-    var t = array[k];
-    var i = left;
-    var j = right;
-    swap(array, left, k);
-    if (compare(array[right], t) > 0) swap(array, left, right);
-
-    while (i < j) {
-      swap(array, i, j), ++i, --j;
-
-      while (compare(array[i], t) < 0) {
-        ++i;
-      }
-
-      while (compare(array[j], t) > 0) {
-        --j;
-      }
-    }
-
-    if (compare(array[left], t) === 0) swap(array, left, j);else ++j, swap(array, j, right);
-    if (j <= k) left = j + 1;
-    if (k <= j) right = j - 1;
-  }
-
-  return array;
-}
-
-function swap(array, i, j) {
-  var t = array[i];
-  array[i] = array[j];
-  array[j] = t;
-}
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/quantile.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = quantile;
-exports.quantileSorted = quantileSorted;
-
-var _max = _interopRequireDefault(require("./max.js"));
-
-var _min = _interopRequireDefault(require("./min.js"));
-
-var _quickselect = _interopRequireDefault(require("./quickselect.js"));
-
-var _number = _interopRequireWildcard(require("./number.js"));
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function quantile(values, p, valueof) {
-  values = Float64Array.from((0, _number.numbers)(values, valueof));
-  if (!(n = values.length)) return;
-  if ((p = +p) <= 0 || n < 2) return (0, _min.default)(values);
-  if (p >= 1) return (0, _max.default)(values);
-  var n,
-      i = (n - 1) * p,
-      i0 = Math.floor(i),
-      value0 = (0, _max.default)((0, _quickselect.default)(values, i0).subarray(0, i0 + 1)),
-      value1 = (0, _min.default)(values.subarray(i0 + 1));
-  return value0 + (value1 - value0) * (i - i0);
-}
-
-function quantileSorted(values, p) {
-  var valueof = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _number.default;
-  if (!(n = values.length)) return;
-  if ((p = +p) <= 0 || n < 2) return +valueof(values[0], 0, values);
-  if (p >= 1) return +valueof(values[n - 1], n - 1, values);
-  var n,
-      i = (n - 1) * p,
-      i0 = Math.floor(i),
-      value0 = +valueof(values[i0], i0, values),
-      value1 = +valueof(values[i0 + 1], i0 + 1, values);
-  return value0 + (value1 - value0) * (i - i0);
-}
-},{"./max.js":"node_modules/d3-array/src/max.js","./min.js":"node_modules/d3-array/src/min.js","./quickselect.js":"node_modules/d3-array/src/quickselect.js","./number.js":"node_modules/d3-array/src/number.js"}],"node_modules/d3-array/src/threshold/freedmanDiaconis.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _count = _interopRequireDefault(require("../count.js"));
-
-var _quantile = _interopRequireDefault(require("../quantile.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(values, min, max) {
-  return Math.ceil((max - min) / (2 * ((0, _quantile.default)(values, 0.75) - (0, _quantile.default)(values, 0.25)) * Math.pow((0, _count.default)(values), -1 / 3)));
-}
-},{"../count.js":"node_modules/d3-array/src/count.js","../quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/threshold/scott.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _count = _interopRequireDefault(require("../count.js"));
-
-var _deviation = _interopRequireDefault(require("../deviation.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(values, min, max) {
-  return Math.ceil((max - min) / (3.5 * (0, _deviation.default)(values) * Math.pow((0, _count.default)(values), -1 / 3)));
-}
-},{"../count.js":"node_modules/d3-array/src/count.js","../deviation.js":"node_modules/d3-array/src/deviation.js"}],"node_modules/d3-array/src/maxIndex.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = maxIndex;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function maxIndex(values, valueof) {
-  var max;
-  var maxIndex = -1;
-  var index = -1;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-        ++index;
-
-        if (value != null && (max < value || max === undefined && value >= value)) {
-          max = value, maxIndex = index;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null && (max < _value || max === undefined && _value >= _value)) {
-          max = _value, maxIndex = index;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return maxIndex;
-}
-},{}],"node_modules/d3-array/src/mean.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = mean;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function mean(values, valueof) {
-  var count = 0;
-  var sum = 0;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value != null && (value = +value) >= value) {
-          ++count, sum += value;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value) {
-          ++count, sum += _value;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  if (count) return sum / count;
-}
-},{}],"node_modules/d3-array/src/median.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _quantile = _interopRequireDefault(require("./quantile.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(values, valueof) {
-  return (0, _quantile.default)(values, 0.5, valueof);
-}
-},{"./quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/merge.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = merge;
-
-var _marked = /*#__PURE__*/regeneratorRuntime.mark(flatten);
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function flatten(arrays) {
-  var _iterator, _step, array;
-
-  return regeneratorRuntime.wrap(function flatten$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          _iterator = _createForOfIteratorHelper(arrays);
-          _context.prev = 1;
-
-          _iterator.s();
-
-        case 3:
-          if ((_step = _iterator.n()).done) {
-            _context.next = 8;
-            break;
-          }
-
-          array = _step.value;
-          return _context.delegateYield(array, "t0", 6);
-
-        case 6:
-          _context.next = 3;
-          break;
-
-        case 8:
-          _context.next = 13;
-          break;
-
-        case 10:
-          _context.prev = 10;
-          _context.t1 = _context["catch"](1);
-
-          _iterator.e(_context.t1);
-
-        case 13:
-          _context.prev = 13;
-
-          _iterator.f();
-
-          return _context.finish(13);
-
-        case 16:
-        case "end":
-          return _context.stop();
-      }
-    }
-  }, _marked, null, [[1, 10, 13, 16]]);
-}
-
-function merge(arrays) {
-  return Array.from(flatten(arrays));
-}
-},{}],"node_modules/d3-array/src/minIndex.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = minIndex;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function minIndex(values, valueof) {
-  var min;
-  var minIndex = -1;
-  var index = -1;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-        ++index;
-
-        if (value != null && (min > value || min === undefined && value >= value)) {
-          min = value, minIndex = index;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null && (min > _value || min === undefined && _value >= _value)) {
-          min = _value, minIndex = index;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return minIndex;
-}
-},{}],"node_modules/d3-array/src/mode.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _internmap = require("internmap");
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _default(values, valueof) {
-  var counts = new _internmap.InternMap();
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value != null && value >= value) {
-          counts.set(value, (counts.get(value) || 0) + 1);
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if ((_value = valueof(_value, ++index, values)) != null && _value >= _value) {
-          counts.set(_value, (counts.get(_value) || 0) + 1);
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  var modeValue;
-  var modeCount = 0;
-
-  var _iterator3 = _createForOfIteratorHelper(counts),
-      _step3;
-
-  try {
-    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-      var _step3$value = _slicedToArray(_step3.value, 2),
-          _value2 = _step3$value[0],
-          count = _step3$value[1];
-
-      if (count > modeCount) {
-        modeCount = count;
-        modeValue = _value2;
-      }
-    }
-  } catch (err) {
-    _iterator3.e(err);
-  } finally {
-    _iterator3.f();
-  }
-
-  return modeValue;
-}
-},{"internmap":"node_modules/internmap/src/index.js"}],"node_modules/d3-array/src/pairs.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = pairs;
-exports.pair = pair;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function pairs(values) {
-  var pairof = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : pair;
-  var pairs = [];
-  var previous;
-  var first = false;
-
-  var _iterator = _createForOfIteratorHelper(values),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var value = _step.value;
-      if (first) pairs.push(pairof(previous, value));
-      previous = value;
-      first = true;
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return pairs;
-}
-
-function pair(a, b) {
-  return [a, b];
-}
-},{}],"node_modules/d3-array/src/range.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(start, stop, step) {
-  start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
-  var i = -1,
-      n = Math.max(0, Math.ceil((stop - start) / step)) | 0,
-      range = new Array(n);
-
-  while (++i < n) {
-    range[i] = start + i * step;
-  }
-
-  return range;
-}
-},{}],"node_modules/d3-array/src/least.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = least;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function least(values) {
-  var compare = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _ascending.default;
-  var min;
-  var defined = false;
-
-  if (compare.length === 1) {
-    var minValue;
-
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var element = _step.value;
-        var value = compare(element);
-
-        if (defined ? (0, _ascending.default)(value, minValue) < 0 : (0, _ascending.default)(value, value) === 0) {
-          min = element;
-          minValue = value;
-          defined = true;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if (defined ? compare(_value, min) < 0 : compare(_value, _value) === 0) {
-          min = _value;
-          defined = true;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return min;
-}
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/leastIndex.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = leastIndex;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-var _minIndex = _interopRequireDefault(require("./minIndex.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function leastIndex(values) {
-  var compare = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _ascending.default;
-  if (compare.length === 1) return (0, _minIndex.default)(values, compare);
-  var minValue;
-  var min = -1;
-  var index = -1;
-
-  var _iterator = _createForOfIteratorHelper(values),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var value = _step.value;
-      ++index;
-
-      if (min < 0 ? compare(value, value) === 0 : compare(value, minValue) < 0) {
-        minValue = value;
-        min = index;
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return min;
-}
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./minIndex.js":"node_modules/d3-array/src/minIndex.js"}],"node_modules/d3-array/src/greatest.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = greatest;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function greatest(values) {
-  var compare = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _ascending.default;
-  var max;
-  var defined = false;
-
-  if (compare.length === 1) {
-    var maxValue;
-
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var element = _step.value;
-        var value = compare(element);
-
-        if (defined ? (0, _ascending.default)(value, maxValue) > 0 : (0, _ascending.default)(value, value) === 0) {
-          max = element;
-          maxValue = value;
-          defined = true;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if (defined ? compare(_value, max) > 0 : compare(_value, _value) === 0) {
-          max = _value;
-          defined = true;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return max;
-}
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/greatestIndex.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = greatestIndex;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-var _maxIndex = _interopRequireDefault(require("./maxIndex.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function greatestIndex(values) {
-  var compare = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _ascending.default;
-  if (compare.length === 1) return (0, _maxIndex.default)(values, compare);
-  var maxValue;
-  var max = -1;
-  var index = -1;
-
-  var _iterator = _createForOfIteratorHelper(values),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var value = _step.value;
-      ++index;
-
-      if (max < 0 ? compare(value, value) === 0 : compare(value, maxValue) > 0) {
-        maxValue = value;
-        max = index;
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return max;
-}
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./maxIndex.js":"node_modules/d3-array/src/maxIndex.js"}],"node_modules/d3-array/src/scan.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = scan;
-
-var _leastIndex = _interopRequireDefault(require("./leastIndex.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function scan(values, compare) {
-  var index = (0, _leastIndex.default)(values, compare);
-  return index < 0 ? undefined : index;
-}
-},{"./leastIndex.js":"node_modules/d3-array/src/leastIndex.js"}],"node_modules/d3-array/src/shuffle.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.shuffler = shuffler;
-exports.default = void 0;
-
-var _default = shuffler(Math.random);
-
-exports.default = _default;
-
-function shuffler(random) {
-  return function shuffle(array) {
-    var i0 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var i1 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : array.length;
-    var m = i1 - (i0 = +i0);
-
-    while (m) {
-      var i = random() * m-- | 0,
-          t = array[m + i0];
-      array[m + i0] = array[i + i0];
-      array[i + i0] = t;
-    }
-
-    return array;
-  };
-}
-},{}],"node_modules/d3-array/src/sum.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = sum;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function sum(values, valueof) {
-  var sum = 0;
-
-  if (valueof === undefined) {
-    var _iterator = _createForOfIteratorHelper(values),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-
-        if (value = +value) {
-          sum += value;
-        }
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  } else {
-    var index = -1;
-
-    var _iterator2 = _createForOfIteratorHelper(values),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var _value = _step2.value;
-
-        if (_value = +valueof(_value, ++index, values)) {
-          sum += _value;
-        }
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
-  }
-
-  return sum;
-}
-},{}],"node_modules/d3-array/src/transpose.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _min = _interopRequireDefault(require("./min.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(matrix) {
-  if (!(n = matrix.length)) return [];
-
-  for (var i = -1, m = (0, _min.default)(matrix, length), transpose = new Array(m); ++i < m;) {
-    for (var j = -1, n, row = transpose[i] = new Array(n); ++j < n;) {
-      row[j] = matrix[j][i];
-    }
-  }
-
-  return transpose;
-}
-
-function length(d) {
-  return d.length;
-}
-},{"./min.js":"node_modules/d3-array/src/min.js"}],"node_modules/d3-array/src/zip.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _transpose = _interopRequireDefault(require("./transpose.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default() {
-  return (0, _transpose.default)(arguments);
-}
-},{"./transpose.js":"node_modules/d3-array/src/transpose.js"}],"node_modules/d3-array/src/every.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = every;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function every(values, test) {
-  if (typeof test !== "function") throw new TypeError("test is not a function");
-  var index = -1;
-
-  var _iterator = _createForOfIteratorHelper(values),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var value = _step.value;
-
-      if (!test(value, ++index, values)) {
-        return false;
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return true;
-}
-},{}],"node_modules/d3-array/src/some.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = some;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function some(values, test) {
-  if (typeof test !== "function") throw new TypeError("test is not a function");
-  var index = -1;
-
-  var _iterator = _createForOfIteratorHelper(values),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var value = _step.value;
-
-      if (test(value, ++index, values)) {
-        return true;
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return false;
-}
-},{}],"node_modules/d3-array/src/filter.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = filter;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function filter(values, test) {
-  if (typeof test !== "function") throw new TypeError("test is not a function");
-  var array = [];
-  var index = -1;
-
-  var _iterator = _createForOfIteratorHelper(values),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var value = _step.value;
-
-      if (test(value, ++index, values)) {
-        array.push(value);
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return array;
-}
-},{}],"node_modules/d3-array/src/map.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = map;
-
-function map(values, mapper) {
-  if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
-  if (typeof mapper !== "function") throw new TypeError("mapper is not a function");
-  return Array.from(values, function (value, index) {
-    return mapper(value, index, values);
-  });
-}
-},{}],"node_modules/d3-array/src/reduce.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = reduce;
-
-function reduce(values, reducer, value) {
-  if (typeof reducer !== "function") throw new TypeError("reducer is not a function");
-  var iterator = values[Symbol.iterator]();
-  var done,
-      next,
-      index = -1;
-
-  if (arguments.length < 3) {
-    var _iterator$next = iterator.next();
-
-    done = _iterator$next.done;
-    value = _iterator$next.value;
-    if (done) return;
-    ++index;
-  }
-
-  while ((_iterator$next2 = iterator.next(), done = _iterator$next2.done, next = _iterator$next2.value, _iterator$next2), !done) {
-    var _iterator$next2;
-
-    value = reducer(value, next, ++index, values);
-  }
-
-  return value;
-}
-},{}],"node_modules/d3-array/src/reverse.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = reverse;
-
-function reverse(values) {
-  if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
-  return Array.from(values).reverse();
-}
-},{}],"node_modules/d3-array/src/difference.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = difference;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function difference(values) {
-  values = new Set(values);
-
-  for (var _len = arguments.length, others = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    others[_key - 1] = arguments[_key];
-  }
-
-  for (var _i = 0, _others = others; _i < _others.length; _i++) {
-    var other = _others[_i];
-
-    var _iterator = _createForOfIteratorHelper(other),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var value = _step.value;
-        values.delete(value);
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  }
-
-  return values;
-}
-},{}],"node_modules/d3-array/src/disjoint.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = disjoint;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function disjoint(values, other) {
-  var iterator = other[Symbol.iterator](),
-      set = new Set();
-
-  var _iterator = _createForOfIteratorHelper(values),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var v = _step.value;
-      if (set.has(v)) return false;
-      var value = void 0,
-          done = void 0;
-
-      while (_iterator$next = iterator.next(), value = _iterator$next.value, done = _iterator$next.done, _iterator$next) {
-        var _iterator$next;
-
-        if (done) break;
-        if (Object.is(v, value)) return false;
-        set.add(value);
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return true;
-}
-},{}],"node_modules/d3-array/src/set.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = set;
-
-function set(values) {
-  return values instanceof Set ? values : new Set(values);
-}
-},{}],"node_modules/d3-array/src/intersection.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = intersection;
-
-var _set = _interopRequireDefault(require("./set.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function intersection(values) {
-  for (var _len = arguments.length, others = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    others[_key - 1] = arguments[_key];
-  }
-
-  values = new Set(values);
-  others = others.map(_set.default);
-
-  var _iterator = _createForOfIteratorHelper(values),
-      _step;
-
-  try {
-    out: for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var value = _step.value;
-
-      var _iterator2 = _createForOfIteratorHelper(others),
-          _step2;
-
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var other = _step2.value;
-
-          if (!other.has(value)) {
-            values.delete(value);
-            continue out;
-          }
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return values;
-}
-},{"./set.js":"node_modules/d3-array/src/set.js"}],"node_modules/d3-array/src/superset.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = superset;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function superset(values, other) {
-  var iterator = values[Symbol.iterator](),
-      set = new Set();
-
-  var _iterator = _createForOfIteratorHelper(other),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var o = _step.value;
-      if (set.has(o)) continue;
-      var value = void 0,
-          done = void 0;
-
-      while (_iterator$next = iterator.next(), value = _iterator$next.value, done = _iterator$next.done, _iterator$next) {
-        var _iterator$next;
-
-        if (done) return false;
-        set.add(value);
-        if (Object.is(o, value)) break;
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return true;
-}
-},{}],"node_modules/d3-array/src/subset.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = subset;
-
-var _superset = _interopRequireDefault(require("./superset.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function subset(values, other) {
-  return (0, _superset.default)(other, values);
-}
-},{"./superset.js":"node_modules/d3-array/src/superset.js"}],"node_modules/d3-array/src/union.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = union;
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function union() {
-  var set = new Set();
-
-  for (var _len = arguments.length, others = new Array(_len), _key = 0; _key < _len; _key++) {
-    others[_key] = arguments[_key];
-  }
-
-  for (var _i = 0, _others = others; _i < _others.length; _i++) {
-    var other = _others[_i];
-
-    var _iterator = _createForOfIteratorHelper(other),
-        _step;
-
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var o = _step.value;
-        set.add(o);
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
-    }
-  }
-
-  return set;
-}
-},{}],"node_modules/d3-array/src/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "bisect", {
-  enumerable: true,
-  get: function () {
-    return _bisect.default;
-  }
-});
-Object.defineProperty(exports, "bisectRight", {
-  enumerable: true,
-  get: function () {
-    return _bisect.bisectRight;
-  }
-});
-Object.defineProperty(exports, "bisectLeft", {
-  enumerable: true,
-  get: function () {
-    return _bisect.bisectLeft;
-  }
-});
-Object.defineProperty(exports, "bisectCenter", {
-  enumerable: true,
-  get: function () {
-    return _bisect.bisectCenter;
-  }
-});
-Object.defineProperty(exports, "ascending", {
-  enumerable: true,
-  get: function () {
-    return _ascending.default;
-  }
-});
-Object.defineProperty(exports, "bisector", {
-  enumerable: true,
-  get: function () {
-    return _bisector.default;
-  }
-});
-Object.defineProperty(exports, "count", {
-  enumerable: true,
-  get: function () {
-    return _count.default;
-  }
-});
-Object.defineProperty(exports, "cross", {
-  enumerable: true,
-  get: function () {
-    return _cross.default;
-  }
-});
-Object.defineProperty(exports, "cumsum", {
-  enumerable: true,
-  get: function () {
-    return _cumsum.default;
-  }
-});
-Object.defineProperty(exports, "descending", {
-  enumerable: true,
-  get: function () {
-    return _descending.default;
-  }
-});
-Object.defineProperty(exports, "deviation", {
-  enumerable: true,
-  get: function () {
-    return _deviation.default;
-  }
-});
-Object.defineProperty(exports, "extent", {
-  enumerable: true,
-  get: function () {
-    return _extent.default;
-  }
-});
-Object.defineProperty(exports, "Adder", {
-  enumerable: true,
-  get: function () {
-    return _fsum.Adder;
-  }
-});
-Object.defineProperty(exports, "fsum", {
-  enumerable: true,
-  get: function () {
-    return _fsum.fsum;
-  }
-});
-Object.defineProperty(exports, "fcumsum", {
-  enumerable: true,
-  get: function () {
-    return _fsum.fcumsum;
-  }
-});
-Object.defineProperty(exports, "group", {
-  enumerable: true,
-  get: function () {
-    return _group.default;
-  }
-});
-Object.defineProperty(exports, "flatGroup", {
-  enumerable: true,
-  get: function () {
-    return _group.flatGroup;
-  }
-});
-Object.defineProperty(exports, "flatRollup", {
-  enumerable: true,
-  get: function () {
-    return _group.flatRollup;
-  }
-});
-Object.defineProperty(exports, "groups", {
-  enumerable: true,
-  get: function () {
-    return _group.groups;
-  }
-});
-Object.defineProperty(exports, "index", {
-  enumerable: true,
-  get: function () {
-    return _group.index;
-  }
-});
-Object.defineProperty(exports, "indexes", {
-  enumerable: true,
-  get: function () {
-    return _group.indexes;
-  }
-});
-Object.defineProperty(exports, "rollup", {
-  enumerable: true,
-  get: function () {
-    return _group.rollup;
-  }
-});
-Object.defineProperty(exports, "rollups", {
-  enumerable: true,
-  get: function () {
-    return _group.rollups;
-  }
-});
-Object.defineProperty(exports, "groupSort", {
-  enumerable: true,
-  get: function () {
-    return _groupSort.default;
-  }
-});
-Object.defineProperty(exports, "bin", {
-  enumerable: true,
-  get: function () {
-    return _bin.default;
-  }
-});
-Object.defineProperty(exports, "histogram", {
-  enumerable: true,
-  get: function () {
-    return _bin.default;
-  }
-});
-Object.defineProperty(exports, "thresholdFreedmanDiaconis", {
-  enumerable: true,
-  get: function () {
-    return _freedmanDiaconis.default;
-  }
-});
-Object.defineProperty(exports, "thresholdScott", {
-  enumerable: true,
-  get: function () {
-    return _scott.default;
-  }
-});
-Object.defineProperty(exports, "thresholdSturges", {
-  enumerable: true,
-  get: function () {
-    return _sturges.default;
-  }
-});
-Object.defineProperty(exports, "max", {
-  enumerable: true,
-  get: function () {
-    return _max.default;
-  }
-});
-Object.defineProperty(exports, "maxIndex", {
-  enumerable: true,
-  get: function () {
-    return _maxIndex.default;
-  }
-});
-Object.defineProperty(exports, "mean", {
-  enumerable: true,
-  get: function () {
-    return _mean.default;
-  }
-});
-Object.defineProperty(exports, "median", {
-  enumerable: true,
-  get: function () {
-    return _median.default;
-  }
-});
-Object.defineProperty(exports, "merge", {
-  enumerable: true,
-  get: function () {
-    return _merge.default;
-  }
-});
-Object.defineProperty(exports, "min", {
-  enumerable: true,
-  get: function () {
-    return _min.default;
-  }
-});
-Object.defineProperty(exports, "minIndex", {
-  enumerable: true,
-  get: function () {
-    return _minIndex.default;
-  }
-});
-Object.defineProperty(exports, "mode", {
-  enumerable: true,
-  get: function () {
-    return _mode.default;
-  }
-});
-Object.defineProperty(exports, "nice", {
-  enumerable: true,
-  get: function () {
-    return _nice.default;
-  }
-});
-Object.defineProperty(exports, "pairs", {
-  enumerable: true,
-  get: function () {
-    return _pairs.default;
-  }
-});
-Object.defineProperty(exports, "permute", {
-  enumerable: true,
-  get: function () {
-    return _permute.default;
-  }
-});
-Object.defineProperty(exports, "quantile", {
-  enumerable: true,
-  get: function () {
-    return _quantile.default;
-  }
-});
-Object.defineProperty(exports, "quantileSorted", {
-  enumerable: true,
-  get: function () {
-    return _quantile.quantileSorted;
-  }
-});
-Object.defineProperty(exports, "quickselect", {
-  enumerable: true,
-  get: function () {
-    return _quickselect.default;
-  }
-});
-Object.defineProperty(exports, "range", {
-  enumerable: true,
-  get: function () {
-    return _range.default;
-  }
-});
-Object.defineProperty(exports, "least", {
-  enumerable: true,
-  get: function () {
-    return _least.default;
-  }
-});
-Object.defineProperty(exports, "leastIndex", {
-  enumerable: true,
-  get: function () {
-    return _leastIndex.default;
-  }
-});
-Object.defineProperty(exports, "greatest", {
-  enumerable: true,
-  get: function () {
-    return _greatest.default;
-  }
-});
-Object.defineProperty(exports, "greatestIndex", {
-  enumerable: true,
-  get: function () {
-    return _greatestIndex.default;
-  }
-});
-Object.defineProperty(exports, "scan", {
-  enumerable: true,
-  get: function () {
-    return _scan.default;
-  }
-});
-Object.defineProperty(exports, "shuffle", {
-  enumerable: true,
-  get: function () {
-    return _shuffle.default;
-  }
-});
-Object.defineProperty(exports, "shuffler", {
-  enumerable: true,
-  get: function () {
-    return _shuffle.shuffler;
-  }
-});
-Object.defineProperty(exports, "sum", {
-  enumerable: true,
-  get: function () {
-    return _sum.default;
-  }
-});
-Object.defineProperty(exports, "ticks", {
-  enumerable: true,
-  get: function () {
-    return _ticks.default;
-  }
-});
-Object.defineProperty(exports, "tickIncrement", {
-  enumerable: true,
-  get: function () {
-    return _ticks.tickIncrement;
-  }
-});
-Object.defineProperty(exports, "tickStep", {
-  enumerable: true,
-  get: function () {
-    return _ticks.tickStep;
-  }
-});
-Object.defineProperty(exports, "transpose", {
-  enumerable: true,
-  get: function () {
-    return _transpose.default;
-  }
-});
-Object.defineProperty(exports, "variance", {
-  enumerable: true,
-  get: function () {
-    return _variance.default;
-  }
-});
-Object.defineProperty(exports, "zip", {
-  enumerable: true,
-  get: function () {
-    return _zip.default;
-  }
-});
-Object.defineProperty(exports, "every", {
-  enumerable: true,
-  get: function () {
-    return _every.default;
-  }
-});
-Object.defineProperty(exports, "some", {
-  enumerable: true,
-  get: function () {
-    return _some.default;
-  }
-});
-Object.defineProperty(exports, "filter", {
-  enumerable: true,
-  get: function () {
-    return _filter.default;
-  }
-});
-Object.defineProperty(exports, "map", {
-  enumerable: true,
-  get: function () {
-    return _map.default;
-  }
-});
-Object.defineProperty(exports, "reduce", {
-  enumerable: true,
-  get: function () {
-    return _reduce.default;
-  }
-});
-Object.defineProperty(exports, "reverse", {
-  enumerable: true,
-  get: function () {
-    return _reverse.default;
-  }
-});
-Object.defineProperty(exports, "sort", {
-  enumerable: true,
-  get: function () {
-    return _sort.default;
-  }
-});
-Object.defineProperty(exports, "difference", {
-  enumerable: true,
-  get: function () {
-    return _difference.default;
-  }
-});
-Object.defineProperty(exports, "disjoint", {
-  enumerable: true,
-  get: function () {
-    return _disjoint.default;
-  }
-});
-Object.defineProperty(exports, "intersection", {
-  enumerable: true,
-  get: function () {
-    return _intersection.default;
-  }
-});
-Object.defineProperty(exports, "subset", {
-  enumerable: true,
-  get: function () {
-    return _subset.default;
-  }
-});
-Object.defineProperty(exports, "superset", {
-  enumerable: true,
-  get: function () {
-    return _superset.default;
-  }
-});
-Object.defineProperty(exports, "union", {
-  enumerable: true,
-  get: function () {
-    return _union.default;
-  }
-});
-Object.defineProperty(exports, "InternMap", {
-  enumerable: true,
-  get: function () {
-    return _internmap.InternMap;
-  }
-});
-Object.defineProperty(exports, "InternSet", {
-  enumerable: true,
-  get: function () {
-    return _internmap.InternSet;
-  }
-});
-
-var _bisect = _interopRequireWildcard(require("./bisect.js"));
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-var _bisector = _interopRequireDefault(require("./bisector.js"));
-
-var _count = _interopRequireDefault(require("./count.js"));
-
-var _cross = _interopRequireDefault(require("./cross.js"));
-
-var _cumsum = _interopRequireDefault(require("./cumsum.js"));
-
-var _descending = _interopRequireDefault(require("./descending.js"));
-
-var _deviation = _interopRequireDefault(require("./deviation.js"));
-
-var _extent = _interopRequireDefault(require("./extent.js"));
-
-var _fsum = require("./fsum.js");
-
-var _group = _interopRequireWildcard(require("./group.js"));
-
-var _groupSort = _interopRequireDefault(require("./groupSort.js"));
-
-var _bin = _interopRequireDefault(require("./bin.js"));
-
-var _freedmanDiaconis = _interopRequireDefault(require("./threshold/freedmanDiaconis.js"));
-
-var _scott = _interopRequireDefault(require("./threshold/scott.js"));
-
-var _sturges = _interopRequireDefault(require("./threshold/sturges.js"));
-
-var _max = _interopRequireDefault(require("./max.js"));
-
-var _maxIndex = _interopRequireDefault(require("./maxIndex.js"));
-
-var _mean = _interopRequireDefault(require("./mean.js"));
-
-var _median = _interopRequireDefault(require("./median.js"));
-
-var _merge = _interopRequireDefault(require("./merge.js"));
-
-var _min = _interopRequireDefault(require("./min.js"));
-
-var _minIndex = _interopRequireDefault(require("./minIndex.js"));
-
-var _mode = _interopRequireDefault(require("./mode.js"));
-
-var _nice = _interopRequireDefault(require("./nice.js"));
-
-var _pairs = _interopRequireDefault(require("./pairs.js"));
-
-var _permute = _interopRequireDefault(require("./permute.js"));
-
-var _quantile = _interopRequireWildcard(require("./quantile.js"));
-
-var _quickselect = _interopRequireDefault(require("./quickselect.js"));
-
-var _range = _interopRequireDefault(require("./range.js"));
-
-var _least = _interopRequireDefault(require("./least.js"));
-
-var _leastIndex = _interopRequireDefault(require("./leastIndex.js"));
-
-var _greatest = _interopRequireDefault(require("./greatest.js"));
-
-var _greatestIndex = _interopRequireDefault(require("./greatestIndex.js"));
-
-var _scan = _interopRequireDefault(require("./scan.js"));
-
-var _shuffle = _interopRequireWildcard(require("./shuffle.js"));
-
-var _sum = _interopRequireDefault(require("./sum.js"));
-
-var _ticks = _interopRequireWildcard(require("./ticks.js"));
-
-var _transpose = _interopRequireDefault(require("./transpose.js"));
-
-var _variance = _interopRequireDefault(require("./variance.js"));
-
-var _zip = _interopRequireDefault(require("./zip.js"));
-
-var _every = _interopRequireDefault(require("./every.js"));
-
-var _some = _interopRequireDefault(require("./some.js"));
-
-var _filter = _interopRequireDefault(require("./filter.js"));
-
-var _map = _interopRequireDefault(require("./map.js"));
-
-var _reduce = _interopRequireDefault(require("./reduce.js"));
-
-var _reverse = _interopRequireDefault(require("./reverse.js"));
-
-var _sort = _interopRequireDefault(require("./sort.js"));
-
-var _difference = _interopRequireDefault(require("./difference.js"));
-
-var _disjoint = _interopRequireDefault(require("./disjoint.js"));
-
-var _intersection = _interopRequireDefault(require("./intersection.js"));
-
-var _subset = _interopRequireDefault(require("./subset.js"));
-
-var _superset = _interopRequireDefault(require("./superset.js"));
-
-var _union = _interopRequireDefault(require("./union.js"));
-
-var _internmap = require("internmap");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-},{"./bisect.js":"node_modules/d3-array/src/bisect.js","./ascending.js":"node_modules/d3-array/src/ascending.js","./bisector.js":"node_modules/d3-array/src/bisector.js","./count.js":"node_modules/d3-array/src/count.js","./cross.js":"node_modules/d3-array/src/cross.js","./cumsum.js":"node_modules/d3-array/src/cumsum.js","./descending.js":"node_modules/d3-array/src/descending.js","./deviation.js":"node_modules/d3-array/src/deviation.js","./extent.js":"node_modules/d3-array/src/extent.js","./fsum.js":"node_modules/d3-array/src/fsum.js","./group.js":"node_modules/d3-array/src/group.js","./groupSort.js":"node_modules/d3-array/src/groupSort.js","./bin.js":"node_modules/d3-array/src/bin.js","./threshold/freedmanDiaconis.js":"node_modules/d3-array/src/threshold/freedmanDiaconis.js","./threshold/scott.js":"node_modules/d3-array/src/threshold/scott.js","./threshold/sturges.js":"node_modules/d3-array/src/threshold/sturges.js","./max.js":"node_modules/d3-array/src/max.js","./maxIndex.js":"node_modules/d3-array/src/maxIndex.js","./mean.js":"node_modules/d3-array/src/mean.js","./median.js":"node_modules/d3-array/src/median.js","./merge.js":"node_modules/d3-array/src/merge.js","./min.js":"node_modules/d3-array/src/min.js","./minIndex.js":"node_modules/d3-array/src/minIndex.js","./mode.js":"node_modules/d3-array/src/mode.js","./nice.js":"node_modules/d3-array/src/nice.js","./pairs.js":"node_modules/d3-array/src/pairs.js","./permute.js":"node_modules/d3-array/src/permute.js","./quantile.js":"node_modules/d3-array/src/quantile.js","./quickselect.js":"node_modules/d3-array/src/quickselect.js","./range.js":"node_modules/d3-array/src/range.js","./least.js":"node_modules/d3-array/src/least.js","./leastIndex.js":"node_modules/d3-array/src/leastIndex.js","./greatest.js":"node_modules/d3-array/src/greatest.js","./greatestIndex.js":"node_modules/d3-array/src/greatestIndex.js","./scan.js":"node_modules/d3-array/src/scan.js","./shuffle.js":"node_modules/d3-array/src/shuffle.js","./sum.js":"node_modules/d3-array/src/sum.js","./ticks.js":"node_modules/d3-array/src/ticks.js","./transpose.js":"node_modules/d3-array/src/transpose.js","./variance.js":"node_modules/d3-array/src/variance.js","./zip.js":"node_modules/d3-array/src/zip.js","./every.js":"node_modules/d3-array/src/every.js","./some.js":"node_modules/d3-array/src/some.js","./filter.js":"node_modules/d3-array/src/filter.js","./map.js":"node_modules/d3-array/src/map.js","./reduce.js":"node_modules/d3-array/src/reduce.js","./reverse.js":"node_modules/d3-array/src/reverse.js","./sort.js":"node_modules/d3-array/src/sort.js","./difference.js":"node_modules/d3-array/src/difference.js","./disjoint.js":"node_modules/d3-array/src/disjoint.js","./intersection.js":"node_modules/d3-array/src/intersection.js","./subset.js":"node_modules/d3-array/src/subset.js","./superset.js":"node_modules/d3-array/src/superset.js","./union.js":"node_modules/d3-array/src/union.js","internmap":"node_modules/internmap/src/index.js"}],"node_modules/d3-scale/src/init.js":[function(require,module,exports) {
+},{"./defaultLocale.js":"node_modules/d3-format/src/defaultLocale.js","./locale.js":"node_modules/d3-format/src/locale.js","./formatSpecifier.js":"node_modules/d3-format/src/formatSpecifier.js","./precisionFixed.js":"node_modules/d3-format/src/precisionFixed.js","./precisionPrefix.js":"node_modules/d3-format/src/precisionPrefix.js","./precisionRound.js":"node_modules/d3-format/src/precisionRound.js"}],"node_modules/d3-scale/src/init.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23199,6 +23593,8 @@ module.exports = "/Sankey data - Moz F&A - Output _ Program _ Issue Area.04826ed
 
 require("regenerator-runtime/runtime");
 
+var _d3Array = require("d3-array");
+
 var _d3Selection = require("d3-selection");
 
 var _d3Fetch = require("d3-fetch");
@@ -23217,7 +23613,7 @@ var _d3Collection = require("d3-collection");
 
 var _d3Transition = require("d3-transition");
 
-var slugify = require('slugify');
+var kebabCase = require('lodash.kebabcase');
 
 var realIssuesToEngagement = require("./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv");
 
@@ -23226,10 +23622,15 @@ var realEngagementToOutput = require("./data/real/Sankey data - Moz F&A - Output
 var d3 = Object.assign({}, {
   csv: _d3Fetch.csv,
   nest: _d3Collection.nest,
+  scaleSqrt: _d3Scale.scaleSqrt,
   select: _d3Selection.select,
   selectAll: _d3Selection.selectAll,
   json: _d3Fetch.json,
+  min: _d3Array.min,
+  max: _d3Array.max,
   sankey: _d3Sankey.sankey,
+  sankeyCenter: _d3Sankey.sankeyCenter,
+  scaleLinear: _d3Scale.scaleLinear,
   sankeyLinkHorizontal: _d3Sankey.sankeyLinkHorizontal,
   format: _d3Format.format,
   scaleOrdinal: _d3Scale.scaleOrdinal,
@@ -23249,7 +23650,7 @@ var margin = {
   bottom: 0,
   left: 0
 };
-var height = 500 / aspect;
+var height = 400 / aspect;
 var width = 800 / aspect;
 /*
   FORMATTING HELPERS
@@ -23265,6 +23666,15 @@ var elementClasses = {};
 var outputsToProgram;
 var tooltip;
 var tooltipHtml;
+/* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
+//node scale
+
+var maxVal_node;
+var minVal_node;
+var maxVal_links;
+var minVal_links;
+var nodeScale;
+var linkScale;
 /*
   APPEND SVG TO PAGE
 */
@@ -23274,7 +23684,7 @@ var svg = d3.select('#container').append('svg').attr('width', width).attr('heigh
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().nodeWidth(20).nodePadding(10).size([width, height]);
+var sankeyGraph = d3.sankey().nodeWidth(25).nodePadding(8).nodeAlign(d3.sankeyCenter).size([width, height]).extent([[1, 5], [width - 1, height - 5]]);
 var path = sankeyGraph.links();
 /**
  *  ADD TOOLTIPS
@@ -23388,20 +23798,30 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   });
   return graph;
 }).then(function (data) {
-  /* LOAD DATA */
+  /* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
+  //node scale
+  maxVal_node = d3.max([10, 100]);
+  minVal_node = d3.min([10, 100]);
+  maxVal_links = d3.max(data.links.map(function (d) {
+    return d.value;
+  }));
+  minVal_links = d3.min(data.links.map(function (d) {
+    return d.value;
+  }));
+  nodeScale = d3.scaleSqrt().domain([minVal_links, maxVal_links]).range([10, 10]); //link scale
+
+  linkScale = d3.scaleSqrt().domain([minVal_links, maxVal_links]).range([10, 10]);
   var chart = sankeyGraph(data);
   /* ADD LINKs */
 
   var link = svg.append('g').selectAll('.link').data(function () {
     return chart.links;
   }).enter().append('path').attr('class', function (d) {
-    return "link ".concat(slugify(d.source.name).toLowerCase(), " source-").concat(slugify(d.source.name, {
+    return "link ".concat(kebabCase(d.source.name).toLowerCase(), " source-").concat(kebabCase(d.source.name, {
       lower: true
-    }), " target-").concat(slugify(d.target.name, {
-      lower: true
-    }));
+    }), " target-").concat(kebabCase(d.target.name));
   }).attr('d', d3.sankeyLinkHorizontal()).attr('stroke-width', function (d) {
-    return d.width;
+    return Math.max(1, d.width);
   });
   /**
    *  ADD TOOLTIPS
@@ -23425,19 +23845,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   /* ADD NODE RECTANGLES */
 
   node.append('rect').attr('class', function (d) {
-    return "rect ".concat(slugify(d.name, {
-      lower: true
-    }), " ").concat(elementClasses[d.name]);
+    console.log(kebabCase(d.name), kebabCase(d.name));
+    return "rect ".concat(kebabCase(d.name), " ").concat(elementClasses[d.name]);
   }).attr('x', function (d) {
     return d.x0;
   }).attr('y', function (d) {
     return d.y0;
   }).attr('height', function (d) {
     return d.y1 - d.y0;
-  }).attr('width', sankeyGraph.nodeWidth()).style('fill', function (d) {
-    return d.color = color(d.name);
-  }).style('stroke', function (d) {
-    return d3.rgb(d.color).darker(2);
+  }).attr('width', function (d) {
+    return d.x1 - d.x0;
   });
   /* ADD NODE TITLES */
 
@@ -23452,7 +23869,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).attr('x', function (d) {
     return d.x1 + 6;
   }).attr('text-anchor', 'start');
-  /** HIGHLIGHT INDIVIDUAL LINE */
+  /** ALL MOUSEOVER EVENTS */
   // ADD TOOLTIPS TO ISSUE AREA NODES
 
   d3.selectAll(".issue-area").on('mouseover', function (event, data) {
@@ -23469,9 +23886,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
     tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1); // highlight all related lines (TODO: privacy + security is not working)
 
-    d3.selectAll(".link.".concat(slugify(data.name, {
-      lower: true
-    }))).transition().duration(200).style('stroke-opacity', 0.7);
+    console.log(kebabCase(data.name));
+    d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', 0.7);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').transition().duration(200).style('stroke-opacity', 0.2);
@@ -23492,13 +23908,9 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 50 + 'px').transition().duration(200).style('opacity', 1); // issue links
     // sourceLinks
 
-    d3.selectAll(".link.source-".concat(slugify(data.name, {
-      lower: true
-    }))).style('stroke-opacity', 1); // targetLinks
+    d3.selectAll(".link.source-".concat(kebabCase(data.name))).style('stroke-opacity', 1); // targetLinks
 
-    d3.selectAll(".link.target-".concat(slugify(data.name, {
-      lower: true
-    }))).style('stroke-opacity', 1);
+    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', 1);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').style('stroke-opacity', 0.2);
@@ -23513,15 +23925,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }, "");
     tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Programs creating this output</span>\n                  ").concat(outputPrograms, "\n              </div>\n            </div>\n          ");
     tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(200).style('opacity', 1);
-    d3.selectAll(".link.target-".concat(slugify(data.name, {
-      lower: true
-    }))).style('stroke-opacity', 1);
+    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', 1);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').style('stroke-opacity', 0.2);
   });
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -23549,7 +23959,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63762" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63626" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

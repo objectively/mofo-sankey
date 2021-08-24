@@ -1,10 +1,11 @@
 import 'regenerator-runtime/runtime';
-var slugify = require('slugify');
+let kebabCase = require('lodash.kebabcase');
+import { min, max } from 'd3-array';
 import { select, selectAll } from 'd3-selection';
 import { csv, json } from 'd3-fetch';
-import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
+import { sankey, sankeyCenter, sankeyLinkHorizontal } from 'd3-sankey';
 import { format } from 'd3-format';
-import { scaleOrdinal } from 'd3-scale';
+import { scaleSqrt, scaleOrdinal, scaleLinear } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
 import { rgb } from 'd3-color';
 import { nest } from 'd3-collection';
@@ -18,10 +19,15 @@ const d3 = Object.assign(
   {
     csv,
     nest,
+    scaleSqrt,
     select,
     selectAll,
     json,
+    min,
+    max,
     sankey,
+    sankeyCenter,
+    scaleLinear,
     sankeyLinkHorizontal,
     format,
     scaleOrdinal,
@@ -41,7 +47,7 @@ const aspect = 0.8;
 
 var margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
-var height = 500 / aspect;
+var height = 400 / aspect;
 var width = 800 / aspect;
 
 /*
@@ -58,6 +64,19 @@ let elementClasses = {};
 let outputsToProgram;
 let tooltip;
 let tooltipHtml;
+
+/* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
+//node scale
+
+let maxVal_node;
+let minVal_node;
+let maxVal_links;
+let minVal_links;
+
+let nodeScale;
+
+let linkScale;
+
 /*
   APPEND SVG TO PAGE
 */
@@ -75,9 +94,14 @@ let svg = d3
 
 let sankeyGraph = d3
   .sankey()
-  .nodeWidth(20)
-  .nodePadding(10)
-  .size([width, height]);
+  .nodeWidth(25)
+  .nodePadding(8)
+  .nodeAlign(d3.sankeyCenter)
+  .size([width, height])
+  .extent([
+    [1, 5],
+    [width - 1, height - 5]
+  ]);
 
 let path = sankeyGraph.links();
 
@@ -196,7 +220,24 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     return graph;
   })
   .then((data) => {
-    /* LOAD DATA */
+    /* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
+    //node scale
+
+    maxVal_node = d3.max([10, 100]);
+    minVal_node = d3.min([10, 100]);
+    maxVal_links = d3.max(data.links.map((d) => d.value));
+    minVal_links = d3.min(data.links.map((d) => d.value));
+
+    nodeScale = d3
+      .scaleSqrt()
+      .domain([minVal_links, maxVal_links])
+      .range([10, 10]);
+    //link scale
+
+    linkScale = d3
+      .scaleSqrt()
+      .domain([minVal_links, maxVal_links])
+      .range([10, 10]);
 
     let chart = sankeyGraph(data);
     /* ADD LINKs */
@@ -209,13 +250,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .enter()
       .append('path')
       .attr('class', (d) => {
-        return `link ${slugify(d.source.name).toLowerCase()} source-${slugify(
+        return `link ${kebabCase(d.source.name).toLowerCase()} source-${kebabCase(
           d.source.name,
           { lower: true }
-        )} target-${slugify(d.target.name, { lower: true })}`;
+        )} target-${kebabCase(d.target.name)}`;
       })
       .attr('d', d3.sankeyLinkHorizontal())
-      .attr('stroke-width', (d) => d.width);
+      .attr('stroke-width', (d) => Math.max(1, d.width));
 
     /**
      *  ADD TOOLTIPS
@@ -262,7 +303,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     node
       .append('rect')
       .attr('class', (d) => {
-        return `rect ${slugify(d.name, { lower: true })} ${
+        console.log(kebabCase(d.name), kebabCase(d.name));
+        return `rect ${kebabCase(d.name)} ${
           elementClasses[d.name]
         }`;
       })
@@ -271,11 +313,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('height', (d) => {
         return d.y1 - d.y0;
       })
-      .attr('width', sankeyGraph.nodeWidth())
-      .style('fill', (d) => {
-        return (d.color = color(d.name));
-      })
-      .style('stroke', (d) => d3.rgb(d.color).darker(2));
+      .attr('width', (d) => d.x1 - d.x0);
 
     /* ADD NODE TITLES */
     node
@@ -283,6 +321,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('x', (d) => d.x0 - 6)
       .attr('y', (d) => (d.y1 + d.y0) / 2)
       .attr('dy', '0.35em')
+
       .attr('text-anchor', 'end')
       .text((d) => {
         return d.name;
@@ -291,7 +330,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('x', (d) => d.x1 + 6)
       .attr('text-anchor', 'start');
 
-    /** HIGHLIGHT INDIVIDUAL LINE */
+    /** ALL MOUSEOVER EVENTS */
 
     // ADD TOOLTIPS TO ISSUE AREA NODES
     d3.selectAll(`.issue-area`)
@@ -329,7 +368,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('opacity', 1);
 
         // highlight all related lines (TODO: privacy + security is not working)
-        d3.selectAll(`.link.${slugify(data.name, { lower: true })}`)
+        console.log(kebabCase(data.name));
+        d3.selectAll(`.link.${kebabCase(data.name)}`)
           .transition()
           .duration(200)
           .style('stroke-opacity', 0.7);
@@ -383,12 +423,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         // issue links
         // sourceLinks
         d3.selectAll(
-          `.link.source-${slugify(data.name, { lower: true })}`
+          `.link.source-${kebabCase(data.name)}`
         ).style('stroke-opacity', 1);
 
         // targetLinks
         d3.selectAll(
-          `.link.target-${slugify(data.name, { lower: true })}`
+          `.link.target-${kebabCase(data.name)}`
         ).style('stroke-opacity', 1);
       })
       .on('mouseout', () => {
@@ -427,7 +467,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('opacity', 1);
 
         d3.selectAll(
-          `.link.target-${slugify(data.name, { lower: true })}`
+          `.link.target-${kebabCase(data.name)}`
         ).style('stroke-opacity', 1);
       })
       .on('mouseout', () => {
