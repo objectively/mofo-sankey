@@ -23655,8 +23655,7 @@ var width = 800 / aspect;
 /*
   FORMATTING HELPERS
 */
-
-var color = d3.scaleOrdinal(_d3ScaleChromatic.schemeCategory10); // SETUP VARIABLES
+// SETUP VARIABLES
 
 var awardsData;
 var nestedIssues;
@@ -23669,12 +23668,14 @@ var tooltipHtml;
 /* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
 //node scale
 
-var maxVal_node;
-var minVal_node;
-var maxVal_links;
-var minVal_links;
+var maxValNode;
+var minValNode;
+var maxValLinks;
+var minValLinks;
 var nodeScale;
 var linkScale;
+var issueNodeScale;
+var issueLinkScale;
 /*
   APPEND SVG TO PAGE
 */
@@ -23684,8 +23685,16 @@ var svg = d3.select('#container').append('svg').attr('width', width).attr('heigh
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().nodeWidth(25).nodePadding(8).nodeAlign(d3.sankeyCenter).size([width, height]).extent([[1, 5], [width - 1, height - 5]]);
-var path = sankeyGraph.links();
+var sankeyGraph = d3.sankey().iterations(32) // .nodeSort(null)
+// .linkSort(null)
+// .nodeWidth(25)
+// .nodePadding(5)
+// .nodeAlign(d3.sankeyCenter)
+.size([width, height]); // .extent([
+//   [1, 5],
+//   [width - 1, height - 5]
+// ]);
+
 /**
  *  ADD TOOLTIPS
  */
@@ -23798,40 +23807,33 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   });
   return graph;
 }).then(function (data) {
-  /* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
-  //node scale
-  maxVal_node = d3.max([10, 100]);
-  minVal_node = d3.min([10, 100]);
-  maxVal_links = d3.max(data.links.map(function (d) {
-    return d.value;
-  }));
-  minVal_links = d3.min(data.links.map(function (d) {
-    return d.value;
-  }));
-  nodeScale = d3.scaleSqrt().domain([minVal_links, maxVal_links]).range([10, 10]); //link scale
-
-  linkScale = d3.scaleSqrt().domain([minVal_links, maxVal_links]).range([10, 10]);
   var chart = sankeyGraph(data);
+  console.log(chart);
+  maxValLinks = d3.max(chart.links.map(function (link) {
+    return link.value;
+  }));
+  minValLinks = d3.min(chart.links.map(function (link) {
+    return link.value;
+  }));
+  issueLinkScale = d3.scaleSqrt().domain([minValLinks, maxValLinks]).range([1, 10]);
   /* ADD LINKs */
 
   var link = svg.append('g').selectAll('.link').data(function () {
     return chart.links;
   }).enter().append('path').attr('class', function (d) {
-    return "link ".concat(kebabCase(d.source.name).toLowerCase(), " source-").concat(kebabCase(d.source.name, {
-      lower: true
-    }), " target-").concat(kebabCase(d.target.name));
-  }).attr('d', d3.sankeyLinkHorizontal()).attr('stroke-width', function (d) {
+    return "link ".concat(kebabCase(d.source.name), " source-").concat(kebabCase(d.source.name), " target-").concat(kebabCase(d.target.name));
+  }).attr('d', d3.sankeyLinkHorizontal()).style('mix-blend-mode', 'multiply').attr('stroke-width', function (d) {
+    if (elementClasses[d.target.name] === 'output') {
+      return 6;
+    }
+
     return Math.max(1, d.width);
   });
   /**
    *  ADD TOOLTIPS
    */
 
-  /*
-   */
-
   link.on('mouseover', function (event, data) {
-    // console.log('link hover', data)
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.value, " Awards\n            </div>\n          </div>\n        ");
     tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
   }).on('mouseout', function (d) {
@@ -23841,17 +23843,42 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
   var node = svg.append('g').selectAll('.node').data(function () {
     return chart.nodes;
-  }).enter().append('g').attr('class', 'node');
+  }).enter().append('g').attr('class', 'node'); // debugger;
+
+  maxValNode = d3.max(chart.nodes.map(function (node) {
+    return node.sourceLinks.length;
+  }));
+  minValNode = d3.min(chart.nodes.map(function (node) {
+    return node.sourceLinks.length;
+  }));
+  issueNodeScale = d3.scaleSqrt().domain([minValNode, maxValNode]).range([10, 20]); // /* ADD NODE RECTANGLES */
+  // node
+  //   .append('rect')
+  //   .attr('class', (d) => {
+  //     return `rect ${kebabCase(d.name)} ${elementClasses[d.name]}`;
+  //   })
+  //   .attr('x', (d) => d.x0)
+  //   .attr('y', (d) => d.y0)
+  //   .attr('height', (d) => {
+  //     return issueNodeScale(d.y1 - d.y0);
+  //   })
+  //   .attr('width', (d) => d.x1 - d.x0);
+
   /* ADD NODE RECTANGLES */
 
   node.append('rect').attr('class', function (d) {
-    console.log(kebabCase(d.name), kebabCase(d.name));
     return "rect ".concat(kebabCase(d.name), " ").concat(elementClasses[d.name]);
   }).attr('x', function (d) {
     return d.x0;
   }).attr('y', function (d) {
     return d.y0;
   }).attr('height', function (d) {
+    if (elementClasses[d.name] === 'output') {
+      return d3.max(chart.links.map(function (link) {
+        return link.source.sourceLinks.length;
+      }));
+    }
+
     return d.y1 - d.y0;
   }).attr('width', function (d) {
     return d.x1 - d.x0;
@@ -23884,9 +23911,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }
 
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1); // highlight all related lines (TODO: privacy + security is not working)
+    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1); // highlight all related lines
 
-    console.log(kebabCase(data.name));
     d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', 0.7);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
@@ -23929,7 +23955,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').style('stroke-opacity', 0.2);
-  });
+  }); // helpers 
 });
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -23959,7 +23985,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62418" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56350" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

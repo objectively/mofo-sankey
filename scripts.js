@@ -53,7 +53,6 @@ var width = 800 / aspect;
 /*
   FORMATTING HELPERS
 */
-const color = d3.scaleOrdinal(schemeCategory10);
 
 // SETUP VARIABLES
 let awardsData;
@@ -68,14 +67,16 @@ let tooltipHtml;
 /* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
 //node scale
 
-let maxVal_node;
-let minVal_node;
-let maxVal_links;
-let minVal_links;
+let maxValNode;
+let minValNode;
+let maxValLinks;
+let minValLinks;
 
 let nodeScale;
 
 let linkScale;
+let issueNodeScale;
+let issueLinkScale;
 
 /*
   APPEND SVG TO PAGE
@@ -94,16 +95,17 @@ let svg = d3
 
 let sankeyGraph = d3
   .sankey()
-  .nodeWidth(25)
-  .nodePadding(8)
-  .nodeAlign(d3.sankeyCenter)
-  .size([width, height])
-  .extent([
-    [1, 5],
-    [width - 1, height - 5]
-  ]);
-
-let path = sankeyGraph.links();
+  .iterations(32)
+  // .nodeSort(null)
+  // .linkSort(null)
+  // .nodeWidth(25)
+  // .nodePadding(5)
+  // .nodeAlign(d3.sankeyCenter)
+  .size([width, height]);
+// .extent([
+//   [1, 5],
+//   [width - 1, height - 5]
+// ]);
 
 /**
  *  ADD TOOLTIPS
@@ -145,10 +147,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         // Add issueAreas to elementClasses
         elementClasses[issue.source] = 'issue-area';
         elementClasses[issue.target] = 'program';
+
         graph.nodes.push({
           name: issue.source
         });
-        graph.nodes.push({ name: issue.target });
+        graph.nodes.push({
+          name: issue.target
+        });
         graph.links.push({
           source: issue.source,
           target: issue.target,
@@ -220,26 +225,17 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     return graph;
   })
   .then((data) => {
-    /* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
-    //node scale
-
-    maxVal_node = d3.max([10, 100]);
-    minVal_node = d3.min([10, 100]);
-    maxVal_links = d3.max(data.links.map((d) => d.value));
-    minVal_links = d3.min(data.links.map((d) => d.value));
-
-    nodeScale = d3
-      .scaleSqrt()
-      .domain([minVal_links, maxVal_links])
-      .range([10, 10]);
-    //link scale
-
-    linkScale = d3
-      .scaleSqrt()
-      .domain([minVal_links, maxVal_links])
-      .range([10, 10]);
-
     let chart = sankeyGraph(data);
+    console.log(chart);
+
+    maxValLinks = d3.max(chart.links.map((link) => link.value));
+    minValLinks = d3.min(chart.links.map((link) => link.value));
+
+    issueLinkScale = d3
+      .scaleSqrt()
+      .domain([minValLinks, maxValLinks])
+      .range([1, 10]);
+
     /* ADD LINKs */
     let link = svg
       .append('g')
@@ -250,22 +246,26 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .enter()
       .append('path')
       .attr('class', (d) => {
-        return `link ${kebabCase(d.source.name).toLowerCase()} source-${kebabCase(
-          d.source.name,
-          { lower: true }
+        return `link ${kebabCase(d.source.name)} source-${kebabCase(
+          d.source.name
         )} target-${kebabCase(d.target.name)}`;
       })
       .attr('d', d3.sankeyLinkHorizontal())
-      .attr('stroke-width', (d) => Math.max(1, d.width));
+      .style('mix-blend-mode', 'multiply')
+      .attr('stroke-width', (d) => {
+        if (elementClasses[d.target.name] === 'output') {
+          return 6;
+        }
+
+        return Math.max(1, d.width);
+      })
 
     /**
      *  ADD TOOLTIPS
      */
-    /*
-     */
+
     link
       .on('mouseover', function (event, data) {
-        // console.log('link hover', data)
         tooltipHtml = `
           <div class="details">
             <div class="issue-title">
@@ -298,19 +298,46 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .enter()
       .append('g')
       .attr('class', 'node');
+    // debugger;
+    maxValNode = d3.max(chart.nodes.map((node) => node.sourceLinks.length));
+    minValNode = d3.min(chart.nodes.map((node) => node.sourceLinks.length));
+
+    issueNodeScale = d3
+      .scaleSqrt()
+      .domain([minValNode, maxValNode])
+      .range([10, 20]);
+
+    // /* ADD NODE RECTANGLES */
+    // node
+    //   .append('rect')
+    //   .attr('class', (d) => {
+    //     return `rect ${kebabCase(d.name)} ${elementClasses[d.name]}`;
+    //   })
+    //   .attr('x', (d) => d.x0)
+    //   .attr('y', (d) => d.y0)
+    //   .attr('height', (d) => {
+    //     return issueNodeScale(d.y1 - d.y0);
+    //   })
+    //   .attr('width', (d) => d.x1 - d.x0);
 
     /* ADD NODE RECTANGLES */
     node
       .append('rect')
       .attr('class', (d) => {
-        console.log(kebabCase(d.name), kebabCase(d.name));
-        return `rect ${kebabCase(d.name)} ${
-          elementClasses[d.name]
-        }`;
+        return `rect ${kebabCase(d.name)} ${elementClasses[d.name]}`;
       })
-      .attr('x', (d) => d.x0)
-      .attr('y', (d) => d.y0)
+      .attr('x', (d) => {
+        return d.x0;
+      })
+      .attr('y', (d) => {
+        return d.y0;
+      })
       .attr('height', (d) => {
+        if (elementClasses[d.name] === 'output') {
+          return d3.max(
+            chart.links.map((link) => link.source.sourceLinks.length)
+          );
+        }
         return d.y1 - d.y0;
       })
       .attr('width', (d) => d.x1 - d.x0);
@@ -367,8 +394,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .duration(200)
           .style('opacity', 1);
 
-        // highlight all related lines (TODO: privacy + security is not working)
-        console.log(kebabCase(data.name));
+        // highlight all related lines
         d3.selectAll(`.link.${kebabCase(data.name)}`)
           .transition()
           .duration(200)
@@ -422,14 +448,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
         // issue links
         // sourceLinks
-        d3.selectAll(
-          `.link.source-${kebabCase(data.name)}`
-        ).style('stroke-opacity', 1);
+        d3.selectAll(`.link.source-${kebabCase(data.name)}`).style(
+          'stroke-opacity',
+          1
+        );
 
         // targetLinks
-        d3.selectAll(
-          `.link.target-${kebabCase(data.name)}`
-        ).style('stroke-opacity', 1);
+        d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
+          'stroke-opacity',
+          1
+        );
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
@@ -466,12 +494,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .duration(200)
           .style('opacity', 1);
 
-        d3.selectAll(
-          `.link.target-${kebabCase(data.name)}`
-        ).style('stroke-opacity', 1);
+        d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
+          'stroke-opacity',
+          1
+        );
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link').style('stroke-opacity', 0.2);
       });
+
+      // helpers 
+      
   });
