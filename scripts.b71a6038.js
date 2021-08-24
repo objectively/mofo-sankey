@@ -117,7 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../node_modules/regenerator-runtime/runtime.js":[function(require,module,exports) {
+})({"node_modules/regenerator-runtime/runtime.js":[function(require,module,exports) {
 var define;
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
@@ -1052,7 +1052,6 @@ function arrayReduce(array, iteratee, accumulator, initAccum) {
   return accumulator;
 }
 
-<<<<<<< HEAD
 /**
  * Splits an ASCII `string` into an array of its words.
  *
@@ -1063,33 +1062,6 @@ function arrayReduce(array, iteratee, accumulator, initAccum) {
 function asciiWords(string) {
   return string.match(reAsciiWord) || [];
 }
-=======
-  replace.extend = function (customMap) {
-    Object.assign(charMap, customMap);
-  };
-
-  return replace;
-});
-},{}],"../node_modules/d3-selection/src/namespaces.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.xhtml = void 0;
-var xhtml = "http://www.w3.org/1999/xhtml";
-exports.xhtml = xhtml;
-var _default = {
-  svg: "http://www.w3.org/2000/svg",
-  xhtml: xhtml,
-  xlink: "http://www.w3.org/1999/xlink",
-  xml: "http://www.w3.org/XML/1998/namespace",
-  xmlns: "http://www.w3.org/2000/xmlns/"
-};
-exports.default = _default;
-},{}],"../node_modules/d3-selection/src/namespace.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 /**
  * The base implementation of `_.propertyOf` without support for deep paths.
@@ -1135,11 +1107,6 @@ function hasUnicodeWord(string) {
 function unicodeWords(string) {
   return string.match(reUnicodeWord) || [];
 }
-<<<<<<< HEAD
-=======
-},{"./namespaces.js":"../node_modules/d3-selection/src/namespaces.js"}],"../node_modules/d3-selection/src/creator.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -1218,11 +1185,6 @@ function createCompounder(callback) {
 function isObjectLike(value) {
   return !!value && typeof value == 'object';
 }
-<<<<<<< HEAD
-=======
-},{"./namespace.js":"../node_modules/d3-selection/src/namespace.js","./namespaces.js":"../node_modules/d3-selection/src/namespaces.js"}],"../node_modules/d3-selection/src/selector.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 /**
  * Checks if `value` is classified as a `Symbol` primitive or object.
@@ -1293,11 +1255,6 @@ function deburr(string) {
   string = toString(string);
   return string && string.replace(reLatin, deburrLetter).replace(reComboMark, '');
 }
-<<<<<<< HEAD
-=======
-},{}],"../node_modules/d3-selection/src/selection/select.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 /**
  * Converts `string` to
@@ -1352,14 +1309,10 @@ function words(string, pattern, guard) {
   }
   return string.match(pattern) || [];
 }
-<<<<<<< HEAD
 
 module.exports = kebabCase;
 
 },{}],"node_modules/d3-array/src/ascending.js":[function(require,module,exports) {
-=======
-},{"./index.js":"../node_modules/d3-selection/src/selection/index.js","../selector.js":"../node_modules/d3-selection/src/selector.js"}],"../node_modules/d3-selection/src/array.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1370,11 +1323,7 @@ exports.default = ascending;
 function ascending(a, b) {
   return a == null || b == null ? NaN : a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/bisector.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/selectorAll.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1384,17 +1333,7 @@ exports.default = bisector;
 
 var _ascending = _interopRequireDefault(require("./ascending.js"));
 
-<<<<<<< HEAD
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-=======
-function _default(selector) {
-  return selector == null ? empty : function () {
-    return this.querySelectorAll(selector);
-  };
-}
-},{}],"../node_modules/d3-selection/src/selection/selectAll.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function bisector(f) {
   var delta = f;
@@ -1458,11 +1397,7 @@ function bisector(f) {
     right: right
   };
 }
-<<<<<<< HEAD
 },{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/number.js":[function(require,module,exports) {
-=======
-},{"./index.js":"../node_modules/d3-selection/src/selection/index.js","../array.js":"../node_modules/d3-selection/src/array.js","../selectorAll.js":"../node_modules/d3-selection/src/selectorAll.js"}],"../node_modules/d3-selection/src/matcher.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1482,11 +1417,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 function number(x) {
   return x === null ? NaN : +x;
 }
-<<<<<<< HEAD
-=======
-},{}],"../node_modules/d3-selection/src/selection/selectChild.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function numbers(values, valueof) {
   var _iterator, _step, value, index, _iterator2, _step2, _value;
@@ -1511,15 +1441,7 @@ function numbers(values, valueof) {
             break;
           }
 
-<<<<<<< HEAD
           value = _step.value;
-=======
-function _default(match) {
-  return this.select(match == null ? childFirst : childFind(typeof match === "function" ? match : (0, _matcher.childMatcher)(match)));
-}
-},{"../matcher.js":"../node_modules/d3-selection/src/matcher.js"}],"../node_modules/d3-selection/src/selection/selectChildren.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
           if (!(value != null && (value = +value) >= value)) {
             _context.next = 9;
@@ -1541,15 +1463,7 @@ function _default(match) {
           _context.prev = 13;
           _context.t0 = _context["catch"](2);
 
-<<<<<<< HEAD
           _iterator.e(_context.t0);
-=======
-function _default(match) {
-  return this.selectAll(match == null ? children : childrenFilter(typeof match === "function" ? match : (0, _matcher.childMatcher)(match)));
-}
-},{"../matcher.js":"../node_modules/d3-selection/src/matcher.js"}],"../node_modules/d3-selection/src/selection/filter.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
         case 16:
           _context.prev = 16;
@@ -1569,33 +1483,18 @@ function _default(match) {
 
           _iterator2.s();
 
-<<<<<<< HEAD
         case 25:
           if ((_step2 = _iterator2.n()).done) {
             _context.next = 32;
             break;
           }
-=======
-  return new _index.Selection(subgroups, this._parents);
-}
-},{"./index.js":"../node_modules/d3-selection/src/selection/index.js","../matcher.js":"../node_modules/d3-selection/src/matcher.js"}],"../node_modules/d3-selection/src/selection/sparse.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
           _value = _step2.value;
 
-<<<<<<< HEAD
           if (!((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value)) {
             _context.next = 30;
             break;
           }
-=======
-function _default(update) {
-  return new Array(update.length);
-}
-},{}],"../node_modules/d3-selection/src/selection/enter.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
           _context.next = 30;
           return _value;
@@ -1617,27 +1516,7 @@ function _default(update) {
         case 37:
           _context.prev = 37;
 
-<<<<<<< HEAD
           _iterator2.f();
-=======
-EnterNode.prototype = {
-  constructor: EnterNode,
-  appendChild: function appendChild(child) {
-    return this._parent.insertBefore(child, this._next);
-  },
-  insertBefore: function insertBefore(child, next) {
-    return this._parent.insertBefore(child, next);
-  },
-  querySelector: function querySelector(selector) {
-    return this._parent.querySelector(selector);
-  },
-  querySelectorAll: function querySelectorAll(selector) {
-    return this._parent.querySelectorAll(selector);
-  }
-};
-},{"./sparse.js":"../node_modules/d3-selection/src/selection/sparse.js","./index.js":"../node_modules/d3-selection/src/selection/index.js"}],"../node_modules/d3-selection/src/constant.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
           return _context.finish(37);
 
@@ -1648,11 +1527,7 @@ EnterNode.prototype = {
     }
   }, _marked, null, [[2, 13, 16, 19], [23, 34, 37, 40]]);
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/bisect.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/selection/data.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1734,11 +1609,7 @@ function count(values, valueof) {
 
   return count;
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/cross.js":[function(require,module,exports) {
-=======
-},{"./index.js":"../node_modules/d3-selection/src/selection/index.js","./enter.js":"../node_modules/d3-selection/src/selection/enter.js","../constant.js":"../node_modules/d3-selection/src/constant.js"}],"../node_modules/d3-selection/src/selection/exit.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1752,15 +1623,7 @@ function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread n
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-<<<<<<< HEAD
 function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-=======
-function _default() {
-  return new _index.Selection(this._exit || this._groups.map(_sparse.default), this._parents);
-}
-},{"./sparse.js":"../node_modules/d3-selection/src/selection/sparse.js","./index.js":"../node_modules/d3-selection/src/selection/index.js"}],"../node_modules/d3-selection/src/selection/join.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
@@ -1775,11 +1638,6 @@ function length(array) {
 function empty(length) {
   return !(length > 0);
 }
-<<<<<<< HEAD
-=======
-},{}],"../node_modules/d3-selection/src/selection/merge.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function arrayify(values) {
   return _typeof(values) !== "object" || "length" in values ? values : Array.from(values);
@@ -1833,11 +1691,7 @@ function cumsum(values, valueof) {
     return sum += +valueof(v, index++, values) || 0;
   });
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/descending.js":[function(require,module,exports) {
-=======
-},{"./index.js":"../node_modules/d3-selection/src/selection/index.js"}],"../node_modules/d3-selection/src/selection/order.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1848,11 +1702,7 @@ exports.default = descending;
 function descending(a, b) {
   return a == null || b == null ? NaN : b < a ? -1 : b > a ? 1 : b >= a ? 0 : NaN;
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/variance.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/selection/sort.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1880,7 +1730,6 @@ function variance(values, valueof) {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var value = _step.value;
 
-<<<<<<< HEAD
         if (value != null && (value = +value) >= value) {
           delta = value - mean;
           mean += delta / ++count;
@@ -1894,31 +1743,13 @@ function variance(values, valueof) {
     }
   } else {
     var index = -1;
-=======
-function ascending(a, b) {
-  return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
-}
-},{"./index.js":"../node_modules/d3-selection/src/selection/index.js"}],"../node_modules/d3-selection/src/selection/call.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
     var _iterator2 = _createForOfIteratorHelper(values),
         _step2;
 
-<<<<<<< HEAD
     try {
       for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
         var _value = _step2.value;
-=======
-function _default() {
-  var callback = arguments[0];
-  arguments[0] = this;
-  callback.apply(null, arguments);
-  return this;
-}
-},{}],"../node_modules/d3-selection/src/selection/nodes.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
         if ((_value = valueof(_value, ++index, values)) != null && (_value = +_value) >= _value) {
           delta = _value - mean;
@@ -1935,11 +1766,7 @@ function _default() {
 
   if (count > 1) return sum / (count - 1);
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/deviation.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/selection/node.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1955,11 +1782,7 @@ function deviation(values, valueof) {
   var v = (0, _variance.default)(values, valueof);
   return v ? Math.sqrt(v) : v;
 }
-<<<<<<< HEAD
 },{"./variance.js":"node_modules/d3-array/src/variance.js"}],"node_modules/d3-array/src/extent.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/selection/size.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1981,16 +1804,9 @@ function extent(values, valueof) {
     var _iterator = _createForOfIteratorHelper(values),
         _step;
 
-<<<<<<< HEAD
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var value = _step.value;
-=======
-  return size;
-}
-},{}],"../node_modules/d3-selection/src/selection/empty.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
         if (value != null) {
           if (min === undefined) {
@@ -2009,16 +1825,8 @@ function extent(values, valueof) {
   } else {
     var index = -1;
 
-<<<<<<< HEAD
     var _iterator2 = _createForOfIteratorHelper(values),
         _step2;
-=======
-function _default() {
-  return !this.node();
-}
-},{}],"../node_modules/d3-selection/src/selection/each.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
     try {
       for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -2042,11 +1850,7 @@ function _default() {
 
   return [min, max];
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/fsum.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/selection/attr.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2077,18 +1881,11 @@ var Adder = /*#__PURE__*/function () {
     this._n = 0;
   }
 
-<<<<<<< HEAD
   _createClass(Adder, [{
     key: "add",
     value: function add(x) {
       var p = this._partials;
       var i = 0;
-=======
-  return this.each((value == null ? fullname.local ? attrRemoveNS : attrRemove : typeof value === "function" ? fullname.local ? attrFunctionNS : attrFunction : fullname.local ? attrConstantNS : attrConstant)(fullname, value));
-}
-},{"../namespace.js":"../node_modules/d3-selection/src/namespace.js"}],"../node_modules/d3-selection/src/window.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
       for (var j = 0; j < this._n && j < 32; j++) {
         var y = p[j],
@@ -2098,7 +1895,6 @@ var Adder = /*#__PURE__*/function () {
         x = hi;
       }
 
-<<<<<<< HEAD
       p[i] = x;
       this._n = i + 1;
       return this;
@@ -2112,14 +1908,6 @@ var Adder = /*#__PURE__*/function () {
           y,
           lo,
           hi = 0;
-=======
-function _default(node) {
-  return node.ownerDocument && node.ownerDocument.defaultView || node.document && node // node is a Window
-  || node.defaultView; // node is a Document
-}
-},{}],"../node_modules/d3-selection/src/selection/style.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
       if (n > 0) {
         hi = p[--n];
@@ -2151,17 +1939,9 @@ exports.Adder = Adder;
 function fsum(values, valueof) {
   var adder = new Adder();
 
-<<<<<<< HEAD
   if (valueof === undefined) {
     var _iterator = _createForOfIteratorHelper(values),
         _step;
-=======
-function styleValue(node, name) {
-  return node.style.getPropertyValue(name) || (0, _window.default)(node).getComputedStyle(node, null).getPropertyValue(name);
-}
-},{"../window.js":"../node_modules/d3-selection/src/window.js"}],"../node_modules/d3-selection/src/selection/property.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2209,11 +1989,7 @@ function fcumsum(values, valueof) {
     return adder.add(+valueof(v, ++index, values) || 0);
   });
 }
-<<<<<<< HEAD
 },{}],"node_modules/internmap/src/index.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/selection/classed.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2259,14 +2035,7 @@ function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new 
 
 function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
 
-<<<<<<< HEAD
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-=======
-  return this.each((typeof value === "function" ? classedFunction : value ? classedTrue : classedFalse)(names, value));
-}
-},{}],"../node_modules/d3-selection/src/selection/text.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
 
@@ -2277,15 +2046,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 var InternMap = /*#__PURE__*/function (_Map) {
   _inherits(InternMap, _Map);
 
-<<<<<<< HEAD
   var _super = _createSuper(InternMap);
-=======
-function _default(value) {
-  return arguments.length ? this.each(value == null ? textRemove : (typeof value === "function" ? textFunction : textConstant)(value)) : this.node().textContent;
-}
-},{}],"../node_modules/d3-selection/src/selection/html.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
   function InternMap(entries) {
     var _this;
@@ -2304,17 +2065,9 @@ function _default(value) {
       }
     });
 
-<<<<<<< HEAD
     if (entries != null) {
       var _iterator = _createForOfIteratorHelper(entries),
           _step;
-=======
-function _default(value) {
-  return arguments.length ? this.each(value == null ? htmlRemove : (typeof value === "function" ? htmlFunction : htmlConstant)(value)) : this.node().innerHTML;
-}
-},{}],"../node_modules/d3-selection/src/selection/raise.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2331,16 +2084,8 @@ function _default(value) {
       }
     }
 
-<<<<<<< HEAD
     return _this;
   }
-=======
-function _default() {
-  return this.each(raise);
-}
-},{}],"../node_modules/d3-selection/src/selection/lower.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
   _createClass(InternMap, [{
     key: "get",
@@ -2441,11 +2186,6 @@ function intern_get(_ref, value) {
 
   return _intern.has(key) ? _intern.get(key) : value;
 }
-<<<<<<< HEAD
-=======
-},{}],"../node_modules/d3-selection/src/selection/append.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function intern_set(_ref2, value) {
   var _intern = _ref2._intern,
@@ -2459,11 +2199,6 @@ function intern_set(_ref2, value) {
 
   return value;
 }
-<<<<<<< HEAD
-=======
-},{"../creator.js":"../node_modules/d3-selection/src/creator.js"}],"../node_modules/d3-selection/src/selection/insert.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function intern_delete(_ref3, value) {
   var _intern = _ref3._intern,
@@ -2483,11 +2218,7 @@ function intern_delete(_ref3, value) {
 function keyof(value) {
   return value !== null && _typeof(value) === "object" ? value.valueOf() : value;
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/identity.js":[function(require,module,exports) {
-=======
-},{"../creator.js":"../node_modules/d3-selection/src/creator.js","../selector.js":"../node_modules/d3-selection/src/selector.js"}],"../node_modules/d3-selection/src/selection/remove.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2498,11 +2229,7 @@ exports.default = identity;
 function identity(x) {
   return x;
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/group.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/selection/clone.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2521,27 +2248,11 @@ var _internmap = require("internmap");
 
 var _identity = _interopRequireDefault(require("./identity.js"));
 
-<<<<<<< HEAD
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-=======
-function _default(deep) {
-  return this.select(deep ? selection_cloneDeep : selection_cloneShallow);
-}
-},{}],"../node_modules/d3-selection/src/selection/datum.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
-<<<<<<< HEAD
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-=======
-function _default(value) {
-  return arguments.length ? this.property("__data__", value) : this.node().__data__;
-}
-},{}],"../node_modules/d3-selection/src/selection/on.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
@@ -2576,16 +2287,6 @@ function groups(values) {
 
   return nest(values, Array.from, _identity.default, keys);
 }
-<<<<<<< HEAD
-=======
-},{}],"../node_modules/d3-selection/src/selection/dispatch.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function flatten(groups, keys) {
   for (var i = 1, n = keys.length; i < n; ++i) {
@@ -2626,11 +2327,6 @@ function rollup(values, reduce) {
 
   return nest(values, _identity.default, reduce, keys);
 }
-<<<<<<< HEAD
-=======
-},{"../window.js":"../node_modules/d3-selection/src/window.js"}],"../node_modules/d3-selection/src/selection/iterator.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function rollups(values, reduce) {
   for (var _len6 = arguments.length, keys = new Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
@@ -2680,7 +2376,6 @@ function nest(values, map, reduce, keys) {
 
         if (_group) _group.push(value);else groups.set(key, [value]);
       }
-<<<<<<< HEAD
     } catch (err) {
       _iterator.e(err);
     } finally {
@@ -2708,12 +2403,6 @@ function nest(values, map, reduce, keys) {
   }(values, 0);
 }
 },{"internmap":"node_modules/internmap/src/index.js","./identity.js":"node_modules/d3-array/src/identity.js"}],"node_modules/d3-array/src/permute.js":[function(require,module,exports) {
-=======
-    }
-  }, _marked, this);
-}
-},{}],"../node_modules/d3-selection/src/selection/index.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2876,57 +2565,12 @@ function groupSort(values, reduce, key) {
     return key;
   });
 }
-<<<<<<< HEAD
 },{"./ascending.js":"node_modules/d3-array/src/ascending.js","./group.js":"node_modules/d3-array/src/group.js","./sort.js":"node_modules/d3-array/src/sort.js"}],"node_modules/d3-array/src/array.js":[function(require,module,exports) {
-=======
-
-Selection.prototype = selection.prototype = _defineProperty({
-  constructor: Selection,
-  select: _select.default,
-  selectAll: _selectAll.default,
-  selectChild: _selectChild.default,
-  selectChildren: _selectChildren.default,
-  filter: _filter.default,
-  data: _data.default,
-  enter: _enter.default,
-  exit: _exit.default,
-  join: _join.default,
-  merge: _merge.default,
-  selection: selection_selection,
-  order: _order.default,
-  sort: _sort.default,
-  call: _call.default,
-  nodes: _nodes.default,
-  node: _node.default,
-  size: _size.default,
-  empty: _empty.default,
-  each: _each.default,
-  attr: _attr.default,
-  style: _style.default,
-  property: _property.default,
-  classed: _classed.default,
-  text: _text.default,
-  html: _html.default,
-  raise: _raise.default,
-  lower: _lower.default,
-  append: _append.default,
-  insert: _insert.default,
-  remove: _remove.default,
-  clone: _clone.default,
-  datum: _datum.default,
-  on: _on.default,
-  dispatch: _dispatch.default
-}, Symbol.iterator, _iterator.default);
-var _default = selection;
-exports.default = _default;
-},{"./select.js":"../node_modules/d3-selection/src/selection/select.js","./selectAll.js":"../node_modules/d3-selection/src/selection/selectAll.js","./selectChild.js":"../node_modules/d3-selection/src/selection/selectChild.js","./selectChildren.js":"../node_modules/d3-selection/src/selection/selectChildren.js","./filter.js":"../node_modules/d3-selection/src/selection/filter.js","./data.js":"../node_modules/d3-selection/src/selection/data.js","./enter.js":"../node_modules/d3-selection/src/selection/enter.js","./exit.js":"../node_modules/d3-selection/src/selection/exit.js","./join.js":"../node_modules/d3-selection/src/selection/join.js","./merge.js":"../node_modules/d3-selection/src/selection/merge.js","./order.js":"../node_modules/d3-selection/src/selection/order.js","./sort.js":"../node_modules/d3-selection/src/selection/sort.js","./call.js":"../node_modules/d3-selection/src/selection/call.js","./nodes.js":"../node_modules/d3-selection/src/selection/nodes.js","./node.js":"../node_modules/d3-selection/src/selection/node.js","./size.js":"../node_modules/d3-selection/src/selection/size.js","./empty.js":"../node_modules/d3-selection/src/selection/empty.js","./each.js":"../node_modules/d3-selection/src/selection/each.js","./attr.js":"../node_modules/d3-selection/src/selection/attr.js","./style.js":"../node_modules/d3-selection/src/selection/style.js","./property.js":"../node_modules/d3-selection/src/selection/property.js","./classed.js":"../node_modules/d3-selection/src/selection/classed.js","./text.js":"../node_modules/d3-selection/src/selection/text.js","./html.js":"../node_modules/d3-selection/src/selection/html.js","./raise.js":"../node_modules/d3-selection/src/selection/raise.js","./lower.js":"../node_modules/d3-selection/src/selection/lower.js","./append.js":"../node_modules/d3-selection/src/selection/append.js","./insert.js":"../node_modules/d3-selection/src/selection/insert.js","./remove.js":"../node_modules/d3-selection/src/selection/remove.js","./clone.js":"../node_modules/d3-selection/src/selection/clone.js","./datum.js":"../node_modules/d3-selection/src/selection/datum.js","./on.js":"../node_modules/d3-selection/src/selection/on.js","./dispatch.js":"../node_modules/d3-selection/src/selection/dispatch.js","./iterator.js":"../node_modules/d3-selection/src/selection/iterator.js"}],"../node_modules/d3-selection/src/select.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-<<<<<<< HEAD
 exports.map = exports.slice = void 0;
 var array = Array.prototype;
 var slice = array.slice;
@@ -2934,16 +2578,6 @@ exports.slice = slice;
 var map = array.map;
 exports.map = map;
 },{}],"node_modules/d3-array/src/constant.js":[function(require,module,exports) {
-=======
-exports.default = _default;
-
-var _index = require("./selection/index.js");
-
-function _default(selector) {
-  return typeof selector === "string" ? new _index.Selection([[document.querySelector(selector)]], [document.documentElement]) : new _index.Selection([[selector]], _index.root);
-}
-},{"./selection/index.js":"../node_modules/d3-selection/src/selection/index.js"}],"../node_modules/d3-selection/src/create.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2956,11 +2590,7 @@ function constant(x) {
     return x;
   };
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/ticks.js":[function(require,module,exports) {
-=======
-},{"./creator.js":"../node_modules/d3-selection/src/creator.js","./select.js":"../node_modules/d3-selection/src/select.js"}],"../node_modules/d3-selection/src/local.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2997,30 +2627,8 @@ function ticks(start, stop, count) {
   } else {
     step = -step;
 
-<<<<<<< HEAD
     var _r = Math.round(start * step),
         _r2 = Math.round(stop * step);
-=======
-    return node[id];
-  },
-  set: function set(node, value) {
-    return node[this._] = value;
-  },
-  remove: function remove(node) {
-    return this._ in node && delete node[this._];
-  },
-  toString: function toString() {
-    return this._;
-  }
-};
-},{}],"../node_modules/d3-selection/src/sourceEvent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
     if (_r / step < start) ++_r;
     if (_r2 / step > stop) --_r2;
@@ -3034,7 +2642,6 @@ exports.default = _default;
   if (reverse) ticks.reverse();
   return ticks;
 }
-<<<<<<< HEAD
 
 function tickIncrement(start, stop, count) {
   var step = (stop - start) / Math.max(0, count),
@@ -3051,9 +2658,6 @@ function tickStep(start, stop, count) {
   return stop < start ? -step1 : step1;
 }
 },{}],"node_modules/d3-array/src/nice.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-selection/src/pointer.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3082,11 +2686,7 @@ function nice(start, stop, count) {
     prestep = step;
   }
 }
-<<<<<<< HEAD
 },{"./ticks.js":"node_modules/d3-array/src/ticks.js"}],"node_modules/d3-array/src/threshold/sturges.js":[function(require,module,exports) {
-=======
-},{"./sourceEvent.js":"../node_modules/d3-selection/src/sourceEvent.js"}],"../node_modules/d3-selection/src/pointers.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3101,11 +2701,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function thresholdSturges(values) {
   return Math.ceil(Math.log((0, _count.default)(values)) / Math.LN2) + 1;
 }
-<<<<<<< HEAD
 },{"../count.js":"node_modules/d3-array/src/count.js"}],"node_modules/d3-array/src/bin.js":[function(require,module,exports) {
-=======
-},{"./pointer.js":"../node_modules/d3-selection/src/pointer.js","./sourceEvent.js":"../node_modules/d3-selection/src/sourceEvent.js"}],"../node_modules/d3-selection/src/selectAll.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3119,15 +2715,7 @@ var _bisect = _interopRequireDefault(require("./bisect.js"));
 
 var _constant = _interopRequireDefault(require("./constant.js"));
 
-<<<<<<< HEAD
 var _extent = _interopRequireDefault(require("./extent.js"));
-=======
-function _default(selector) {
-  return typeof selector === "string" ? new _index.Selection([document.querySelectorAll(selector)], [document.documentElement]) : new _index.Selection([(0, _array.default)(selector)], _index.root);
-}
-},{"./array.js":"../node_modules/d3-selection/src/array.js","./selection/index.js":"../node_modules/d3-selection/src/selection/index.js"}],"../node_modules/d3-selection/src/index.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 var _identity = _interopRequireDefault(require("./identity.js"));
 
@@ -3171,17 +2759,11 @@ function bin() {
       values[i] = value(data[i], i, data);
     }
 
-<<<<<<< HEAD
     var xz = domain(values),
         x0 = xz[0],
         x1 = xz[1],
         tz = threshold(values, x0, x1); // Convert number of thresholds into uniform thresholds, and nice the
     // default domain accordingly.
-=======
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./create.js":"../node_modules/d3-selection/src/create.js","./creator.js":"../node_modules/d3-selection/src/creator.js","./local.js":"../node_modules/d3-selection/src/local.js","./matcher.js":"../node_modules/d3-selection/src/matcher.js","./namespace.js":"../node_modules/d3-selection/src/namespace.js","./namespaces.js":"../node_modules/d3-selection/src/namespaces.js","./pointer.js":"../node_modules/d3-selection/src/pointer.js","./pointers.js":"../node_modules/d3-selection/src/pointers.js","./select.js":"../node_modules/d3-selection/src/select.js","./selectAll.js":"../node_modules/d3-selection/src/selectAll.js","./selection/index.js":"../node_modules/d3-selection/src/selection/index.js","./selector.js":"../node_modules/d3-selection/src/selector.js","./selectorAll.js":"../node_modules/d3-selection/src/selectorAll.js","./selection/style.js":"../node_modules/d3-selection/src/selection/style.js","./window.js":"../node_modules/d3-selection/src/window.js"}],"../node_modules/d3-fetch/src/blob.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
     if (!Array.isArray(tz)) {
       var max = x1,
@@ -3190,15 +2772,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       if (domain === _extent.default) {
         var _nice = (0, _nice3.default)(x0, x1, tn);
 
-<<<<<<< HEAD
         var _nice2 = _slicedToArray(_nice, 2);
-=======
-function _default(input, init) {
-  return fetch(input, init).then(responseBlob);
-}
-},{}],"../node_modules/d3-fetch/src/buffer.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
         x0 = _nice2[0];
         x1 = _nice2[1];
@@ -3212,17 +2786,9 @@ function _default(input, init) {
       // coerce values or the domain to numbers, and thus must be careful to
       // compare order (>=) rather than strict equality (===)!
 
-<<<<<<< HEAD
       if (tz[tz.length - 1] >= x1) {
         if (max >= x1 && domain === _extent.default) {
           var step = (0, _ticks.tickIncrement)(x0, x1, tn);
-=======
-function _default(input, init) {
-  return fetch(input, init).then(responseArrayBuffer);
-}
-},{}],"../node_modules/d3-dsv/src/dsv.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
           if (isFinite(step)) {
             if (step > 0) {
@@ -3397,11 +2963,7 @@ function min(values, valueof) {
 
   return min;
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/quickselect.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-dsv/src/csv.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3419,7 +2981,6 @@ function quickselect(array, k) {
   var compare = arguments.length > 4 ? arguments[4] : undefined;
   compare = compare === undefined ? _sort.ascendingDefined : (0, _sort.compareDefined)(compare);
 
-<<<<<<< HEAD
   while (right > left) {
     if (right - left > 600) {
       var n = right - left + 1;
@@ -3464,24 +3025,6 @@ function swap(array, i, j) {
   array[j] = t;
 }
 },{"./sort.js":"node_modules/d3-array/src/sort.js"}],"node_modules/d3-array/src/quantile.js":[function(require,module,exports) {
-=======
-var csv = (0, _dsv.default)(",");
-var csvParse = csv.parse;
-exports.csvParse = csvParse;
-var csvParseRows = csv.parseRows;
-exports.csvParseRows = csvParseRows;
-var csvFormat = csv.format;
-exports.csvFormat = csvFormat;
-var csvFormatBody = csv.formatBody;
-exports.csvFormatBody = csvFormatBody;
-var csvFormatRows = csv.formatRows;
-exports.csvFormatRows = csvFormatRows;
-var csvFormatRow = csv.formatRow;
-exports.csvFormatRow = csvFormatRow;
-var csvFormatValue = csv.formatValue;
-exports.csvFormatValue = csvFormatValue;
-},{"./dsv.js":"../node_modules/d3-dsv/src/dsv.js"}],"../node_modules/d3-dsv/src/tsv.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3504,7 +3047,6 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-<<<<<<< HEAD
 function quantile(values, p, valueof) {
   values = Float64Array.from((0, _number.numbers)(values, valueof));
   if (!(n = values.length)) return;
@@ -3531,24 +3073,6 @@ function quantileSorted(values, p) {
   return value0 + (value1 - value0) * (i - i0);
 }
 },{"./max.js":"node_modules/d3-array/src/max.js","./min.js":"node_modules/d3-array/src/min.js","./quickselect.js":"node_modules/d3-array/src/quickselect.js","./number.js":"node_modules/d3-array/src/number.js"}],"node_modules/d3-array/src/threshold/freedmanDiaconis.js":[function(require,module,exports) {
-=======
-var tsv = (0, _dsv.default)("\t");
-var tsvParse = tsv.parse;
-exports.tsvParse = tsvParse;
-var tsvParseRows = tsv.parseRows;
-exports.tsvParseRows = tsvParseRows;
-var tsvFormat = tsv.format;
-exports.tsvFormat = tsvFormat;
-var tsvFormatBody = tsv.formatBody;
-exports.tsvFormatBody = tsvFormatBody;
-var tsvFormatRows = tsv.formatRows;
-exports.tsvFormatRows = tsvFormatRows;
-var tsvFormatRow = tsv.formatRow;
-exports.tsvFormatRow = tsvFormatRow;
-var tsvFormatValue = tsv.formatValue;
-exports.tsvFormatValue = tsvFormatValue;
-},{"./dsv.js":"../node_modules/d3-dsv/src/dsv.js"}],"../node_modules/d3-dsv/src/autoType.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3562,15 +3086,10 @@ var _quantile = _interopRequireDefault(require("../quantile.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-<<<<<<< HEAD
 function thresholdFreedmanDiaconis(values, min, max) {
   return Math.ceil((max - min) / (2 * ((0, _quantile.default)(values, 0.75) - (0, _quantile.default)(values, 0.25)) * Math.pow((0, _count.default)(values), -1 / 3)));
 }
 },{"../count.js":"node_modules/d3-array/src/count.js","../quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/threshold/scott.js":[function(require,module,exports) {
-=======
-var fixtz = new Date("2019-01-01T00:00").getHours() || new Date("2019-07-01T00:00").getHours();
-},{}],"../node_modules/d3-dsv/src/index.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3583,15 +3102,11 @@ var _count = _interopRequireDefault(require("../count.js"));
 var _deviation = _interopRequireDefault(require("../deviation.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-<<<<<<< HEAD
 
 function thresholdScott(values, min, max) {
   return Math.ceil((max - min) / (3.5 * (0, _deviation.default)(values) * Math.pow((0, _count.default)(values), -1 / 3)));
 }
 },{"../count.js":"node_modules/d3-array/src/count.js","../deviation.js":"node_modules/d3-array/src/deviation.js"}],"node_modules/d3-array/src/maxIndex.js":[function(require,module,exports) {
-=======
-},{"./dsv.js":"../node_modules/d3-dsv/src/dsv.js","./csv.js":"../node_modules/d3-dsv/src/csv.js","./tsv.js":"../node_modules/d3-dsv/src/tsv.js","./autoType.js":"../node_modules/d3-dsv/src/autoType.js"}],"../node_modules/d3-fetch/src/text.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3649,11 +3164,7 @@ function maxIndex(values, valueof) {
 
   return maxIndex;
 }
-<<<<<<< HEAD
 },{}],"node_modules/d3-array/src/mean.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-fetch/src/dsv.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3675,7 +3186,6 @@ function mean(values, valueof) {
     var _iterator = _createForOfIteratorHelper(values),
         _step;
 
-<<<<<<< HEAD
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var value = _step.value;
@@ -3713,13 +3223,6 @@ function mean(values, valueof) {
   if (count) return sum / count;
 }
 },{}],"node_modules/d3-array/src/median.js":[function(require,module,exports) {
-=======
-var csv = dsvParse(_d3Dsv.csvParse);
-exports.csv = csv;
-var tsv = dsvParse(_d3Dsv.tsvParse);
-exports.tsv = tsv;
-},{"d3-dsv":"../node_modules/d3-dsv/src/index.js","./text.js":"../node_modules/d3-fetch/src/text.js"}],"../node_modules/d3-fetch/src/image.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3734,11 +3237,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function median(values, valueof) {
   return (0, _quantile.default)(values, 0.5, valueof);
 }
-<<<<<<< HEAD
 },{"./quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/merge.js":[function(require,module,exports) {
-=======
-},{}],"../node_modules/d3-fetch/src/json.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3746,28 +3245,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = merge;
 
-<<<<<<< HEAD
 var _marked = /*#__PURE__*/regeneratorRuntime.mark(flatten);
-=======
-function responseJson(response) {
-  if (!response.ok) throw new Error(response.status + " " + response.statusText);
-  if (response.status === 204 || response.status === 205) return;
-  return response.json();
-}
-
-function _default(input, init) {
-  return fetch(input, init).then(responseJson);
-}
-},{}],"../node_modules/d3-fetch/src/xml.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.svg = exports.html = exports.default = void 0;
-
-var _text = _interopRequireDefault(require("./text.js"));
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
@@ -3775,18 +3253,8 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-<<<<<<< HEAD
 function flatten(arrays) {
   var _iterator, _step, array;
-=======
-exports.default = _default;
-var html = parser("text/html");
-exports.html = html;
-var svg = parser("image/svg+xml");
-exports.svg = svg;
-},{"./text.js":"../node_modules/d3-fetch/src/text.js"}],"../node_modules/d3-fetch/src/index.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
   return regeneratorRuntime.wrap(function flatten$(_context) {
     while (1) {
@@ -3825,13 +3293,7 @@ exports.svg = svg;
 
           _iterator.f();
 
-<<<<<<< HEAD
           return _context.finish(13);
-=======
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./blob.js":"../node_modules/d3-fetch/src/blob.js","./buffer.js":"../node_modules/d3-fetch/src/buffer.js","./dsv.js":"../node_modules/d3-fetch/src/dsv.js","./image.js":"../node_modules/d3-fetch/src/image.js","./json.js":"../node_modules/d3-fetch/src/json.js","./text.js":"../node_modules/d3-fetch/src/text.js","./xml.js":"../node_modules/d3-fetch/src/xml.js"}],"node_modules/d3-sankey/node_modules/d3-array/src/ascending.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
         case 16:
         case "end":
@@ -9747,7 +9209,6 @@ Object.defineProperty(exports, "histogram", {
     return _bin.default;
   }
 });
-<<<<<<< HEAD
 Object.defineProperty(exports, "thresholdFreedmanDiaconis", {
   enumerable: true,
   get: function () {
@@ -9783,153 +9244,12 @@ Object.defineProperty(exports, "mean", {
   get: function () {
     return _mean.default;
   }
-=======
-
-var _sankey = _interopRequireDefault(require("./sankey.js"));
-
-var _align = require("./align.js");
-
-var _sankeyLinkHorizontal = _interopRequireDefault(require("./sankeyLinkHorizontal.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./sankey.js":"node_modules/d3-sankey/src/sankey.js","./align.js":"node_modules/d3-sankey/src/align.js","./sankeyLinkHorizontal.js":"node_modules/d3-sankey/src/sankeyLinkHorizontal.js"}],"../node_modules/d3-format/src/formatDecimal.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-exports.formatDecimalParts = formatDecimalParts;
-
-function _default(x) {
-  return Math.abs(x = Math.round(x)) >= 1e21 ? x.toLocaleString("en").replace(/,/g, "") : x.toString(10);
-} // Computes the decimal coefficient and exponent of the specified number x with
-// significant digits p, where x is positive and p is in [1, 21] or undefined.
-// For example, formatDecimalParts(1.23) returns ["123", 0].
-
-
-function formatDecimalParts(x, p) {
-  if ((i = (x = p ? x.toExponential(p - 1) : x.toExponential()).indexOf("e")) < 0) return null; // NaN, ±Infinity
-
-  var i,
-      coefficient = x.slice(0, i); // The string returned by toExponential either has the form \d\.\d+e[-+]\d+
-  // (e.g., 1.2e+3) or the form \de[-+]\d+ (e.g., 1e+3).
-
-  return [coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient, +x.slice(i + 1)];
-}
-},{}],"../node_modules/d3-format/src/exponent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _formatDecimal = require("./formatDecimal.js");
-
-function _default(x) {
-  return x = (0, _formatDecimal.formatDecimalParts)(Math.abs(x)), x ? x[1] : NaN;
-}
-},{"./formatDecimal.js":"../node_modules/d3-format/src/formatDecimal.js"}],"../node_modules/d3-format/src/formatGroup.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(grouping, thousands) {
-  return function (value, width) {
-    var i = value.length,
-        t = [],
-        j = 0,
-        g = grouping[0],
-        length = 0;
-
-    while (i > 0 && g > 0) {
-      if (length + g + 1 > width) g = Math.max(1, width - length);
-      t.push(value.substring(i -= g, i + g));
-      if ((length += g + 1) > width) break;
-      g = grouping[j = (j + 1) % grouping.length];
-    }
-
-    return t.reverse().join(thousands);
-  };
-}
-},{}],"../node_modules/d3-format/src/formatNumerals.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(numerals) {
-  return function (value) {
-    return value.replace(/[0-9]/g, function (i) {
-      return numerals[+i];
-    });
-  };
-}
-},{}],"../node_modules/d3-format/src/formatSpecifier.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = formatSpecifier;
-exports.FormatSpecifier = FormatSpecifier;
-// [[fill]align][sign][symbol][0][width][,][.precision][~][type]
-var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
-
-function formatSpecifier(specifier) {
-  if (!(match = re.exec(specifier))) throw new Error("invalid format: " + specifier);
-  var match;
-  return new FormatSpecifier({
-    fill: match[1],
-    align: match[2],
-    sign: match[3],
-    symbol: match[4],
-    zero: match[5],
-    width: match[6],
-    comma: match[7],
-    precision: match[8] && match[8].slice(1),
-    trim: match[9],
-    type: match[10]
-  });
-}
-
-formatSpecifier.prototype = FormatSpecifier.prototype; // instanceof
-
-function FormatSpecifier(specifier) {
-  this.fill = specifier.fill === undefined ? " " : specifier.fill + "";
-  this.align = specifier.align === undefined ? ">" : specifier.align + "";
-  this.sign = specifier.sign === undefined ? "-" : specifier.sign + "";
-  this.symbol = specifier.symbol === undefined ? "" : specifier.symbol + "";
-  this.zero = !!specifier.zero;
-  this.width = specifier.width === undefined ? undefined : +specifier.width;
-  this.comma = !!specifier.comma;
-  this.precision = specifier.precision === undefined ? undefined : +specifier.precision;
-  this.trim = !!specifier.trim;
-  this.type = specifier.type === undefined ? "" : specifier.type + "";
-}
-
-FormatSpecifier.prototype.toString = function () {
-  return this.fill + this.align + this.sign + this.symbol + (this.zero ? "0" : "") + (this.width === undefined ? "" : Math.max(1, this.width | 0)) + (this.comma ? "," : "") + (this.precision === undefined ? "" : "." + Math.max(0, this.precision | 0)) + (this.trim ? "~" : "") + this.type;
-};
-},{}],"../node_modules/d3-format/src/formatTrim.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 });
 Object.defineProperty(exports, "median", {
   enumerable: true,
   get: function () {
     return _median.default;
   }
-<<<<<<< HEAD
 });
 Object.defineProperty(exports, "merge", {
   enumerable: true,
@@ -9942,109 +9262,24 @@ Object.defineProperty(exports, "min", {
   get: function () {
     return _min.default;
   }
-=======
-
-  return i0 > 0 ? s.slice(0, i0) + s.slice(i1 + 1) : s;
-}
-},{}],"../node_modules/d3-format/src/formatPrefixAuto.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-exports.prefixExponent = void 0;
-
-var _formatDecimal = require("./formatDecimal.js");
-
-var prefixExponent;
-exports.prefixExponent = prefixExponent;
-
-function _default(x, p) {
-  var d = (0, _formatDecimal.formatDecimalParts)(x, p);
-  if (!d) return x + "";
-  var coefficient = d[0],
-      exponent = d[1],
-      i = exponent - (exports.prefixExponent = prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1,
-      n = coefficient.length;
-  return i === n ? coefficient : i > n ? coefficient + new Array(i - n + 1).join("0") : i > 0 ? coefficient.slice(0, i) + "." + coefficient.slice(i) : "0." + new Array(1 - i).join("0") + (0, _formatDecimal.formatDecimalParts)(x, Math.max(0, p + i - 1))[0]; // less than 1y!
-}
-},{"./formatDecimal.js":"../node_modules/d3-format/src/formatDecimal.js"}],"../node_modules/d3-format/src/formatRounded.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _formatDecimal = require("./formatDecimal.js");
-
-function _default(x, p) {
-  var d = (0, _formatDecimal.formatDecimalParts)(x, p);
-  if (!d) return x + "";
-  var coefficient = d[0],
-      exponent = d[1];
-  return exponent < 0 ? "0." + new Array(-exponent).join("0") + coefficient : coefficient.length > exponent + 1 ? coefficient.slice(0, exponent + 1) + "." + coefficient.slice(exponent + 1) : coefficient + new Array(exponent - coefficient.length + 2).join("0");
-}
-},{"./formatDecimal.js":"../node_modules/d3-format/src/formatDecimal.js"}],"../node_modules/d3-format/src/formatTypes.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 });
 Object.defineProperty(exports, "minIndex", {
   enumerable: true,
   get: function () {
     return _minIndex.default;
   }
-<<<<<<< HEAD
 });
 Object.defineProperty(exports, "nice", {
   enumerable: true,
   get: function () {
     return _nice.default;
   }
-=======
-};
-exports.default = _default;
-},{"./formatDecimal.js":"../node_modules/d3-format/src/formatDecimal.js","./formatPrefixAuto.js":"../node_modules/d3-format/src/formatPrefixAuto.js","./formatRounded.js":"../node_modules/d3-format/src/formatRounded.js"}],"../node_modules/d3-format/src/identity.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-function _default(x) {
-  return x;
-}
-},{}],"../node_modules/d3-format/src/locale.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 });
 Object.defineProperty(exports, "pairs", {
   enumerable: true,
   get: function () {
     return _pairs.default;
   }
-<<<<<<< HEAD
-=======
-
-  return {
-    format: newFormat,
-    formatPrefix: formatPrefix
-  };
-}
-},{"./exponent.js":"../node_modules/d3-format/src/exponent.js","./formatGroup.js":"../node_modules/d3-format/src/formatGroup.js","./formatNumerals.js":"../node_modules/d3-format/src/formatNumerals.js","./formatSpecifier.js":"../node_modules/d3-format/src/formatSpecifier.js","./formatTrim.js":"../node_modules/d3-format/src/formatTrim.js","./formatTypes.js":"../node_modules/d3-format/src/formatTypes.js","./formatPrefixAuto.js":"../node_modules/d3-format/src/formatPrefixAuto.js","./identity.js":"../node_modules/d3-format/src/identity.js"}],"../node_modules/d3-format/src/defaultLocale.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 });
 Object.defineProperty(exports, "permute", {
   enumerable: true,
@@ -10052,7 +9287,6 @@ Object.defineProperty(exports, "permute", {
     return _permute.default;
   }
 });
-<<<<<<< HEAD
 Object.defineProperty(exports, "quantile", {
   enumerable: true,
   get: function () {
@@ -10076,66 +9310,6 @@ Object.defineProperty(exports, "range", {
   get: function () {
     return _range.default;
   }
-=======
-
-function defaultLocale(definition) {
-  locale = (0, _locale.default)(definition);
-  exports.format = format = locale.format;
-  exports.formatPrefix = formatPrefix = locale.formatPrefix;
-  return locale;
-}
-},{"./locale.js":"../node_modules/d3-format/src/locale.js"}],"../node_modules/d3-format/src/precisionFixed.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _exponent = _interopRequireDefault(require("./exponent.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(step) {
-  return Math.max(0, -(0, _exponent.default)(Math.abs(step)));
-}
-},{"./exponent.js":"../node_modules/d3-format/src/exponent.js"}],"../node_modules/d3-format/src/precisionPrefix.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _exponent = _interopRequireDefault(require("./exponent.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(step, value) {
-  return Math.max(0, Math.max(-8, Math.min(8, Math.floor((0, _exponent.default)(value) / 3))) * 3 - (0, _exponent.default)(Math.abs(step)));
-}
-},{"./exponent.js":"../node_modules/d3-format/src/exponent.js"}],"../node_modules/d3-format/src/precisionRound.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _exponent = _interopRequireDefault(require("./exponent.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(step, max) {
-  step = Math.abs(step), max = Math.abs(max) - step;
-  return Math.max(0, (0, _exponent.default)(max) - (0, _exponent.default)(step)) + 1;
-}
-},{"./exponent.js":"../node_modules/d3-format/src/exponent.js"}],"../node_modules/d3-format/src/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 });
 Object.defineProperty(exports, "least", {
   enumerable: true,
@@ -10328,13 +9502,7 @@ var _descending = _interopRequireDefault(require("./descending.js"));
 
 var _deviation = _interopRequireDefault(require("./deviation.js"));
 
-<<<<<<< HEAD
 var _extent = _interopRequireDefault(require("./extent.js"));
-=======
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-},{"./defaultLocale.js":"../node_modules/d3-format/src/defaultLocale.js","./locale.js":"../node_modules/d3-format/src/locale.js","./formatSpecifier.js":"../node_modules/d3-format/src/formatSpecifier.js","./precisionFixed.js":"../node_modules/d3-format/src/precisionFixed.js","./precisionPrefix.js":"../node_modules/d3-format/src/precisionPrefix.js","./precisionRound.js":"../node_modules/d3-format/src/precisionRound.js"}],"node_modules/d3-array/src/ascending.js":[function(require,module,exports) {
-"use strict";
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 var _fsum = require("./fsum.js");
 
@@ -10970,12 +10138,8 @@ function Path() {
   this._x0 = this._y0 = // start of current subpath
   this._x1 = this._y1 = null; // end of current subpath
 
-<<<<<<< HEAD
   this._ = "";
 }
-=======
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 
 function path() {
   return new Path();
@@ -17128,7 +16292,7 @@ function tickFormat(start, stop, count, specifier) {
 
   return (0, _d3Format.format)(specifier);
 }
-},{"d3-array":"node_modules/d3-array/src/index.js","d3-format":"../node_modules/d3-format/src/index.js"}],"node_modules/d3-scale/src/linear.js":[function(require,module,exports) {
+},{"d3-array":"node_modules/d3-array/src/index.js","d3-format":"node_modules/d3-format/src/index.js"}],"node_modules/d3-scale/src/linear.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17445,7 +16609,7 @@ function log() {
 
   return scale;
 }
-},{"d3-array":"node_modules/d3-array/src/index.js","d3-format":"../node_modules/d3-format/src/index.js","./nice.js":"node_modules/d3-scale/src/nice.js","./continuous.js":"node_modules/d3-scale/src/continuous.js","./init.js":"node_modules/d3-scale/src/init.js"}],"node_modules/d3-scale/src/symlog.js":[function(require,module,exports) {
+},{"d3-array":"node_modules/d3-array/src/index.js","d3-format":"node_modules/d3-format/src/index.js","./nice.js":"node_modules/d3-scale/src/nice.js","./continuous.js":"node_modules/d3-scale/src/continuous.js","./init.js":"node_modules/d3-scale/src/init.js"}],"node_modules/d3-scale/src/symlog.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22990,7 +22154,7 @@ function _default(name, value) {
       i = fullname === "transform" ? _d3Interpolate.interpolateTransformSvg : _interpolate.default;
   return this.attrTween(name, typeof value === "function" ? (fullname.local ? attrFunctionNS : attrFunction)(fullname, i, (0, _tween.tweenValue)(this, "attr." + name, value)) : value == null ? (fullname.local ? attrRemoveNS : attrRemove)(fullname) : (fullname.local ? attrConstantNS : attrConstant)(fullname, i, value));
 }
-},{"d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"../node_modules/d3-selection/src/index.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./interpolate.js":"node_modules/d3-transition/src/transition/interpolate.js"}],"node_modules/d3-transition/src/transition/attrTween.js":[function(require,module,exports) {
+},{"d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./interpolate.js":"node_modules/d3-transition/src/transition/interpolate.js"}],"node_modules/d3-transition/src/transition/attrTween.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23046,7 +22210,7 @@ function _default(name, value) {
   var fullname = (0, _d3Selection.namespace)(name);
   return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value));
 }
-},{"d3-selection":"../node_modules/d3-selection/src/index.js"}],"node_modules/d3-transition/src/transition/delay.js":[function(require,module,exports) {
+},{"d3-selection":"node_modules/d3-selection/src/index.js"}],"node_modules/d3-transition/src/transition/delay.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23166,7 +22330,7 @@ function _default(match) {
 
   return new _index.Transition(subgroups, this._parents, this._name, this._id);
 }
-},{"d3-selection":"../node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js"}],"node_modules/d3-transition/src/transition/merge.js":[function(require,module,exports) {
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js"}],"node_modules/d3-transition/src/transition/merge.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23288,7 +22452,7 @@ function _default(select) {
 
   return new _index.Transition(subgroups, this._parents, name, id);
 }
-},{"d3-selection":"../node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/selectAll.js":[function(require,module,exports) {
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/selectAll.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23328,7 +22492,7 @@ function _default(select) {
 
   return new _index.Transition(subgroups, parents, name, id);
 }
-},{"d3-selection":"../node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/selection.js":[function(require,module,exports) {
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./index.js":"node_modules/d3-transition/src/transition/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js"}],"node_modules/d3-transition/src/transition/selection.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23343,7 +22507,7 @@ var Selection = _d3Selection.selection.prototype.constructor;
 function _default() {
   return new Selection(this._groups, this._parents);
 }
-},{"d3-selection":"../node_modules/d3-selection/src/index.js"}],"node_modules/d3-transition/src/transition/style.js":[function(require,module,exports) {
+},{"d3-selection":"node_modules/d3-selection/src/index.js"}],"node_modules/d3-transition/src/transition/style.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23422,7 +22586,7 @@ function _default(name, value, priority) {
   var i = (name += "") === "transform" ? _d3Interpolate.interpolateTransformCss : _interpolate.default;
   return value == null ? this.styleTween(name, styleNull(name, i)).on("end.style." + name, styleRemove(name)) : typeof value === "function" ? this.styleTween(name, styleFunction(name, i, (0, _tween.tweenValue)(this, "style." + name, value))).each(styleMaybeRemove(this._id, name)) : this.styleTween(name, styleConstant(name, i, value), priority).on("end.style." + name, null);
 }
-},{"d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"../node_modules/d3-selection/src/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./interpolate.js":"node_modules/d3-transition/src/transition/interpolate.js"}],"node_modules/d3-transition/src/transition/styleTween.js":[function(require,module,exports) {
+},{"d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","./schedule.js":"node_modules/d3-transition/src/transition/schedule.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./interpolate.js":"node_modules/d3-transition/src/transition/interpolate.js"}],"node_modules/d3-transition/src/transition/styleTween.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23705,7 +22869,7 @@ Transition.prototype = transition.prototype = _defineProperty({
   easeVarying: _easeVarying.default,
   end: _end.default
 }, Symbol.iterator, selection_prototype[Symbol.iterator]);
-},{"d3-selection":"../node_modules/d3-selection/src/index.js","./attr.js":"node_modules/d3-transition/src/transition/attr.js","./attrTween.js":"node_modules/d3-transition/src/transition/attrTween.js","./delay.js":"node_modules/d3-transition/src/transition/delay.js","./duration.js":"node_modules/d3-transition/src/transition/duration.js","./ease.js":"node_modules/d3-transition/src/transition/ease.js","./easeVarying.js":"node_modules/d3-transition/src/transition/easeVarying.js","./filter.js":"node_modules/d3-transition/src/transition/filter.js","./merge.js":"node_modules/d3-transition/src/transition/merge.js","./on.js":"node_modules/d3-transition/src/transition/on.js","./remove.js":"node_modules/d3-transition/src/transition/remove.js","./select.js":"node_modules/d3-transition/src/transition/select.js","./selectAll.js":"node_modules/d3-transition/src/transition/selectAll.js","./selection.js":"node_modules/d3-transition/src/transition/selection.js","./style.js":"node_modules/d3-transition/src/transition/style.js","./styleTween.js":"node_modules/d3-transition/src/transition/styleTween.js","./text.js":"node_modules/d3-transition/src/transition/text.js","./textTween.js":"node_modules/d3-transition/src/transition/textTween.js","./transition.js":"node_modules/d3-transition/src/transition/transition.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./end.js":"node_modules/d3-transition/src/transition/end.js"}],"node_modules/d3-ease/src/linear.js":[function(require,module,exports) {
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./attr.js":"node_modules/d3-transition/src/transition/attr.js","./attrTween.js":"node_modules/d3-transition/src/transition/attrTween.js","./delay.js":"node_modules/d3-transition/src/transition/delay.js","./duration.js":"node_modules/d3-transition/src/transition/duration.js","./ease.js":"node_modules/d3-transition/src/transition/ease.js","./easeVarying.js":"node_modules/d3-transition/src/transition/easeVarying.js","./filter.js":"node_modules/d3-transition/src/transition/filter.js","./merge.js":"node_modules/d3-transition/src/transition/merge.js","./on.js":"node_modules/d3-transition/src/transition/on.js","./remove.js":"node_modules/d3-transition/src/transition/remove.js","./select.js":"node_modules/d3-transition/src/transition/select.js","./selectAll.js":"node_modules/d3-transition/src/transition/selectAll.js","./selection.js":"node_modules/d3-transition/src/transition/selection.js","./style.js":"node_modules/d3-transition/src/transition/style.js","./styleTween.js":"node_modules/d3-transition/src/transition/styleTween.js","./text.js":"node_modules/d3-transition/src/transition/text.js","./textTween.js":"node_modules/d3-transition/src/transition/textTween.js","./transition.js":"node_modules/d3-transition/src/transition/transition.js","./tween.js":"node_modules/d3-transition/src/transition/tween.js","./end.js":"node_modules/d3-transition/src/transition/end.js"}],"node_modules/d3-ease/src/linear.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24355,7 +23519,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _d3Selection.selection.prototype.interrupt = _interrupt.default;
 _d3Selection.selection.prototype.transition = _transition.default;
-},{"d3-selection":"../node_modules/d3-selection/src/index.js","./interrupt.js":"node_modules/d3-transition/src/selection/interrupt.js","./transition.js":"node_modules/d3-transition/src/selection/transition.js"}],"node_modules/d3-transition/src/active.js":[function(require,module,exports) {
+},{"d3-selection":"node_modules/d3-selection/src/index.js","./interrupt.js":"node_modules/d3-transition/src/selection/interrupt.js","./transition.js":"node_modules/d3-transition/src/selection/transition.js"}],"node_modules/d3-transition/src/active.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24767,11 +23931,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     d3.selectAll('.link').style('stroke-opacity', 0.2);
   });
 });
-<<<<<<< HEAD
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
-=======
-},{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","slugify":"node_modules/slugify/slugify.js","d3-selection":"../node_modules/d3-selection/src/index.js","d3-fetch":"../node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"../node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -24799,11 +23959,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-<<<<<<< HEAD
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63626" + '/');
-=======
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55205" + '/');
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62418" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -24979,5 +24135,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","scripts.js"], null)
+},{}]},{},["../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","scripts.js"], null)
 //# sourceMappingURL=/scripts.b71a6038.js.map
