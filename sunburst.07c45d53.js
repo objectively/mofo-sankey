@@ -9578,12 +9578,6 @@ var _d3Selection = require("d3-selection");
 
 var _d3Fetch = require("d3-fetch");
 
-var _d3Dsv = require("d3-dsv");
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
 var d3 = Object.assign({}, {
   arc: _d3Shape.arc,
   hierarchy: _d3Hierarchy.hierarchy,
@@ -9679,45 +9673,8 @@ var colors = {
   'Open Science Fellows': 'hotpink'
 };
 
-var file = require('../data/sunburst.json'); // console.log(file)
+var file = require('../data/sunburst.json'); // d3.json(file).then((data) => {
 
-
-function getData(_x) {
-  return _getData.apply(this, arguments);
-}
-
-function _getData() {
-  _getData = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dataFile) {
-    var response, data;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            _context.next = 2;
-            return fetch(dataFile);
-
-          case 2:
-            response = _context.sent;
-            _context.next = 5;
-            return response.json();
-
-          case 5:
-            data = _context.sent;
-            console.log('data:', data);
-            return _context.abrupt("return", data);
-
-          case 8:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-  return _getData.apply(this, arguments);
-}
-
-getData('https://gist.githubusercontent.com/enabek/0de2d662e9190833ef18edf089af6403/raw/1c5f7a52163865f7ca5701b0ba7fbe262c16ce2e/test');
-getData('sunburst.json'); // d3.json(file).then((data) => {
 
 d3.json('https://gist.githubusercontent.com/enabek/0de2d662e9190833ef18edf089af6403/raw/1c5f7a52163865f7ca5701b0ba7fbe262c16ce2e/test').then(function (data) {
   var root = setPartition(data);
@@ -9748,7 +9705,7 @@ d3.json('https://gist.githubusercontent.com/enabek/0de2d662e9190833ef18edf089af6
 }).catch(function (error) {
   console.error('Error loading the data');
 });
-},{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","d3-shape":"../node_modules/d3-shape/src/index.js","d3-hierarchy":"../node_modules/d3-hierarchy/src/index.js","d3-selection":"../node_modules/d3-selection/src/index.js","d3-fetch":"../node_modules/d3-fetch/src/index.js","d3-dsv":"../node_modules/d3-dsv/src/index.js","../data/sunburst.json":"../data/sunburst.json"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","d3-shape":"../node_modules/d3-shape/src/index.js","d3-hierarchy":"../node_modules/d3-hierarchy/src/index.js","d3-selection":"../node_modules/d3-selection/src/index.js","d3-fetch":"../node_modules/d3-fetch/src/index.js","../data/sunburst.json":"../data/sunburst.json"}],"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -9776,11 +9733,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-<<<<<<< HEAD
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62293" + '/');
-=======
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55205" + '/');
->>>>>>> 362ab87fb1dc4571ed81e4fe6382d042b61b32d8
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49865" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -9956,5 +9909,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","sunburst.js"], null)
-//# sourceMappingURL=/sunburst.6212ddf0.js.map
+},{}]},{},["../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","sunburst.js"], null)
+//# sourceMappingURL=/sunburst.07c45d53.js.map
