@@ -2,7 +2,7 @@
   --mo-gray-05: #f2f2f2;
   --issue-1: #0080ff;
   --issue-2: #f2b946;
-  --issue-3: #f18a8a;
+  --issue-3: #f39f9f;
   --issue-4: #e59c9c;
   --issue-5: #35c287;
   --issue-6: #87b699;
@@ -31,49 +31,45 @@
   --output-5: #9d72c4;
   --output-6: #b397c5;
   --output-7: #b7b9fa;
-  --output-8: #4e4c4c;
-  --output-9: #666666;
-  --output-10: #999999;
   --output-11: #cccccc;
-
+  --output-10: #999999;
+  --output-9: #666666;
+  --output-8: #4e4c4c;
 }
 
 // nodes
 .rect.open-innovation {
   fill: var(--issue-1);
 }
-.rect.privacy-security {
+.rect.web-literacy {
   fill: var(--issue-2);
 }
-.rect.web-literacy {
+.rect.digital-inclusion {
   fill: var(--issue-3);
 }
-.rect.other-unavailable {
+.rect.privacy-security {
   fill: var(--issue-4);
 }
-.rect.decentralization {
+.rect.other-unavailable {
   fill: var(--issue-5);
 }
-.rect.digital-inclusion {
+.rect.decentralization {
   fill: var(--issue-6);
 }
 .rect.trustworthy-ai {
   fill: var(--issue-7);
 }
-.rect.web-literacy {
-  fill: var(--issue-3);
-}
 
-.rect.moss {
+.rect.responsible-cs-challenge {
   fill: var(--program-1);
 }
-.link.target-moss {
+.link.target-responsile-cs-challenge {
   stroke: var(--program-1);
 }
-.rect.responsible-cs-challenge {
+.rect.moss {
   fill: var(--program-2);
 }
-.link.target-responsible-cs-challenge {
+.link.target-moss {
   stroke: var(--program-2);
 }
 .rect.mozilla-science-mini-grants {
@@ -82,16 +78,16 @@
 .link.target-mozilla-science-mini-grants {
   stroke: var(--program-3);
 }
-.rect.open-science-fellows {
+.rect.gigabit-community-fund {
   fill: var(--program-4);
 }
-.link.target-open-science-fellows {
+.link.target-gigabit-community-fund {
   stroke: var(--program-4);
 }
-.rect.gigabit-community-fund {
+.rect.hive {
   fill: var(--program-5);
 }
-.link.target-gigabit-community-fund {
+.link.target-hive {
   stroke: var(--program-5);
 }
 .rect.open-news-fellows {
@@ -100,10 +96,10 @@
 .link.target-open-news-fellows {
   stroke: var(--program-6);
 }
-.rect.open-web-fellows {
+.rect.open-science-fellows {
   fill: var(--program-7);
 }
-.link.target-open-web-fellows {
+.link.target-open-science-fellows {
   stroke: var(--program-7);
 }
 .rect.discretionary-awards {
@@ -112,46 +108,48 @@
 .link.target-discretionary-awards {
   stroke: var(--program-8);
 }
+
 .rect.fellow-in-residence-senior-fellows {
   fill: var(--program-9);
 }
 .link.target-fellow-in-residence-senior-fellows {
   stroke: var(--program-9);
 }
-.rect.tech-society-fellows {
+.rect.other-programs {
   fill: var(--program-10);
 }
-.link.target-tech-society-fellows {
+.link.target-other-programs {
   stroke: var(--program-10);
 }
-.rect.creative-media-awards {
+
+.rect.tech-society-fellows {
   fill: var(--program-11);
 }
-.link.target-creative-media-awards {
+.link.target-tech-society-fellows {
   stroke: var(--program-11);
 }
-.rect.tech-policy-fellows {
+.rect.advocacy-network-fund {
   fill: var(--program-12);
 }
-.link.target-tech-policy-fellows {
+.link.target-advocacy-network-fund {
   stroke: var(--program-12);
 }
-.rect.other-programs {
+.rect.tech-policy-fellows {
   fill: var(--program-13);
 }
-.link.target-other-programs {
+.link.target-tech-policy-fellows {
   stroke: var(--program-13);
 }
-.rect.hive {
+.rect.open-web-fellows {
   fill: var(--program-14);
 }
-.link.target-hive {
+.link.target-open-web-fellows {
   stroke: var(--program-14);
 }
-.rect.advocacy-network-fund {
+.rect.creative-media-awards {
   fill: var(--program-15);
 }
-.link.target-advocacy-network-fund {
+.link.target-creative-media-awards {
   stroke: var(--program-15);
 }
 .rect.mozilla-fellows {
@@ -160,76 +158,81 @@
 .link.target-mozilla-fellows {
   stroke: var(--program-16);
 }
+
 .rect.nsf-wins {
   fill: var(--program-17);
 }
 .link.target-nsf-wins {
   stroke: var(--program-17);
 }
+
 .rect.general-operating-support {
   fill: var(--output-1);
 }
 .link.target-general-operating-support {
   stroke: var(--output-1);
 }
-.rect.software {
+.rect.curriculum-or-educational-resource {
   fill: var(--output-2);
 }
-.link.target-software {
+.link.target-curriculum-or-educational-resource {
   stroke: var(--output-2);
 }
-.rect.curriculum-or-educational-resource {
+.rect.software {
   fill: var(--output-3);
 }
-.link.target-curriculum-or-educational-resource {
+.link.target-software {
   stroke: var(--output-3);
 }
-.rect.other-not-available {
+.rect.workshop-or-convening {
   fill: var(--output-4);
 }
-.link.target-other-not-available {
+.link.target-workshop-or-convening {
   stroke: var(--output-4);
 }
-.rect.public-resource {
+.rect.capacity-building {
   fill: var(--output-5);
 }
-.link.target-public-resource {
+.link.target-capacity-building {
   stroke: var(--output-5);
 }
-.rect.art-or-media {
+.rect.public-resource {
   fill: var(--output-6);
 }
-.link.target-art-or-media {
+.link.target-public-resource {
   stroke: var(--output-6);
 }
-.rect.research {
+.rect.other-not-available {
   fill: var(--output-7);
 }
-.link.target-research {
+.link.target-other-not-available {
   stroke: var(--output-7);
 }
-.rect.capacity-building {
+.rect.research {
   fill: var(--output-8);
 }
-.link.target-capacity-building {
+.link.target-research {
   stroke: var(--output-8);
 }
-.rect.workshop-or-convening {
+
+.rect.art-or-media {
   fill: var(--output-9);
 }
-.link.target-workshop-or-convening {
+.link.target-art-or-media {
   stroke: var(--output-9);
 }
-.rect.policy-recommendations {
+
+.rect.hardware {
   fill: var(--output-10);
 }
-.link.target-policy-recommendations {
+.link.target-hardware {
   stroke: var(--output-10);
 }
-.rect.hardware {
+
+.rect.policy-recommendations {
   fill: var(--output-11);
 }
-.link.target-hardware {
+.link.target-policy-recommendations {
   stroke: var(--output-11);
 }
 
@@ -277,7 +280,3 @@
 .total-programs {
   font-weight: 700;
 }
-
-.node {
-}
-

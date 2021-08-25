@@ -10,6 +10,12 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import { rgb } from 'd3-color';
 import { nest } from 'd3-collection';
 import { transition } from 'd3-transition';
+import { interpolate, interpolateNumber } from 'd3-interpolate';
+import { linkHorizontal } from 'd3-shape';
+import {
+  customLinkGenerator,
+  customLinkGenerator2
+} from './helpers/custom-link-generator';
 
 let realIssuesToEngagement = require(`./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
 let realEngagementToOutput = require(`./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
@@ -22,7 +28,9 @@ const d3 = Object.assign(
     scaleSqrt,
     select,
     selectAll,
+    interpolateNumber,
     json,
+    linkHorizontal,
     min,
     max,
     sankey,
@@ -96,16 +104,16 @@ let svg = d3
 let sankeyGraph = d3
   .sankey()
   .iterations(32)
-  // .nodeSort(null)
-  // .linkSort(null)
-  // .nodeWidth(25)
-  // .nodePadding(5)
-  // .nodeAlign(d3.sankeyCenter)
-  .size([width, height]);
-// .extent([
-//   [1, 5],
-//   [width - 1, height - 5]
-// ]);
+  .nodeSort(null)
+  .linkSort(null)
+  .nodeWidth(25)
+  .nodePadding(5)
+  .nodeAlign(d3.sankeyCenter)
+  .size([width, height])
+  .extent([
+    [1, 5],
+    [width - 1, height - 5]
+  ]);
 
 /**
  *  ADD TOOLTIPS
@@ -248,18 +256,24 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('class', (d) => {
         return `link ${kebabCase(d.source.name)} source-${kebabCase(
           d.source.name
-        )} target-${kebabCase(d.target.name)}`;
+        )} target-${kebabCase(d.target.name)} link-${
+          elementClasses[d.source.name]
+        }`;
       })
-      .attr('d', d3.sankeyLinkHorizontal())
       .style('mix-blend-mode', 'multiply')
       .attr('stroke-width', (d) => {
         if (elementClasses[d.target.name] === 'output') {
           return 6;
         }
-
         return Math.max(1, d.width);
-      })
+      });
 
+    d3.selectAll('path.link-issue-area').attr('d', sankeyLinkHorizontal());
+    d3.selectAll('path.link-program').attr('d', (d) => {
+      // console.log(d.source, d.target)
+      return customLinkGenerator2(d);
+    });
+    d3.selectAll('path.link-output').attr('d', (d) => customLinkGenerator(d));
     /**
      *  ADD TOOLTIPS
      */
@@ -304,9 +318,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     issueNodeScale = d3
       .scaleSqrt()
-      .domain([minValNode, maxValNode])
+      .domain(
+        Array.from(d3.selectAll('.node')).map((node) => node.__data__.value)
+      )
       .range([10, 20]);
-
     // /* ADD NODE RECTANGLES */
     // node
     //   .append('rect')
@@ -334,9 +349,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       })
       .attr('height', (d) => {
         if (elementClasses[d.name] === 'output') {
-          return d3.max(
-            chart.links.map((link) => link.source.sourceLinks.length)
-          );
+          return 15;
+          // return d3.max(
+          //   chart.links.map((link) => link.source.sourceLinks.length)
+          // );
         }
         return d.y1 - d.y0;
       })
@@ -503,7 +519,4 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link').style('stroke-opacity', 0.2);
       });
-
-      // helpers 
-      
   });
