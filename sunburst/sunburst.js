@@ -154,10 +154,9 @@ const colors = {
   'Open Science Fellows': 'hotpink'
 };
 
-const file = require('../data/sunburst.json');
+const jsonFile = require('../data/sunburst.json');
 
-// d3.json(file).then((data) => {
-d3.json('https://gist.githubusercontent.com/enabek/0de2d662e9190833ef18edf089af6403/raw/1c5f7a52163865f7ca5701b0ba7fbe262c16ce2e/test').then((data) => {
+d3.json(jsonFile).then((data) => {
   const root = setPartition(data);
   root.each(d => d.current = d);
 
