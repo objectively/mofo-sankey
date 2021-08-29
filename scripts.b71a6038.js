@@ -26992,7 +26992,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.customLinkGenerator2 = exports.customLinkGenerator = void 0;
+exports.customLinkGenerator = void 0;
 
 var _d3Shape = require("d3-shape");
 
@@ -27002,12 +27002,6 @@ var customLinkGenerator = (0, _d3Shape.linkHorizontal)().x(function (d) {
   return d.y0;
 });
 exports.customLinkGenerator = customLinkGenerator;
-var customLinkGenerator2 = (0, _d3Shape.linkHorizontal)().x(function (d) {
-  return d.x1;
-}).y(function (d) {
-  return d.y0 + 3.5;
-});
-exports.customLinkGenerator2 = customLinkGenerator2;
 },{"d3-shape":"node_modules/d3-shape/src/index.js"}],"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":[function(require,module,exports) {
 module.exports = "/Sankey data - Moz F&A - Issue Area _ Program _ Output.b5bad402.csv";
 },{}],"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":[function(require,module,exports) {
@@ -27069,25 +27063,19 @@ var d3 = Object.assign({}, {
   schemeCategory10: _d3ScaleChromatic.schemeCategory10,
   rgb: _d3Color.rgb,
   transition: _d3Transition.transition
-}); // const jsonUrl = `https://gist.githubusercontent.com/tekd/e9d8aee9e059f773aaf52f1130f98c65/raw/4a2af7014f0a8eed1a384f9d3f478fef6f67b218/sankey-test.json`;
-
+});
 /*
   SET UP GRAPH DIMENSIONS
 */
 
-var aspect = 0.8;
 var margin = {
   top: 0,
   right: 0,
   bottom: 0,
   left: 0
 };
-var height = 400 / aspect;
-var width = 800 / aspect;
-/*
-  FORMATTING HELPERS
-*/
-// SETUP VARIABLES
+var height = 500 - (margin.top + margin.bottom);
+var width = 900 - (margin.left + margin.right); // SETUP VARIABLES
 
 var awardsData;
 var nestedIssues;
@@ -27097,27 +27085,14 @@ var elementClasses = {};
 var outputsToProgram;
 var tooltip;
 var tooltipHtml;
-/* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
-//node scale
+var linkScale; // APPEND SVG TO PAGE
 
-var maxValNode;
-var minValNode;
-var maxValLinks;
-var minValLinks;
-var nodeScale;
-var linkScale;
-var issueNodeScale;
-var issueLinkScale;
-/*
-  APPEND SVG TO PAGE
-*/
-
-var svg = d3.select('#container').append('svg').attr('width', width).attr('height', height).append('g');
+var svg = d3.select('#container').append('svg').attr('width', width + (margin.left + margin.right)).attr('height', height + (margin.top + margin.bottom)).append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
 /*
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().iterations(32).nodeSort(null).linkSort(null).nodeWidth(25).nodePadding(5).nodeAlign(d3.sankeyCenter).size([width, height]).extent([[1, 5], [width - 1, height - 5]]);
+var sankeyGraph = d3.sankey().iterations(0).linkSort(null).nodeSort(null).size([width, height]);
 /**
  *  ADD TOOLTIPS
  */
@@ -27228,76 +27203,56 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     graph.links[i].source = graphMap.indexOf(graph.links[i].source);
     graph.links[i].target = graphMap.indexOf(graph.links[i].target);
   });
+  /**
+   * Do we want to scale the data so the smaller projects get weight?
+   */
+
+  var minLinkVal = d3.min(graph.links.map(function (link) {
+    return link.value;
+  }));
+  var maxLinkVal = d3.max(graph.links.map(function (link) {
+    return link.value;
+  }));
+  linkScale = d3.scaleSqrt().domain([minLinkVal, maxLinkVal]).range([20, maxLinkVal]);
+  graph.links.forEach(function (link) {
+    link.rawValue = link.value;
+    link.value = linkScale(link.value);
+  });
   return graph;
 }).then(function (data) {
+  console.log('dataaaa', data);
   var chart = sankeyGraph(data);
-  console.log(chart);
-  maxValLinks = d3.max(chart.links.map(function (link) {
-    return link.value;
-  }));
-  minValLinks = d3.min(chart.links.map(function (link) {
-    return link.value;
-  }));
-  issueLinkScale = d3.scaleSqrt().domain([minValLinks, maxValLinks]).range([1, 10]);
   /* ADD LINKs */
 
   var link = svg.append('g').selectAll('.link').data(function () {
     return chart.links;
   }).enter().append('path').attr('class', function (d) {
     return "link ".concat(kebabCase(d.source.name), " source-").concat(kebabCase(d.source.name), " target-").concat(kebabCase(d.target.name), " link-").concat(elementClasses[d.source.name]);
-  }).style('mix-blend-mode', 'multiply').attr('stroke-width', function (d) {
-    if (elementClasses[d.target.name] === 'output') {
-      return 6;
+  }).attr('d', (0, _d3Sankey.sankeyLinkHorizontal)()).attr('stroke-width', function (d) {
+    /**
+     * do we want uniform width for all outputs?
+     if (elementClasses[d.target.name] === 'output') {
+       return 4;
+     }
+     */
+    return d.width;
+  }).attr('transform', function (d) {
+    if (elementClasses[d.target.name] === 'output') {// return `translate(0,2)`;
     }
+  });
+  /** 
+     * SEE LINE 244       
+     d3.selectAll('path.link-issue-area').attr('d', sankeyLinkHorizontal());
+     d3.selectAll('path.link-program').attr('d', (d) => {
+         return customLinkGenerator(d);
+       });
+    */
 
-    return Math.max(1, d.width);
-  });
-  d3.selectAll('path.link-issue-area').attr('d', (0, _d3Sankey.sankeyLinkHorizontal)());
-  d3.selectAll('path.link-program').attr('d', function (d) {
-    // console.log(d.source, d.target)
-    return (0, _customLinkGenerator.customLinkGenerator2)(d);
-  });
-  d3.selectAll('path.link-output').attr('d', function (d) {
-    return (0, _customLinkGenerator.customLinkGenerator)(d);
-  });
-  /**
-   *  ADD TOOLTIPS
-   */
-
-  link.on('mouseover', function (event, data) {
-    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.value, " Awards\n            </div>\n          </div>\n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
-  }).on('mouseout', function (d) {
-    tooltip.transition().duration(500).style('opacity', 0);
-  });
   /* ADD NODES */
 
   var node = svg.append('g').selectAll('.node').data(function () {
     return chart.nodes;
-  }).enter().append('g').attr('class', 'node'); // debugger;
-
-  maxValNode = d3.max(chart.nodes.map(function (node) {
-    return node.sourceLinks.length;
-  }));
-  minValNode = d3.min(chart.nodes.map(function (node) {
-    return node.sourceLinks.length;
-  }));
-  issueNodeScale = d3.scaleSqrt().domain(Array.from(d3.selectAll('.node')).map(function (node) {
-    return node.__data__.value;
-  })).range([10, 20]); // /* ADD NODE RECTANGLES */
-  // node
-  //   .append('rect')
-  //   .attr('class', (d) => {
-  //     return `rect ${kebabCase(d.name)} ${elementClasses[d.name]}`;
-  //   })
-  //   .attr('x', (d) => d.x0)
-  //   .attr('y', (d) => d.y0)
-  //   .attr('height', (d) => {
-  //     return issueNodeScale(d.y1 - d.y0);
-  //   })
-  //   .attr('width', (d) => d.x1 - d.x0);
-
-  /* ADD NODE RECTANGLES */
+  }).enter().append('g').attr('class', 'node'); // /* ADD NODE RECTANGLES */
 
   node.append('rect').attr('class', function (d) {
     return "rect ".concat(kebabCase(d.name), " ").concat(elementClasses[d.name]);
@@ -27305,13 +27260,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     return d.x0;
   }).attr('y', function (d) {
     return d.y0;
-  }).attr('height', function (d) {
-    if (elementClasses[d.name] === 'output') {
-      return 15; // return d3.max(
-      //   chart.links.map((link) => link.source.sourceLinks.length)
-      // );
-    }
-
+  }).attr('height', function (d, i) {
+    /**
+     * 
+     if (elementClasses[d.name] === 'output') {
+         return 15;
+       }
+    */
     return d.y1 - d.y0;
   }).attr('width', function (d) {
     return d.x1 - d.x0;
@@ -27329,6 +27284,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).attr('x', function (d) {
     return d.x1 + 6;
   }).attr('text-anchor', 'start');
+  /**
+   *  ADD TOOLTIPS
+   */
+
+  link.on('mouseover', function (event, data) {
+    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n            </div>\n          </div>\n        ");
+    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
+  }).on('mouseout', function (d) {
+    tooltip.transition().duration(500).style('opacity', 0);
+  });
   /** ALL MOUSEOVER EVENTS */
   // ADD TOOLTIPS TO ISSUE AREA NODES
 
@@ -27339,7 +27304,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     if (nodeData) {
       awardsData = nodeData.reduce(function (acc, issue) {
-        return acc += "".concat(issue.target.name, " - ").concat(issue.value, " ").concat(issue.value > 1 ? 'awards' : "award", '</br>');
+        return acc += "".concat(issue.target.name, " - ").concat(issue.rawValue, " ").concat(issue.rawValue > 1 ? 'awards' : "award", '</br>');
       }, "");
     }
 
@@ -27357,7 +27322,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       return program.source.name === data.name;
     });
     var outputs = data.sourceLinks.map(function (d) {
-      return [d.target.name, d.value];
+      return [d.target.name, d.rawValue];
     }).sort();
     tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Issues</span>\n                ").concat(data.targetLinks.map(function (d) {
       return d.source.name;
@@ -27418,7 +27383,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61846" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55772" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
