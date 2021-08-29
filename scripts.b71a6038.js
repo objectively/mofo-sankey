@@ -27102,7 +27102,8 @@ var sankeyGraph = d3.sankey().iterations(0).nodePadding(5) // .linkSort(null)
  *  ADD TOOLTIPS
  */
 
-tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+tooltip = d3.select('body').append('div').attr('class', 'tooltip'); // .style('opacity', 0);
+
 /* 
   FORMAT DATA
 */
@@ -27301,7 +27302,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', fadeOpacity);
     d3.select(this).transition().duration(100).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function (d) {
-    tooltip.transition().duration(200).style('opacity', 0);
+    // tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   });
   /** ALL MOUSEOVER EVENTS */
@@ -27326,7 +27327,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(200).style('opacity', 0);
+    // tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO PROGRAM NODES
 
@@ -27337,7 +27338,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     var outputs = data.sourceLinks.map(function (d) {
       return [d.target.name, d.rawValue];
     }).sort();
-    console.log(outputs);
     tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Issues</span>\n                ").concat(data.targetLinks.map(function (d) {
       return d.source.name;
     }).sort().join('</br>'), "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Outputs</span>\n                  ").concat(outputs.map(function (output) {
@@ -27350,7 +27350,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(200).style('opacity', 0);
+    // tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO OUTPUT NODES
 
@@ -27361,12 +27361,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     var outputPrograms = nodeData.values.reduce(function (acc, program) {
       return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
     }, "");
-    tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Programs creating this output</span>\n                  ").concat(outputPrograms, "\n              </div>\n            </div>\n          ");
+    tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n                <span class=\"detail-heading\">Programs creating this output</span>\n              </div>\n              <div class=\"outputs-list\">\n              ").concat(outputPrograms, "\n              </div>\n            </div>\n          ");
     tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(200).style('opacity', 1);
     d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
     d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(200).style('opacity', 0);
+    // tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
   });
 });
