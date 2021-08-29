@@ -261,6 +261,7 @@ svg {
 }
 
 .tooltip {
+  font-family: sans-serif;
   position: absolute;
   background-color: var(--mo-gray-05);
   width: 20rem;
@@ -273,16 +274,28 @@ text {
 
 .issue-title,
 .detail-heading {
+  outline: red solid 1px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  display: block;
+}
+
+.detail-heading {
+  outline: red solid 1px;
   font-size: 1rem;
   font-weight: 700;
   display: block;
 }
 
-.total-programs,
-.total-awards {
-  font-size: 0.8rem;
+.total-programs {
+  outline: green solid 1px;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .total-programs {
-  font-weight: 700;
+  outline: purple solid 1px;
+  // font-weight: 700;
 }
+
+.programs-count, .total-awards {font-weight: 400;}

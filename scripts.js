@@ -97,7 +97,7 @@ tooltip = d3
   .select('body')
   .append('div')
   .attr('class', 'tooltip')
-  .style('opacity', 0);
+  // .style('opacity', 0);
 
 /* 
   FORMAT DATA
@@ -351,7 +351,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', function (d) {
-        tooltip.transition().duration(200).style('opacity', 0);
+        // tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
           .duration(100)
@@ -409,7 +409,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
+        // tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
           .duration(200)
@@ -425,8 +425,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         let outputs = data.sourceLinks
           .map((d) => [d.target.name, d.rawValue])
           .sort();
-
-        console.log(outputs);
 
         tooltipHtml = `
             <div class="details">
@@ -470,7 +468,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         );
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
+        // tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
       });
 
@@ -489,10 +487,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             <div class="details">
               <div class="issue-title">
                 ${data.name}
+                <span class="detail-heading">Programs creating this output</span>
               </div>
               <div class="outputs-list">
-                <span class="detail-heading">Programs creating this output</span>
-                  ${outputPrograms}
+              ${outputPrograms}
               </div>
             </div>
           `;
@@ -512,7 +510,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         );
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
+        // tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
       });
   });
