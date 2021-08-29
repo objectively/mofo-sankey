@@ -248,17 +248,16 @@ svg {
 }
 
 .node rect {
-  // fill-opacity: 0.9;
   shape-rendering: crispEdges;
 }
 
 .link {
   fill: none;
-  stroke-opacity: 0.5;
+  stroke-opacity: 0.3;
 }
 
 .link:hover {
-  stroke-opacity: .9;
+  stroke-opacity: 1;
 }
 
 .tooltip {

@@ -54,9 +54,9 @@ let margin = { top: 50, right: 10, bottom: 50, left: 10 };
 let height = 500 - (margin.top + margin.bottom);
 let width = 1000 - (margin.left + margin.right);
 
-let defaultOpacity = 0.6;
+let defaultOpacity = 0.3;
 let hoverOpacity = 1;
-let fadeOpacity = 0.3;
+let fadeOpacity = 0.1;
 
 // SETUP VARIABLES
 let awardsData;
@@ -140,7 +140,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         graph.links.push({
           source: issue.source,
           target: issue.target,
-          value: issue.totalAwards
+          value: issue.totalAwards,
+          rawValue: issue.totalAwards
         });
       });
     });
@@ -210,16 +211,20 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
      let minLinkVal = d3.min(graph.links.map((link) => link.value));
      let maxLinkVal = d3.max(graph.links.map((link) => link.value));
      linkScale = d3
-     .scaleSqrt()
+     .scaleLinear()
      .domain([minLinkVal, maxLinkVal])
-     .range([20, maxLinkVal]);
+     .range([minLinkVal, maxLinkVal]);
      
-     // graph.links.forEach((link) => {
-       //   link.rawValue = link.value;
-       //   link.value = linkScale(link.value);
-       // });
-    */
-
+     graph.links.forEach((link) => {
+       link.rawValue = link.value;
+       link.value = link.value > 2 ? linkScale(link.value): link.value + 5;
+      });
+      */
+    graph.links.forEach((link) => {
+      link.rawValue = link.value;
+      link.value = link.value;
+    });
+    console.log(graph);
     return graph;
   })
   .then((data) => {
@@ -247,8 +252,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
          * do we want uniform width for all outputs?
          if (elementClasses[d.target.name] === 'output') {
            return 4;
-         }
-         */
+          }
+          */
 
         return d.width;
       });
@@ -288,9 +293,9 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         /**
          * 
          if (elementClasses[d.name] === 'output') {
-             return 15;
-           }
-         */
+           return 22;
+          }
+        */
         return d.y1 - d.y0;
       })
       .attr('width', (d) => {
@@ -421,6 +426,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .map((d) => [d.target.name, d.rawValue])
           .sort();
 
+        console.log(outputs);
+
         tooltipHtml = `
             <div class="details">
               <div class="issue-title">
@@ -497,7 +504,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .duration(200)
           .style('opacity', 1);
 
-          d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
+        d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
 
         d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
           'stroke-opacity',
