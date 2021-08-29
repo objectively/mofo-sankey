@@ -1,40 +1,40 @@
 :root {
   --mo-gray-05: #f2f2f2;
-  --issue-1: #4CA6FF;
-  --issue-2: #F2B946;
-  --issue-3: #E4487D;
+  --issue-1: #4ca6ff;
+  --issue-2: #f2b946;
+  --issue-3: #e4487d;
   --issue-4: #008080;
-  --issue-5: #E4487D;
-  --issue-6: #F2B946;
-  --issue-7: #4CA6FF;
-  --program-1: #4CA6FF;
-  --program-2: #F2B946;
-  --program-3: #E4487D;
+  --issue-5: #e4487d;
+  --issue-6: #f2b946;
+  --issue-7: #4ca6ff;
+  --program-1: #4ca6ff;
+  --program-2: #f2b946;
+  --program-3: #e4487d;
   --program-4: #008080;
-  --program-5: #E4487D;
-  --program-6: #F2B946;
-  --program-7: #4CA6FF;
-  --program-8: #F2B946;
+  --program-5: #e4487d;
+  --program-6: #f2b946;
+  --program-7: #4ca6ff;
+  --program-8: #f2b946;
   --program-9: #008080;
-  --program-10: #F2B946;
-  --program-11: #4CA6FF;
-  --program-12: #F2B946;
-  --program-13: #E4487D;
+  --program-10: #f2b946;
+  --program-11: #4ca6ff;
+  --program-12: #f2b946;
+  --program-13: #e4487d;
   --program-14: #008080;
-  --program-15: #E4487D;
-  --program-16: #F2B946;
-  --program-17: #4CA6FF;
-  --output-1: #00B3B3;
-  --output-2: #B35FFC;
+  --program-15: #e4487d;
+  --program-16: #f2b946;
+  --program-17: #4ca6ff;
+  --output-1: #00b3b3;
+  --output-2: #b35ffc;
   --output-3: #999999;
   --output-4: #666666;
-  --output-5: #6703BF;
+  --output-5: #6703bf;
   --output-6: #333333;
-  --output-7: #6703BF;
+  --output-7: #6703bf;
   --output-8: #666666;
   --output-9: #999999;
-  --output-10: #B35FFC;
-  --output-11: #00B3B3;
+  --output-10: #b35ffc;
+  --output-11: #00b3b3;
 }
 
 // nodes
@@ -248,20 +248,17 @@ svg {
 }
 
 .node rect {
-  padding: 10px;
   // fill-opacity: 0.9;
-  // shape-rendering: crispEdges;
+  shape-rendering: crispEdges;
 }
-// path { outline: green solid 1px;}
 
 .link {
-
   fill: none;
-  stroke-opacity: 0.3;
+  stroke-opacity: 0.5;
 }
 
 .link:hover {
-  stroke-opacity: 1;
+  stroke-opacity: .9;
 }
 
 .tooltip {

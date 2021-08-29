@@ -27069,13 +27069,16 @@ var d3 = Object.assign({}, {
 */
 
 var margin = {
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: 0
+  top: 50,
+  right: 10,
+  bottom: 50,
+  left: 10
 };
 var height = 500 - (margin.top + margin.bottom);
-var width = 900 - (margin.left + margin.right); // SETUP VARIABLES
+var width = 1000 - (margin.left + margin.right);
+var defaultOpacity = 0.6;
+var hoverOpacity = 1;
+var fadeOpacity = 0.3; // SETUP VARIABLES
 
 var awardsData;
 var nestedIssues;
@@ -27092,7 +27095,9 @@ var svg = d3.select('#container').append('svg').attr('width', width + (margin.le
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().iterations(0).linkSort(null).nodeSort(null).size([width, height]);
+var sankeyGraph = d3.sankey().iterations(0).nodePadding(5) // .linkSort(null)
+// .nodeSort(null)
+.size([width, height]);
 /**
  *  ADD TOOLTIPS
  */
@@ -27205,22 +27210,21 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   });
   /**
    * Do we want to scale the data so the smaller projects get weight?
-   */
+   let minLinkVal = d3.min(graph.links.map((link) => link.value));
+   let maxLinkVal = d3.max(graph.links.map((link) => link.value));
+   linkScale = d3
+   .scaleSqrt()
+   .domain([minLinkVal, maxLinkVal])
+   .range([20, maxLinkVal]);
+   
+   // graph.links.forEach((link) => {
+     //   link.rawValue = link.value;
+     //   link.value = linkScale(link.value);
+     // });
+  */
 
-  var minLinkVal = d3.min(graph.links.map(function (link) {
-    return link.value;
-  }));
-  var maxLinkVal = d3.max(graph.links.map(function (link) {
-    return link.value;
-  }));
-  linkScale = d3.scaleSqrt().domain([minLinkVal, maxLinkVal]).range([20, maxLinkVal]);
-  graph.links.forEach(function (link) {
-    link.rawValue = link.value;
-    link.value = linkScale(link.value);
-  });
   return graph;
 }).then(function (data) {
-  console.log('dataaaa', data);
   var chart = sankeyGraph(data);
   /* ADD LINKs */
 
@@ -27236,9 +27240,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
      }
      */
     return d.width;
-  }).attr('transform', function (d) {
-    if (elementClasses[d.target.name] === 'output') {// return `translate(0,2)`;
-    }
   });
   /** 
      * SEE LINE 244       
@@ -27266,7 +27267,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
      if (elementClasses[d.name] === 'output') {
          return 15;
        }
-    */
+     */
     return d.y1 - d.y0;
   }).attr('width', function (d) {
     return d.x1 - d.x0;
@@ -27291,10 +27292,15 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   link.on('mouseover', function (event, data) {
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n            </div>\n          </div>\n        ");
     tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
+    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', fadeOpacity);
+    d3.select(this).transition().duration(100).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function (d) {
-    tooltip.transition().duration(500).style('opacity', 0);
+    tooltip.transition().duration(200).style('opacity', 0);
+    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   });
   /** ALL MOUSEOVER EVENTS */
+
+  /** LINK MOUSEOVER */
   // ADD TOOLTIPS TO ISSUE AREA NODES
 
   d3.selectAll(".issue-area").on('mouseover', function (event, data) {
@@ -27309,12 +27315,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }
 
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1); // highlight all related lines
+    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity); // highlight all related lines
 
-    d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', 0.7);
+    d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
-    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', 0.2);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO PROGRAM NODES
 
   d3.selectAll("rect.program").on('mouseover', function (event, data) {
@@ -27332,12 +27339,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 50 + 'px').transition().duration(200).style('opacity', 1); // issue links
     // sourceLinks
 
-    d3.selectAll(".link.source-".concat(kebabCase(data.name))).style('stroke-opacity', 1); // targetLinks
+    d3.selectAll(".link.source-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity); // targetLinks
 
-    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', 1);
+    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
-    d3.selectAll('.link').style('stroke-opacity', 0.2);
+    d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO OUTPUT NODES
 
   d3.selectAll(".output").on('mouseover', function (event, data) {
@@ -27349,10 +27356,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }, "");
     tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Programs creating this output</span>\n                  ").concat(outputPrograms, "\n              </div>\n            </div>\n          ");
     tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(200).style('opacity', 1);
-    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', 1);
+    d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
+    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
     tooltip.transition().duration(200).style('opacity', 0);
-    d3.selectAll('.link').style('stroke-opacity', 0.2);
+    d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
   });
 });
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {

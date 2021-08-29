@@ -49,10 +49,14 @@ const d3 = Object.assign(
   SET UP GRAPH DIMENSIONS
 */
 
-let margin = { top: 0, right: 0, bottom: 0, left: 0 };
+let margin = { top: 50, right: 10, bottom: 50, left: 10 };
 
 let height = 500 - (margin.top + margin.bottom);
-let width = 900 - (margin.left + margin.right);
+let width = 1000 - (margin.left + margin.right);
+
+let defaultOpacity = 0.6;
+let hoverOpacity = 1;
+let fadeOpacity = 0.3;
 
 // SETUP VARIABLES
 let awardsData;
@@ -81,8 +85,9 @@ let svg = d3
 let sankeyGraph = d3
   .sankey()
   .iterations(0)
-  .linkSort(null)
-  .nodeSort(null)
+  .nodePadding(5)
+  // .linkSort(null)
+  // .nodeSort(null)
   .size([width, height]);
 
 /**
@@ -202,24 +207,22 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     /**
      * Do we want to scale the data so the smaller projects get weight?
-     */
-    let minLinkVal = d3.min(graph.links.map((link) => link.value));
-    let maxLinkVal = d3.max(graph.links.map((link) => link.value));
-    linkScale = d3
-      .scaleSqrt()
-      .domain([minLinkVal, maxLinkVal])
-      .range([20, maxLinkVal]);
-
-    graph.links.forEach((link) => {
-      link.rawValue = link.value;
-      link.value = linkScale(link.value);
-    });
+     let minLinkVal = d3.min(graph.links.map((link) => link.value));
+     let maxLinkVal = d3.max(graph.links.map((link) => link.value));
+     linkScale = d3
+     .scaleSqrt()
+     .domain([minLinkVal, maxLinkVal])
+     .range([20, maxLinkVal]);
+     
+     // graph.links.forEach((link) => {
+       //   link.rawValue = link.value;
+       //   link.value = linkScale(link.value);
+       // });
+    */
 
     return graph;
   })
   .then((data) => {
-    console.log('dataaaa', data);
-
     let chart = sankeyGraph(data);
 
     /* ADD LINKs */
@@ -248,11 +251,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
          */
 
         return d.width;
-      })
-      .attr('transform', function (d) {
-        if (elementClasses[d.target.name] === 'output') {
-          // return `translate(0,2)`;
-        }
       });
 
     /** 
@@ -292,7 +290,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
          if (elementClasses[d.name] === 'output') {
              return 15;
            }
-        */
+         */
         return d.y1 - d.y0;
       })
       .attr('width', (d) => {
@@ -338,12 +336,26 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .transition()
           .duration(200)
           .style('opacity', 1);
+        d3.selectAll('.link')
+          .transition()
+          .duration(100)
+          .style('stroke-opacity', fadeOpacity);
+        d3.select(this)
+          .transition()
+          .duration(100)
+          .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', function (d) {
-        tooltip.transition().duration(500).style('opacity', 0);
+        tooltip.transition().duration(200).style('opacity', 0);
+        d3.selectAll('.link')
+          .transition()
+          .duration(100)
+          .style('stroke-opacity', defaultOpacity);
       });
 
     /** ALL MOUSEOVER EVENTS */
+
+    /** LINK MOUSEOVER */
 
     // ADD TOOLTIPS TO ISSUE AREA NODES
     d3.selectAll(`.issue-area`)
@@ -380,16 +392,23 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .duration(200)
           .style('opacity', 1);
 
+        d3.selectAll('.link')
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', fadeOpacity);
         // highlight all related lines
+
         d3.selectAll(`.link.${kebabCase(data.name)}`)
           .transition()
           .duration(200)
-          .style('stroke-opacity', 0.7);
+          .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link').transition().duration(200)
-        .style('stroke-opacity', 0.2);
+        d3.selectAll('.link')
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', defaultOpacity);
       });
 
     // ADD TOOLTIPS TO PROGRAM NODES
@@ -434,18 +453,18 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         // sourceLinks
         d3.selectAll(`.link.source-${kebabCase(data.name)}`).style(
           'stroke-opacity',
-          1
+          hoverOpacity
         );
 
         // targetLinks
         d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
           'stroke-opacity',
-          1
+          hoverOpacity
         );
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link').style('stroke-opacity', 0.2);
+        d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
       });
 
     // ADD TOOLTIPS TO OUTPUT NODES
@@ -478,13 +497,15 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .duration(200)
           .style('opacity', 1);
 
+          d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
+
         d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
           'stroke-opacity',
-          1
+          hoverOpacity
         );
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link').style('stroke-opacity', 0.2);
+        d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
       });
   });
