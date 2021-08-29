@@ -45,22 +45,14 @@ const d3 = Object.assign(
   }
 );
 
-// const jsonUrl = `https://gist.githubusercontent.com/tekd/e9d8aee9e059f773aaf52f1130f98c65/raw/4a2af7014f0a8eed1a384f9d3f478fef6f67b218/sankey-test.json`;
-
 /*
   SET UP GRAPH DIMENSIONS
 */
 
-const aspect = 0.8;
+let margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
-var margin = { top: 0, right: 0, bottom: 0, left: 0 };
-
-var height = 400 / aspect;
-var width = 800 / aspect;
-
-/*
-  FORMATTING HELPERS
-*/
+let height = 500 - (margin.top + margin.bottom);
+let width = 900 - (margin.left + margin.right);
 
 // SETUP VARIABLES
 let awardsData;
@@ -71,31 +63,16 @@ let elementClasses = {};
 let outputsToProgram;
 let tooltip;
 let tooltipHtml;
-
-/* NODE SCALING http://bl.ocks.org/mydu/1c695db789cc6e30616e */
-//node scale
-
-let maxValNode;
-let minValNode;
-let maxValLinks;
-let minValLinks;
-
-let nodeScale;
-
 let linkScale;
-let issueNodeScale;
-let issueLinkScale;
 
-/*
-  APPEND SVG TO PAGE
-*/
-
+// APPEND SVG TO PAGE
 let svg = d3
   .select('#container')
   .append('svg')
-  .attr('width', width)
-  .attr('height', height)
-  .append('g');
+  .attr('width', width + (margin.left + margin.right))
+  .attr('height', height + (margin.top + margin.bottom))
+  .append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
 
 /*
   SETUP SANKEY PROPERTIES
@@ -103,17 +80,10 @@ let svg = d3
 
 let sankeyGraph = d3
   .sankey()
-  .iterations(32)
-  .nodeSort(null)
+  .iterations(0)
   .linkSort(null)
-  .nodeWidth(25)
-  .nodePadding(5)
-  .nodeAlign(d3.sankeyCenter)
-  .size([width, height])
-  .extent([
-    [1, 5],
-    [width - 1, height - 5]
-  ]);
+  .nodeSort(null)
+  .size([width, height]);
 
 /**
  *  ADD TOOLTIPS
@@ -230,19 +200,27 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       graph.links[i].target = graphMap.indexOf(graph.links[i].target);
     });
 
+    /**
+     * Do we want to scale the data so the smaller projects get weight?
+     */
+    let minLinkVal = d3.min(graph.links.map((link) => link.value));
+    let maxLinkVal = d3.max(graph.links.map((link) => link.value));
+    linkScale = d3
+      .scaleSqrt()
+      .domain([minLinkVal, maxLinkVal])
+      .range([20, maxLinkVal]);
+
+    graph.links.forEach((link) => {
+      link.rawValue = link.value;
+      link.value = linkScale(link.value);
+    });
+
     return graph;
   })
   .then((data) => {
+    console.log('dataaaa', data);
+
     let chart = sankeyGraph(data);
-    console.log(chart);
-
-    maxValLinks = d3.max(chart.links.map((link) => link.value));
-    minValLinks = d3.min(chart.links.map((link) => link.value));
-
-    issueLinkScale = d3
-      .scaleSqrt()
-      .domain([minValLinks, maxValLinks])
-      .range([1, 10]);
 
     /* ADD LINKs */
     let link = svg
@@ -260,48 +238,31 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           elementClasses[d.source.name]
         }`;
       })
-      .style('mix-blend-mode', 'multiply')
+      .attr('d', sankeyLinkHorizontal())
       .attr('stroke-width', (d) => {
-        if (elementClasses[d.target.name] === 'output') {
-          return 6;
-        }
-        return Math.max(1, d.width);
-      });
+        /**
+         * do we want uniform width for all outputs?
+         if (elementClasses[d.target.name] === 'output') {
+           return 4;
+         }
+         */
 
-    d3.selectAll('path.link-issue-area').attr('d', sankeyLinkHorizontal());
-    d3.selectAll('path.link-program').attr('d', (d) => {
-      // console.log(d.source, d.target)
-      return customLinkGenerator2(d);
-    });
-    d3.selectAll('path.link-output').attr('d', (d) => customLinkGenerator(d));
-    /**
-     *  ADD TOOLTIPS
-     */
-
-    link
-      .on('mouseover', function (event, data) {
-        tooltipHtml = `
-          <div class="details">
-            <div class="issue-title">
-              ${data.source.name}
-            </div>
-            <div class="total-awards">
-              ${data.target.name} - ${data.value} Awards
-            </div>
-          </div>
-        `;
-
-        tooltip
-          .html(tooltipHtml)
-          .style('left', event.pageX + 'px')
-          .style('top', event.pageY + 'px')
-          .transition()
-          .duration(200)
-          .style('opacity', 1);
+        return d.width;
       })
-      .on('mouseout', function (d) {
-        tooltip.transition().duration(500).style('opacity', 0);
+      .attr('transform', function (d) {
+        if (elementClasses[d.target.name] === 'output') {
+          // return `translate(0,2)`;
+        }
       });
+
+    /** 
+       * SEE LINE 244       
+       d3.selectAll('path.link-issue-area').attr('d', sankeyLinkHorizontal());
+       d3.selectAll('path.link-program').attr('d', (d) => {
+           return customLinkGenerator(d);
+         });
+      */
+
     /* ADD NODES */
     let node = svg
       .append('g')
@@ -312,30 +273,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .enter()
       .append('g')
       .attr('class', 'node');
-    // debugger;
-    maxValNode = d3.max(chart.nodes.map((node) => node.sourceLinks.length));
-    minValNode = d3.min(chart.nodes.map((node) => node.sourceLinks.length));
 
-    issueNodeScale = d3
-      .scaleSqrt()
-      .domain(
-        Array.from(d3.selectAll('.node')).map((node) => node.__data__.value)
-      )
-      .range([10, 20]);
     // /* ADD NODE RECTANGLES */
-    // node
-    //   .append('rect')
-    //   .attr('class', (d) => {
-    //     return `rect ${kebabCase(d.name)} ${elementClasses[d.name]}`;
-    //   })
-    //   .attr('x', (d) => d.x0)
-    //   .attr('y', (d) => d.y0)
-    //   .attr('height', (d) => {
-    //     return issueNodeScale(d.y1 - d.y0);
-    //   })
-    //   .attr('width', (d) => d.x1 - d.x0);
-
-    /* ADD NODE RECTANGLES */
     node
       .append('rect')
       .attr('class', (d) => {
@@ -347,16 +286,18 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('y', (d) => {
         return d.y0;
       })
-      .attr('height', (d) => {
-        if (elementClasses[d.name] === 'output') {
-          return 15;
-          // return d3.max(
-          //   chart.links.map((link) => link.source.sourceLinks.length)
-          // );
-        }
+      .attr('height', (d, i) => {
+        /**
+         * 
+         if (elementClasses[d.name] === 'output') {
+             return 15;
+           }
+        */
         return d.y1 - d.y0;
       })
-      .attr('width', (d) => d.x1 - d.x0);
+      .attr('width', (d) => {
+        return d.x1 - d.x0;
+      });
 
     /* ADD NODE TITLES */
     node
@@ -373,6 +314,35 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('x', (d) => d.x1 + 6)
       .attr('text-anchor', 'start');
 
+    /**
+     *  ADD TOOLTIPS
+     */
+
+    link
+      .on('mouseover', function (event, data) {
+        tooltipHtml = `
+          <div class="details">
+            <div class="issue-title">
+              ${data.source.name}
+            </div>
+            <div class="total-awards">
+              ${data.target.name} - ${data.rawValue} Awards
+            </div>
+          </div>
+        `;
+
+        tooltip
+          .html(tooltipHtml)
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY + 'px')
+          .transition()
+          .duration(200)
+          .style('opacity', 1);
+      })
+      .on('mouseout', function (d) {
+        tooltip.transition().duration(500).style('opacity', 0);
+      });
+
     /** ALL MOUSEOVER EVENTS */
 
     // ADD TOOLTIPS TO ISSUE AREA NODES
@@ -384,8 +354,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
         if (nodeData) {
           awardsData = nodeData.reduce((acc, issue) => {
-            return (acc += `${issue.target.name} - ${issue.value} ${
-              issue.value > 1 ? 'awards' : `award`
+            return (acc += `${issue.target.name} - ${issue.rawValue} ${
+              issue.rawValue > 1 ? 'awards' : `award`
             }${'</br>'}`);
           }, ``);
         }
@@ -418,10 +388,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       })
       .on('mouseout', () => {
         tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link')
-          .transition()
-          .duration(200)
-          .style('stroke-opacity', 0.2);
+        d3.selectAll('.link').transition().duration(200)
+        .style('stroke-opacity', 0.2);
       });
 
     // ADD TOOLTIPS TO PROGRAM NODES
@@ -431,7 +399,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           (program) => program.source.name === data.name
         );
         let outputs = data.sourceLinks
-          .map((d) => [d.target.name, d.value])
+          .map((d) => [d.target.name, d.rawValue])
           .sort();
 
         tooltipHtml = `

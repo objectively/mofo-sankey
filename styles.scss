@@ -1,40 +1,40 @@
 :root {
   --mo-gray-05: #f2f2f2;
-  --issue-1: #0080ff;
-  --issue-2: #f2b946;
-  --issue-3: #f39f9f;
-  --issue-4: #e59c9c;
-  --issue-5: #35c287;
-  --issue-6: #87b699;
-  --issue-7: #9dddb8;
-  --program-1: #5191d1;
-  --program-2: #82aedb;
-  --program-3: #4ca6ff;
-  --program-4: #99ccff;
-  --program-5: #ff4f5e;
-  --program-6: #ff7d88;
-  --program-7: #f87c86;
-  --program-8: #f7848e;
-  --program-9: #ff04b1;
-  --program-10: #ec56bd;
-  --program-11: #dd489a;
-  --program-12: #ff04b1;
-  --program-13: #ff4857;
-  --program-14: #fc5e6b;
-  --program-15: #f07b85;
-  --program-16: #fa7c86;
-  --program-17: #f89099;
-  --output-1: #008080;
-  --output-2: #00b3b3;
-  --output-3: #551c8d;
-  --output-4: #7040a3;
-  --output-5: #9d72c4;
-  --output-6: #b397c5;
-  --output-7: #b7b9fa;
-  --output-11: #cccccc;
-  --output-10: #999999;
-  --output-9: #666666;
-  --output-8: #4e4c4c;
+  --issue-1: #03045e;
+  --issue-2: #023e8a;
+  --issue-3: #023e8a;
+  --issue-4: #0096c7;
+  --issue-5: #00b4d8;
+  --issue-6: #48cae4;
+  --issue-7: #90e0ef;
+  --program-1: #ea698b;
+  --program-2: #d55d92;
+  --program-3: #c05299;
+  --program-4: #ac46a1;
+  --program-5: #973aa8;
+  --program-6: #822faf;
+  --program-7: #6d23b6;
+  --program-8: #6411ad;
+  --program-9: #571089;
+  --program-10: #47126b;
+  --program-11: #564592;
+  --program-12: #724cf9;
+  --program-13: #ca7df9;
+  --program-14: #f896d8;
+  --program-15: #ada7c9;
+  --program-16: #90a8c3;
+  --program-17: #64a6bd;
+  --output-1: #212529;
+  --output-2: #343a40;
+  --output-3: #495057;
+  --output-4: #6c757d;
+  --output-5: #adb5bd;
+  --output-6: #adb5bd;
+  --output-7: #c6def1;
+  --output-11: #eaf2d7;
+  --output-10: #efcfe3;
+  --output-9: #ea9ab2;
+  --output-8: #e27396;
 }
 
 // nodes
@@ -235,26 +235,33 @@
 .link.target-policy-recommendations {
   stroke: var(--output-11);
 }
-
+body {
+  margin: 0;
+}
+svg {
+  outline: green solid 1px;
+}
 #container {
+  outline: red solid 1px;
   display: flex;
   justify-content: center;
-  margin: 4rem;
 }
 
 .node rect {
-  fill-opacity: 0.9;
-  shape-rendering: crispEdges;
+  padding: 10px;
+  // fill-opacity: 0.9;
+  // shape-rendering: crispEdges;
 }
+// path { outline: green solid 1px;}
 
 .link {
+
   fill: none;
-  // stroke: teal;
-  stroke-opacity: 0.2;
+  stroke-opacity: 0.3;
 }
 
 .link:hover {
-  stroke-opacity: 0.5;
+  stroke-opacity: 1;
 }
 
 .tooltip {
@@ -262,7 +269,10 @@
   background-color: var(--mo-gray-05);
   width: 20rem;
   padding: 8px;
+}
+text {
   font-family: sans-serif;
+  font-size: 0.7rem;
 }
 
 .issue-title,
