@@ -240,9 +240,12 @@ body {
 }
 svg {
   outline: green solid 1px;
+  height: 100%;
+  width: 100%;
 }
 #container {
-  outline: red solid 1px;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   justify-content: center;
 }
@@ -274,14 +277,12 @@ text {
 
 .issue-title,
 .detail-heading {
-  outline: red solid 1px;
   font-size: 1.6rem;
   font-weight: 700;
   display: block;
 }
 
 .detail-heading {
-  outline: red solid 1px;
   font-size: 1rem;
   font-weight: 700;
   display: block;
@@ -298,4 +299,7 @@ text {
   // font-weight: 700;
 }
 
-.programs-count, .total-awards {font-weight: 400;}
+.programs-count,
+.total-awards {
+  font-weight: 400;
+}

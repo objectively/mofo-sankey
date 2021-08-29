@@ -27074,8 +27074,8 @@ var margin = {
   bottom: 50,
   left: 10
 };
-var height = 500 - (margin.top + margin.bottom);
-var width = 1000 - (margin.left + margin.right);
+var height = document.querySelector('#container').clientHeight - (margin.top + margin.bottom);
+var width = document.querySelector('#container').clientWidth - (margin.left + margin.right);
 var defaultOpacity = 0.3;
 var hoverOpacity = 1;
 var fadeOpacity = 0.1; // SETUP VARIABLES
@@ -27090,7 +27090,7 @@ var tooltip;
 var tooltipHtml;
 var linkScale; // APPEND SVG TO PAGE
 
-var svg = d3.select('#container').append('svg').attr('width', width + (margin.left + margin.right)).attr('height', height + (margin.top + margin.bottom)).append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
+var svg = d3.select('#container').append('svg').attr('width', document.querySelector('#container').clientWidth + (margin.left + margin.right)).attr('height', document.querySelector('#container').clientHeight + (margin.top + margin.bottom)).attr('viewBox', "0 0 ".concat(document.querySelector('#container').clientWidth, " ").concat(document.querySelector('#container').clientHeight)).attr('preserveAspectRatio', 'xMinYMin').append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
 /*
   SETUP SANKEY PROPERTIES
 */
@@ -27102,8 +27102,7 @@ var sankeyGraph = d3.sankey().iterations(0).nodePadding(5) // .linkSort(null)
  *  ADD TOOLTIPS
  */
 
-tooltip = d3.select('body').append('div').attr('class', 'tooltip'); // .style('opacity', 0);
-
+tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 /* 
   FORMAT DATA
 */
@@ -27398,7 +27397,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55772" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61534" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

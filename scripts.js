@@ -51,8 +51,8 @@ const d3 = Object.assign(
 
 let margin = { top: 50, right: 10, bottom: 50, left: 10 };
 
-let height = 500 - (margin.top + margin.bottom);
-let width = 1000 - (margin.left + margin.right);
+let height = document.querySelector('#container').clientHeight -  (margin.top + margin.bottom);
+let width = document.querySelector('#container').clientWidth - (margin.left + margin.right);
 
 let defaultOpacity = 0.3;
 let hoverOpacity = 1;
@@ -70,11 +70,19 @@ let tooltipHtml;
 let linkScale;
 
 // APPEND SVG TO PAGE
+
 let svg = d3
   .select('#container')
   .append('svg')
-  .attr('width', width + (margin.left + margin.right))
-  .attr('height', height + (margin.top + margin.bottom))
+  .attr('width', document.querySelector('#container').clientWidth + (margin.left + margin.right))
+  .attr('height', document.querySelector('#container').clientHeight + (margin.top + margin.bottom))
+  .attr(
+    'viewBox',
+    `0 0 ${document.querySelector('#container').clientWidth} ${
+      document.querySelector('#container').clientHeight
+    }`
+  )
+  .attr('preserveAspectRatio', 'xMinYMin')
   .append('g')
   .attr('transform', `translate(${margin.left},${margin.top})`);
 
@@ -97,7 +105,7 @@ tooltip = d3
   .select('body')
   .append('div')
   .attr('class', 'tooltip')
-  // .style('opacity', 0);
+  .style('opacity', 0);
 
 /* 
   FORMAT DATA
