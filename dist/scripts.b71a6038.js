@@ -27188,7 +27188,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       graph.links.push({
         source: p.source,
         target: p.target,
-        value: p.totalAwards
+        value: p.totalAwards,
+        rawValue: p.totalAwards
       });
     });
   });
@@ -27239,22 +27240,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).enter().append('path').attr('class', function (d) {
     return "link ".concat(kebabCase(d.source.name), " source-").concat(kebabCase(d.source.name), " target-").concat(kebabCase(d.target.name), " link-").concat(elementClasses[d.source.name]);
   }).attr('d', (0, _d3Sankey.sankeyLinkHorizontal)()).attr('stroke-width', function (d) {
-    /**
-     * do we want uniform width for all outputs?
-     if (elementClasses[d.target.name] === 'output') {
-       return 4;
-      }
-      */
     return d.width;
   });
-  /** 
-     * SEE LINE 244       
-     d3.selectAll('path.link-issue-area').attr('d', sankeyLinkHorizontal());
-     d3.selectAll('path.link-program').attr('d', (d) => {
-         return customLinkGenerator(d);
-       });
-    */
-
   /* ADD NODES */
 
   var node = svg.append('g').selectAll('.node').data(function () {
@@ -27268,12 +27255,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).attr('y', function (d) {
     return d.y0;
   }).attr('height', function (d, i) {
-    /**
-     * 
-     if (elementClasses[d.name] === 'output') {
-       return 22;
-      }
-    */
     return d.y1 - d.y0;
   }).attr('width', function (d) {
     return d.x1 - d.x0;
@@ -27301,7 +27282,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', fadeOpacity);
     d3.select(this).transition().duration(100).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function (d) {
-    // tooltip.transition().duration(200).style('opacity', 0);
+    tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   });
   /** ALL MOUSEOVER EVENTS */
@@ -27326,7 +27307,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    // tooltip.transition().duration(200).style('opacity', 0);
+    tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO PROGRAM NODES
 
@@ -27342,15 +27323,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }).sort().join('</br>'), "\n              </div>\n              <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Outputs</span>\n                  ").concat(outputs.map(function (output) {
       return "".concat(output[1], " ").concat(output[0]);
     }).join('</br>'), "\n              </div>\n            </div>\n          ");
-    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 50 + 'px').transition().duration(200).style('opacity', 1); // issue links
+    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 150 + 'px').transition().duration(200).style('opacity', 1);
+    d3.selectAll('.link').style('stroke-opacity', fadeOpacity); // issue links
     // sourceLinks
 
     d3.selectAll(".link.source-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity); // targetLinks
 
     d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    // tooltip.transition().duration(200).style('opacity', 0);
-    d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
+    tooltip.transition().duration(200).style('opacity', 0);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO OUTPUT NODES
 
   d3.selectAll(".output").on('mouseover', function (event, data) {
@@ -27365,7 +27347,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
     d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    // tooltip.transition().duration(200).style('opacity', 0);
+    tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
   });
 });
@@ -27397,7 +27379,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61035" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64272" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

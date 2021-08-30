@@ -51,8 +51,12 @@ const d3 = Object.assign(
 
 let margin = { top: 50, right: 10, bottom: 50, left: 10 };
 
-let height = document.querySelector('#container').clientHeight -  (margin.top + margin.bottom);
-let width = document.querySelector('#container').clientWidth - (margin.left + margin.right);
+let height =
+  document.querySelector('#container').clientHeight -
+  (margin.top + margin.bottom);
+let width =
+  document.querySelector('#container').clientWidth -
+  (margin.left + margin.right);
 
 let defaultOpacity = 0.3;
 let hoverOpacity = 1;
@@ -74,8 +78,16 @@ let linkScale;
 let svg = d3
   .select('#container')
   .append('svg')
-  .attr('width', document.querySelector('#container').clientWidth + (margin.left + margin.right))
-  .attr('height', document.querySelector('#container').clientHeight + (margin.top + margin.bottom))
+  .attr(
+    'width',
+    document.querySelector('#container').clientWidth +
+      (margin.left + margin.right)
+  )
+  .attr(
+    'height',
+    document.querySelector('#container').clientHeight +
+      (margin.top + margin.bottom)
+  )
   .attr(
     'viewBox',
     `0 0 ${document.querySelector('#container').clientWidth} ${
@@ -193,7 +205,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         graph.links.push({
           source: p.source,
           target: p.target,
-          value: p.totalAwards
+          value: p.totalAwards,
+          rawValue: p.totalAwards
         });
       });
     });
@@ -256,23 +269,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       })
       .attr('d', sankeyLinkHorizontal())
       .attr('stroke-width', (d) => {
-        /**
-         * do we want uniform width for all outputs?
-         if (elementClasses[d.target.name] === 'output') {
-           return 4;
-          }
-          */
-
         return d.width;
       });
-
-    /** 
-       * SEE LINE 244       
-       d3.selectAll('path.link-issue-area').attr('d', sankeyLinkHorizontal());
-       d3.selectAll('path.link-program').attr('d', (d) => {
-           return customLinkGenerator(d);
-         });
-      */
 
     /* ADD NODES */
     let node = svg
@@ -298,12 +296,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         return d.y0;
       })
       .attr('height', (d, i) => {
-        /**
-         * 
-         if (elementClasses[d.name] === 'output') {
-           return 22;
-          }
-        */
         return d.y1 - d.y0;
       })
       .attr('width', (d) => {
@@ -359,7 +351,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', function (d) {
-        // tooltip.transition().duration(200).style('opacity', 0);
+        tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
           .duration(100)
@@ -417,7 +409,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        // tooltip.transition().duration(200).style('opacity', 0);
+        tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
           .duration(200)
@@ -457,11 +449,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         tooltip
           .html(tooltipHtml)
           .style('left', event.pageX - 150 + 'px')
-          .style('top', event.pageY + 50 + 'px')
+          .style('top', event.pageY + 150 + 'px')
           .transition()
           .duration(200)
           .style('opacity', 1);
 
+        d3.selectAll('.link')
+          .style('stroke-opacity', fadeOpacity);
         // issue links
         // sourceLinks
         d3.selectAll(`.link.source-${kebabCase(data.name)}`).style(
@@ -476,8 +470,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         );
       })
       .on('mouseout', () => {
-        // tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
+        tooltip.transition().duration(200).style('opacity', 0);
+        d3.selectAll('.link')
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', defaultOpacity);
       });
 
     // ADD TOOLTIPS TO OUTPUT NODES
@@ -518,7 +515,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         );
       })
       .on('mouseout', () => {
-        // tooltip.transition().duration(200).style('opacity', 0);
+        tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
       });
   });
