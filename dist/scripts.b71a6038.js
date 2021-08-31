@@ -27094,8 +27094,7 @@ var svg = d3.select('#container').append('svg').attr('width', document.querySele
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().iterations(0) // .nodePadding(15)
-// .linkSort(null)
+var sankeyGraph = d3.sankey().iterations(0).nodePadding(8) // .linkSort(null)
 // .nodeSort(null)
 .size([width, height]);
 /**
@@ -27246,6 +27245,9 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).attr('y', function (d) {
     return d.y0;
   }).attr('height', function (d, i) {
+    // if (elementClasses[d.name] === 'program') {
+    //   return (d.y1 - d.y0) * 1.2;
+    // }
     return d.y1 - d.y0;
   }).attr('width', function (d) {
     return sankeyGraph.nodeWidth();
@@ -27281,150 +27283,68 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   /** LINK MOUSEOVER */
   // ADD TOOLTIPS TO ISSUE AREA NODES
 
+  d3.selectAll(".issue-area").on('mouseover', function (event, data) {
+    var nodeData = issuesProgramDetail.filter(function (program) {
+      return program.source.name === data.name;
+    });
+
+    if (nodeData) {
+      awardsData = nodeData.reduce(function (acc, issue) {
+        return acc += "".concat(issue.target.name, " - ").concat(issue.rawValue, " ").concat(issue.rawValue > 1 ? 'awards' : "award", '</br>');
+      }, "");
+    }
+
+    tooltipHtml = "\n        <div class=\"details\">\n        <div class=\"issue-title\">\n        ".concat(data.name, "\n        </div>\n        <div class=\"total-programs\">\n        ").concat(nodeData.length, " Programs\n        </div>\n        <div class=\"total-awards\">\n        ").concat(awardsData, "\n        </div>\n        </div>  \n        ");
+    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity); // highlight all related lines
+
+    d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
+  }).on('mouseout', function () {
+    tooltip.transition().duration(200).style('opacity', 0);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
+  }); // ADD TOOLTIPS TO PROGRAM NODES
+
+  d3.selectAll("rect.program").on('mouseover', function (event, data) {
+    var nodeData = issuesProgramDetail.filter(function (program) {
+      return program.source.name === data.name;
+    });
+    var outputs = data.sourceLinks.map(function (d) {
+      return [d.target.name, d.rawValue];
+    }).sort();
+    tooltipHtml = "\n          <div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.name, "\n          </div>\n          <div class=\"issues-list\">\n          <span class=\"detail-heading\">Issues</span>\n          ").concat(data.targetLinks.map(function (d) {
+      return d.source.name;
+    }).sort().join('</br>'), "\n            </div>\n            <div class=\"outputs-list\">\n            <span class=\"detail-heading\">Outputs</span>\n            ").concat(outputs.map(function (output) {
+      return "".concat(output[1], " ").concat(output[0]);
+    }).join('</br>'), "\n              </div>\n              </div>\n              ");
+    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 150 + 'px').transition().duration(200).style('opacity', 1); // d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
+    // issue links
+    // sourceLinks
+
+    d3.selectAll(".link.source-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity); // targetLinks
+
+    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
+  }).on('mouseout', function () {
+    // tooltip.transition().duration(200).style('opacity', 0);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
+  }); // ADD TOOLTIPS TO OUTPUT NODES
+
+  d3.selectAll(".output").on('mouseover', function (event, data) {
+    var nodeData = outputsToProgram.filter(function (output) {
+      return output.key === data.name;
+    })[0];
+    var outputPrograms = nodeData.values.reduce(function (acc, program) {
+      return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
+    }, "");
+    tooltipHtml = "\n        <div class=\"details\">\n        <div class=\"issue-title\">\n        ".concat(data.name, "\n        <span class=\"detail-heading\">Programs creating this output</span>\n        </div>\n        <div class=\"outputs-list\">\n        ").concat(outputPrograms, "\n        </div>\n        </div>\n        ");
+    tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(200).style('opacity', 1);
+    d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
+    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
+  }).on('mouseout', function () {
+    tooltip.transition().duration(200).style('opacity', 0);
+    d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
+  });
   /*
-  d3.selectAll(`.issue-area`)
-    .on('mouseover', (event, data) => {
-      let nodeData = issuesProgramDetail.filter(
-        (program) => program.source.name === data.name
-      );
-       if (nodeData) {
-        awardsData = nodeData.reduce((acc, issue) => {
-          return (acc += `${issue.target.name} - ${issue.rawValue} ${
-            issue.rawValue > 1 ? 'awards' : `award`
-          }${'</br>'}`);
-        }, ``);
-      }
-      tooltipHtml = `
-        <div class="details">
-          <div class="issue-title">
-            ${data.name}
-          </div>
-          <div class="total-programs">
-            ${nodeData.length} Programs
-          </div>
-          <div class="total-awards">
-            ${awardsData}
-          </div>
-        </div>  
-      `;
-      tooltip
-        .html(tooltipHtml)
-        .style('left', event.pageX + 50 + 'px')
-        .style('top', event.pageY + 'px')
-        .transition()
-        .duration(200)
-        .style('opacity', 1);
-       d3.selectAll('.link')
-        .transition()
-        .duration(200)
-        .style('stroke-opacity', fadeOpacity);
-      // highlight all related lines
-       d3.selectAll(`.link.${kebabCase(data.name)}`)
-        .transition()
-        .duration(200)
-        .style('stroke-opacity', hoverOpacity);
-    })
-    .on('mouseout', () => {
-      tooltip.transition().duration(200).style('opacity', 0);
-      d3.selectAll('.link')
-        .transition()
-        .duration(200)
-        .style('stroke-opacity', defaultOpacity);
-    });
-   // ADD TOOLTIPS TO PROGRAM NODES
-  d3.selectAll(`rect.program`)
-    .on('mouseover', (event, data) => {
-      let nodeData = issuesProgramDetail.filter(
-        (program) => program.source.name === data.name
-      );
-      let outputs = data.sourceLinks
-        .map((d) => [d.target.name, d.rawValue])
-        .sort();
-       tooltipHtml = `
-          <div class="details">
-            <div class="issue-title">
-              ${data.name}
-            </div>
-            <div class="issues-list">
-              <span class="detail-heading">Issues</span>
-              ${data.targetLinks
-                .map((d) => d.source.name)
-                .sort()
-                .join('</br>')}
-            </div>
-            <div class="outputs-list">
-              <span class="detail-heading">Outputs</span>
-                ${outputs
-                  .map((output) => `${output[1]} ${output[0]}`)
-                  .join('</br>')}
-            </div>
-          </div>
-        `;
-      tooltip
-        .html(tooltipHtml)
-        .style('left', event.pageX - 150 + 'px')
-        .style('top', event.pageY + 150 + 'px')
-        .transition()
-        .duration(200)
-        .style('opacity', 1);
-       d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
-      // issue links
-      // sourceLinks
-      d3.selectAll(`.link.source-${kebabCase(data.name)}`).style(
-        'stroke-opacity',
-        hoverOpacity
-      );
-       // targetLinks
-      d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
-        'stroke-opacity',
-        hoverOpacity
-      );
-    })
-    .on('mouseout', () => {
-      tooltip.transition().duration(200).style('opacity', 0);
-      d3.selectAll('.link')
-        .transition()
-        .duration(200)
-        .style('stroke-opacity', defaultOpacity);
-    });
-   // ADD TOOLTIPS TO OUTPUT NODES
-  d3.selectAll(`.output`)
-    .on('mouseover', (event, data) => {
-      let nodeData = outputsToProgram.filter((output) => {
-        return output.key === data.name;
-      })[0];
-       let outputPrograms = nodeData.values.reduce((acc, program) => {
-        return (acc += `${program.key} - ${program.values.length}</br>`);
-      }, ``);
-       tooltipHtml = `
-          <div class="details">
-            <div class="issue-title">
-              ${data.name}
-              <span class="detail-heading">Programs creating this output</span>
-            </div>
-            <div class="outputs-list">
-            ${outputPrograms}
-            </div>
-          </div>
-        `;
-      tooltip
-        .html(tooltipHtml)
-        .style('left', event.pageX - 350 + 'px')
-        .style('top', event.pageY - 25 + 'px')
-        .transition()
-        .duration(200)
-        .style('opacity', 1);
-       d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
-       d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
-        'stroke-opacity',
-        hoverOpacity
-      );
-    })
-    .on('mouseout', () => {
-      tooltip.transition().duration(200).style('opacity', 0);
-      d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
-    });
-    */
+  */
 });
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
