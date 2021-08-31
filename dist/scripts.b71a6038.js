@@ -27087,15 +27087,15 @@ var programsToOutput;
 var elementClasses = {};
 var outputsToProgram;
 var tooltip;
-var tooltipHtml;
-var linkScale; // APPEND SVG TO PAGE
+var tooltipHtml; // APPEND SVG TO PAGE
 
 var svg = d3.select('#container').append('svg').attr('width', document.querySelector('#container').clientWidth + (margin.left + margin.right)).attr('height', document.querySelector('#container').clientHeight + (margin.top + margin.bottom)).attr('viewBox', "0 0 ".concat(document.querySelector('#container').clientWidth, " ").concat(document.querySelector('#container').clientHeight)).attr('preserveAspectRatio', 'xMinYMin').append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
 /*
   SETUP SANKEY PROPERTIES
 */
 
-var sankeyGraph = d3.sankey().iterations(0).nodePadding(5) // .linkSort(null)
+var sankeyGraph = d3.sankey().iterations(0) // .nodePadding(10)
+// .linkSort(null)
 // .nodeSort(null)
 .size([width, height]);
 /**
@@ -27113,6 +27113,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     nodes: [],
     links: []
   };
+  var linkScale = d3.scaleSqrt().domain([0, 84]).range([5, 80]);
   nestedIssues = d3.nest().key(function (d) {
     return d['Issue Area Tags\n(pick ONE) '];
   }).key(function (d) {
@@ -27143,8 +27144,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       graph.links.push({
         source: issue.source,
         target: issue.target,
-        value: issue.totalAwards,
-        rawValue: issue.totalAwards
+        value: issue.totalAwards
       });
     });
   }); //store transformed data before replacing link names
@@ -27188,8 +27188,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       graph.links.push({
         source: p.source,
         target: p.target,
-        value: p.totalAwards,
-        rawValue: p.totalAwards
+        value: p.totalAwards
       });
     });
   });
@@ -27210,24 +27209,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     graph.links[i].source = graphMap.indexOf(graph.links[i].source);
     graph.links[i].target = graphMap.indexOf(graph.links[i].target);
   });
-  /**
-   * Do we want to scale the data so the smaller projects get weight?
-   let minLinkVal = d3.min(graph.links.map((link) => link.value));
-   let maxLinkVal = d3.max(graph.links.map((link) => link.value));
-   linkScale = d3
-   .scaleLinear()
-   .domain([minLinkVal, maxLinkVal])
-   .range([minLinkVal, maxLinkVal]);
-   
-   graph.links.forEach((link) => {
-     link.rawValue = link.value;
-     link.value = link.value > 2 ? linkScale(link.value): link.value + 5;
-    });
-    */
-
+  var minLinkVal = d3.min(graph.links.map(function (link) {
+    return link.value;
+  }));
+  var maxLinkVal = d3.max(graph.links.map(function (link) {
+    return link.value;
+  }));
+  linkScale = d3.scaleLinear().domain([minLinkVal, maxLinkVal]).range([15, 80]);
   graph.links.forEach(function (link) {
     link.rawValue = link.value;
-    link.value = link.value;
+    link.value = linkScale(link.value);
   });
   console.log(graph);
   return graph;
@@ -27257,7 +27248,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).attr('height', function (d, i) {
     return d.y1 - d.y0;
   }).attr('width', function (d) {
-    return d.x1 - d.x0;
+    return sankeyGraph.nodeWidth();
   });
   /* ADD NODE TITLES */
 
@@ -27379,7 +27370,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64272" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51378" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

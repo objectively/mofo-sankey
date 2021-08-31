@@ -71,7 +71,6 @@ let elementClasses = {};
 let outputsToProgram;
 let tooltip;
 let tooltipHtml;
-let linkScale;
 
 // APPEND SVG TO PAGE
 
@@ -105,7 +104,7 @@ let svg = d3
 let sankeyGraph = d3
   .sankey()
   .iterations(0)
-  .nodePadding(5)
+  // .nodePadding(10)
   // .linkSort(null)
   // .nodeSort(null)
   .size([width, height]);
@@ -126,6 +125,8 @@ tooltip = d3
 Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
   .then((data) => {
     let graph = { nodes: [], links: [] };
+
+    let linkScale = d3.scaleSqrt().domain([0, 84]).range([5, 80]);
 
     nestedIssues = d3
       .nest()
@@ -160,8 +161,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         graph.links.push({
           source: issue.source,
           target: issue.target,
-          value: issue.totalAwards,
-          rawValue: issue.totalAwards
+          value: issue.totalAwards
         });
       });
     });
@@ -195,7 +195,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         };
       });
     });
-
+    
     programsToOutput.forEach((program) => {
       program.forEach((p) => {
         elementClasses[p.source] = 'program';
@@ -205,8 +205,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         graph.links.push({
           source: p.source,
           target: p.target,
-          value: p.totalAwards,
-          rawValue: p.totalAwards
+          value: p.totalAwards
         });
       });
     });
@@ -226,24 +225,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       graph.links[i].source = graphMap.indexOf(graph.links[i].source);
       graph.links[i].target = graphMap.indexOf(graph.links[i].target);
     });
-
-    /**
-     * Do we want to scale the data so the smaller projects get weight?
-     let minLinkVal = d3.min(graph.links.map((link) => link.value));
-     let maxLinkVal = d3.max(graph.links.map((link) => link.value));
-     linkScale = d3
-     .scaleLinear()
-     .domain([minLinkVal, maxLinkVal])
-     .range([minLinkVal, maxLinkVal]);
-     
-     graph.links.forEach((link) => {
-       link.rawValue = link.value;
-       link.value = link.value > 2 ? linkScale(link.value): link.value + 5;
-      });
-      */
+    let minLinkVal = d3.min(graph.links.map((link) => link.value));
+    let maxLinkVal = d3.max(graph.links.map((link) => link.value));
+    linkScale = d3
+      .scaleLinear()
+      .domain([minLinkVal, maxLinkVal])
+      .range([15, 80]);
+    
     graph.links.forEach((link) => {
       link.rawValue = link.value;
-      link.value = link.value;
+      link.value = linkScale(link.value);
     });
     console.log(graph);
     return graph;
@@ -299,7 +290,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         return d.y1 - d.y0;
       })
       .attr('width', (d) => {
-        return d.x1 - d.x0;
+        return sankeyGraph.nodeWidth();
       });
 
     /* ADD NODE TITLES */
@@ -454,8 +445,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .duration(200)
           .style('opacity', 1);
 
-        d3.selectAll('.link')
-          .style('stroke-opacity', fadeOpacity);
+        d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
         // issue links
         // sourceLinks
         d3.selectAll(`.link.source-${kebabCase(data.name)}`).style(
