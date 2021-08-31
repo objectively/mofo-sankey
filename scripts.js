@@ -49,7 +49,7 @@ const d3 = Object.assign(
   SET UP GRAPH DIMENSIONS
 */
 
-let margin = { top: 50, right: 10, bottom: 50, left: 10 };
+let margin = { top: 20, right: 50, bottom: 20, left: 50 };
 
 let height =
   document.querySelector('#container').clientHeight -
@@ -104,7 +104,7 @@ let svg = d3
 let sankeyGraph = d3
   .sankey()
   .iterations(0)
-  // .nodePadding(10)
+  // .nodePadding(15)
   // .linkSort(null)
   // .nodeSort(null)
   .size([width, height]);
@@ -230,7 +230,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     linkScale = d3
       .scaleLinear()
       .domain([minLinkVal, maxLinkVal])
-      .range([15, 80]);
+      .range([14, 84]);
     
     graph.links.forEach((link) => {
       link.rawValue = link.value;
@@ -354,6 +354,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     /** LINK MOUSEOVER */
 
     // ADD TOOLTIPS TO ISSUE AREA NODES
+    /*
     d3.selectAll(`.issue-area`)
       .on('mouseover', (event, data) => {
         let nodeData = issuesProgramDetail.filter(
@@ -508,4 +509,5 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
       });
+      */
   });

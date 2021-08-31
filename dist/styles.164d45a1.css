@@ -315,10 +315,6 @@ svg {
   stroke-opacity: 0.3;
 }
 
-.link:hover {
-  stroke-opacity: 1;
-}
-
 .tooltip {
   font-family: sans-serif;
   position: absolute;
