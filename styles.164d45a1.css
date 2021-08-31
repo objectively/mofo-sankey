@@ -39,34 +39,42 @@
 
 .rect.open-innovation {
   fill: var(--issue-1);
+  stroke: solid 2px var(--issue-1);
 }
 
 .rect.web-literacy {
   fill: var(--issue-2);
+  stroke: solid 2px var(--issue-2);
 }
 
 .rect.digital-inclusion {
   fill: var(--issue-3);
+  stroke: solid 2px var(--issue-3);
 }
 
 .rect.privacy-security {
   fill: var(--issue-4);
+  stroke: solid 2px var(--issue-4);
 }
 
 .rect.other-unavailable {
   fill: var(--issue-5);
+  stroke: solid 2px var(--issue-5);
 }
 
 .rect.decentralization {
   fill: var(--issue-6);
+  stroke: solid 2px var(--issue-6);
 }
 
 .rect.trustworthy-ai {
   fill: var(--issue-7);
+  stroke: solid 2px var(--issue-7);
 }
 
 .rect.responsible-cs-challenge {
   fill: var(--program-1);
+  stroke: solid 2px var(--program-1);
 }
 
 .link.target-responsile-cs-challenge {
@@ -75,6 +83,7 @@
 
 .rect.moss {
   fill: var(--program-2);
+  stroke: solid 2px var(--program-2);
 }
 
 .link.target-moss {
@@ -83,6 +92,7 @@
 
 .rect.mozilla-science-mini-grants {
   fill: var(--program-3);
+  stroke: solid 2px var(--program-3);
 }
 
 .link.target-mozilla-science-mini-grants {
@@ -91,6 +101,7 @@
 
 .rect.gigabit-community-fund {
   fill: var(--program-4);
+  stroke: solid 2px var(--program-4);
 }
 
 .link.target-gigabit-community-fund {
@@ -99,6 +110,7 @@
 
 .rect.hive {
   fill: var(--program-5);
+  stroke: solid 2px var(--program-5);
 }
 
 .link.target-hive {
@@ -107,6 +119,7 @@
 
 .rect.open-news-fellows {
   fill: var(--program-6);
+  stroke: solid 2px var(--program-6);
 }
 
 .link.target-open-news-fellows {
@@ -115,6 +128,7 @@
 
 .rect.open-science-fellows {
   fill: var(--program-7);
+  stroke: solid 2px var(--program-7);
 }
 
 .link.target-open-science-fellows {
@@ -123,6 +137,7 @@
 
 .rect.discretionary-awards {
   fill: var(--program-8);
+  stroke: solid 2px var(--program-8);
 }
 
 .link.target-discretionary-awards {
@@ -131,6 +146,7 @@
 
 .rect.fellow-in-residence-senior-fellows {
   fill: var(--program-9);
+  stroke: solid 2px var(--program-9);
 }
 
 .link.target-fellow-in-residence-senior-fellows {
@@ -139,6 +155,7 @@
 
 .rect.other-programs {
   fill: var(--program-10);
+  stroke: solid 2px var(--program-10);
 }
 
 .link.target-other-programs {
@@ -147,6 +164,7 @@
 
 .rect.tech-society-fellows {
   fill: var(--program-11);
+  stroke: solid 2px var(--program-11);
 }
 
 .link.target-tech-society-fellows {
@@ -155,6 +173,7 @@
 
 .rect.advocacy-network-fund {
   fill: var(--program-12);
+  stroke: solid 2px var(--program-12);
 }
 
 .link.target-advocacy-network-fund {
@@ -163,6 +182,7 @@
 
 .rect.tech-policy-fellows {
   fill: var(--program-13);
+  stroke: solid 2px var(--program-13);
 }
 
 .link.target-tech-policy-fellows {
@@ -171,6 +191,7 @@
 
 .rect.open-web-fellows {
   fill: var(--program-14);
+  stroke: solid 2px var(--program-14);
 }
 
 .link.target-open-web-fellows {
@@ -179,6 +200,7 @@
 
 .rect.creative-media-awards {
   fill: var(--program-15);
+  stroke: solid 2px var(--program-15);
 }
 
 .link.target-creative-media-awards {
@@ -187,6 +209,7 @@
 
 .rect.mozilla-fellows {
   fill: var(--program-16);
+  stroke: solid 2px var(--program-16);
 }
 
 .link.target-mozilla-fellows {
@@ -195,6 +218,7 @@
 
 .rect.nsf-wins {
   fill: var(--program-17);
+  stroke: solid 2px var(--program-17);
 }
 
 .link.target-nsf-wins {
@@ -203,6 +227,7 @@
 
 .rect.general-operating-support {
   fill: var(--output-1);
+  stroke: solid 2px var(--output-1);
 }
 
 .link.target-general-operating-support {
@@ -211,6 +236,7 @@
 
 .rect.curriculum-or-educational-resource {
   fill: var(--output-2);
+  stroke: solid 2px var(--output-2);
 }
 
 .link.target-curriculum-or-educational-resource {
@@ -219,6 +245,7 @@
 
 .rect.software {
   fill: var(--output-3);
+  stroke: solid 2px var(--output-3);
 }
 
 .link.target-software {
@@ -227,6 +254,7 @@
 
 .rect.workshop-or-convening {
   fill: var(--output-4);
+  stroke: solid 2px var(--output-4);
 }
 
 .link.target-workshop-or-convening {
@@ -235,6 +263,7 @@
 
 .rect.capacity-building {
   fill: var(--output-5);
+  stroke: solid 2px var(--output-5);
 }
 
 .link.target-capacity-building {
@@ -243,6 +272,7 @@
 
 .rect.public-resource {
   fill: var(--output-6);
+  stroke: solid 2px var(--output-6);
 }
 
 .link.target-public-resource {
@@ -251,6 +281,7 @@
 
 .rect.other-not-available {
   fill: var(--output-7);
+  stroke: solid 2px var(--output-7);
 }
 
 .link.target-other-not-available {
@@ -259,6 +290,7 @@
 
 .rect.research {
   fill: var(--output-8);
+  stroke: solid 2px var(--output-8);
 }
 
 .link.target-research {
@@ -267,6 +299,7 @@
 
 .rect.art-or-media {
   fill: var(--output-9);
+  stroke: solid 2px var(--output-9);
 }
 
 .link.target-art-or-media {
@@ -275,6 +308,7 @@
 
 .rect.hardware {
   fill: var(--output-10);
+  stroke: solid 2px var(--output-10);
 }
 
 .link.target-hardware {
@@ -283,6 +317,7 @@
 
 .rect.policy-recommendations {
   fill: var(--output-11);
+  stroke: solid 2px var(--output-11);
 }
 
 .link.target-policy-recommendations {
@@ -294,7 +329,6 @@ body {
 }
 
 svg {
-  outline: green solid 1px;
   height: 100%;
   width: 100%;
 }
@@ -342,13 +376,13 @@ text {
 }
 
 .total-programs {
-  outline: green solid 1px;
+  stroke: green solid 1px;
   font-size: 1rem;
   font-weight: 700;
 }
 
 .total-programs {
-  outline: purple solid 1px;
+  stroke: purple solid 1px;
 }
 
 .programs-count,
