@@ -287,9 +287,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         return d.y0;
       })
       .attr('height', (d, i) => {
-        // if (elementClasses[d.name] === 'program') {
-        //   return (d.y1 - d.y0) * 1.2;
-        // }
         return d.y1 - d.y0;
       })
       .attr('width', (d) => {
@@ -442,45 +439,52 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
               `;
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX - 150 + 'px')
-          .style('top', event.pageY + 150 + 'px')
+          .style('left', event.pageX - 10 + 'px')
+          .style('top', event.pageY + 10 + 'px')
           .transition()
           .duration(200)
           .style('opacity', 1);
 
-        // d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
+        d3.selectAll(`*:not(.source-${kebabCase(data.name)})`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', fadeOpacity);
+        d3.selectAll(`*:not(.target-${kebabCase(data.name)})`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', fadeOpacity);
         // issue links
         // sourceLinks
-        d3.selectAll(`.link.source-${kebabCase(data.name)}`).style(
-          'stroke-opacity',
-          hoverOpacity
-        );
+        d3.selectAll(`.link.source-${kebabCase(data.name)}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', hoverOpacity);
 
         // targetLinks
-        d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
-          'stroke-opacity',
-          hoverOpacity
-        );
+        d3.selectAll(`.link.target-${kebabCase(data.name)}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        // tooltip.transition().duration(200).style('opacity', 0);
+        tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
           .duration(200)
           .style('stroke-opacity', defaultOpacity);
       });
 
-      // ADD TOOLTIPS TO OUTPUT NODES
-      d3.selectAll(`.output`)
+    // ADD TOOLTIPS TO OUTPUT NODES
+    d3.selectAll(`.output`)
       .on('mouseover', (event, data) => {
         let nodeData = outputsToProgram.filter((output) => {
           return output.key === data.name;
         })[0];
-        
+
         let outputPrograms = nodeData.values.reduce((acc, program) => {
           return (acc += `${program.key} - ${program.values.length}</br>`);
         }, ``);
-        
+
         tooltipHtml = `
         <div class="details">
         <div class="issue-title">
@@ -493,25 +497,24 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         </div>
         `;
         tooltip
-        .html(tooltipHtml)
-        .style('left', event.pageX - 350 + 'px')
-        .style('top', event.pageY - 25 + 'px')
-        .transition()
-        .duration(200)
-        .style('opacity', 1);
-        
+          .html(tooltipHtml)
+          .style('left', event.pageX - 350 + 'px')
+          .style('top', event.pageY - 25 + 'px')
+          .transition()
+          .duration(200)
+          .style('opacity', 1);
+
         d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
-        
+
         d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
           'stroke-opacity',
           hoverOpacity
-          );
-        })
-        .on('mouseout', () => {
-          tooltip.transition().duration(200).style('opacity', 0);
-          d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
-        });
-        /*
-        */
+        );
+      })
+      .on('mouseout', () => {
+        tooltip.transition().duration(200).style('opacity', 0);
+        d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
       });
-      
+    /*
+     */
+  });

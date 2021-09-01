@@ -27245,9 +27245,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   }).attr('y', function (d) {
     return d.y0;
   }).attr('height', function (d, i) {
-    // if (elementClasses[d.name] === 'program') {
-    //   return (d.y1 - d.y0) * 1.2;
-    // }
     return d.y1 - d.y0;
   }).attr('width', function (d) {
     return sankeyGraph.nodeWidth();
@@ -27316,15 +27313,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }).sort().join('</br>'), "\n            </div>\n            <div class=\"outputs-list\">\n            <span class=\"detail-heading\">Outputs</span>\n            ").concat(outputs.map(function (output) {
       return "".concat(output[1], " ").concat(output[0]);
     }).join('</br>'), "\n              </div>\n              </div>\n              ");
-    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 150 + 'px').transition().duration(200).style('opacity', 1); // d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
-    // issue links
+    tooltip.html(tooltipHtml).style('left', event.pageX - 10 + 'px').style('top', event.pageY + 10 + 'px').transition().duration(200).style('opacity', 1);
+    d3.selectAll("*:not(.source-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
+    d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity); // issue links
     // sourceLinks
 
-    d3.selectAll(".link.source-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity); // targetLinks
+    d3.selectAll(".link.source-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity); // targetLinks
 
-    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
+    d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    // tooltip.transition().duration(200).style('opacity', 0);
+    tooltip.transition().duration(200).style('opacity', 0);
     d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO OUTPUT NODES
 
@@ -27344,7 +27342,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
   });
   /*
-  */
+   */
 });
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -27374,7 +27372,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51378" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51986" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
