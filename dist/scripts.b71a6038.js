@@ -27268,11 +27268,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
   link.on('mouseover', function (event, data) {
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n            </div>\n          </div>\n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
-    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', fadeOpacity);
-    d3.select(this).transition().duration(100).style('stroke-opacity', hoverOpacity);
+    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(100).style('opacity', 1);
+    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity);
+    d3.select(this).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function (d) {
-    tooltip.transition().duration(200).style('opacity', 0);
+    tooltip.transition().duration(300).style('opacity', 0);
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   });
   /** ALL MOUSEOVER EVENTS */
@@ -27291,14 +27291,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       }, "");
     }
 
-    tooltipHtml = "\n        <div class=\"details\">\n        <div class=\"issue-title\">\n        ".concat(data.name, "\n        </div>\n        <div class=\"total-programs\">\n        ").concat(nodeData.length, " Programs\n        </div>\n        <div class=\"total-awards\">\n        ").concat(awardsData, "\n        </div>\n        </div>  \n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(200).style('opacity', 1);
+    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
+    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(100).style('opacity', 1);
     d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity); // highlight all related lines
 
     d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(200).style('opacity', 0);
-    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
+    tooltip.transition().duration(300).style('opacity', 0);
+    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO PROGRAM NODES
 
   d3.selectAll("rect.program").on('mouseover', function (event, data) {
@@ -27313,7 +27313,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }).sort().join('</br>'), "\n            </div>\n            <div class=\"outputs-list\">\n            <span class=\"detail-heading\">Outputs</span>\n            ").concat(outputs.map(function (output) {
       return "".concat(output[1], " ").concat(output[0]);
     }).join('</br>'), "\n              </div>\n              </div>\n              ");
-    tooltip.html(tooltipHtml).style('left', event.pageX - 10 + 'px').style('top', event.pageY + 10 + 'px').transition().duration(200).style('opacity', 1);
+    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 150 + 'px').transition().duration(100).style('opacity', 1);
     d3.selectAll("*:not(.source-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
     d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity); // issue links
     // sourceLinks
@@ -27322,8 +27322,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(200).style('opacity', 0);
-    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', defaultOpacity);
+    tooltip.transition().duration(300).style('opacity', 0);
+    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO OUTPUT NODES
 
   d3.selectAll(".output").on('mouseover', function (event, data) {
@@ -27334,12 +27334,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
     }, "");
     tooltipHtml = "\n        <div class=\"details\">\n        <div class=\"issue-title\">\n        ".concat(data.name, "\n        <span class=\"detail-heading\">Programs creating this output</span>\n        </div>\n        <div class=\"outputs-list\">\n        ").concat(outputPrograms, "\n        </div>\n        </div>\n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(200).style('opacity', 1);
-    d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
-    d3.selectAll(".link.target-".concat(kebabCase(data.name))).style('stroke-opacity', hoverOpacity);
+    tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(100).style('opacity', 1);
+    d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
+    d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(200).style('opacity', 0);
-    d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
+    tooltip.transition().duration(300).style('opacity', 0);
+    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   });
   /*
    */
@@ -27372,7 +27372,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51986" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63504" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -330,19 +330,19 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('left', event.pageX + 'px')
           .style('top', event.pageY + 'px')
           .transition()
-          .duration(200)
+          .duration(100)
           .style('opacity', 1);
         d3.selectAll('.link')
           .transition()
-          .duration(100)
+          .duration(200)
           .style('stroke-opacity', fadeOpacity);
         d3.select(this)
           .transition()
-          .duration(100)
+          .duration(200)
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', function (d) {
-        tooltip.transition().duration(200).style('opacity', 0);
+        tooltip.transition().duration(300).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
           .duration(100)
@@ -368,24 +368,24 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           }, ``);
         }
         tooltipHtml = `
-        <div class="details">
-        <div class="issue-title">
-        ${data.name}
-        </div>
-        <div class="total-programs">
-        ${nodeData.length} Programs
-        </div>
-        <div class="total-awards">
-        ${awardsData}
-        </div>
-        </div>  
+          <div class="details">
+            <div class="issue-title">
+              ${data.name}
+            </div>
+            <div class="total-programs">
+              ${nodeData.length} Programs
+            </div>
+            <div class="total-awards">
+              ${awardsData}
+            </div>
+          </div>  
         `;
         tooltip
           .html(tooltipHtml)
           .style('left', event.pageX + 50 + 'px')
           .style('top', event.pageY + 'px')
           .transition()
-          .duration(200)
+          .duration(100)
           .style('opacity', 1);
 
         d3.selectAll('.link')
@@ -400,10 +400,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
+        tooltip.transition().duration(300).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
-          .duration(200)
+          .duration(100)
           .style('stroke-opacity', defaultOpacity);
       });
 
@@ -439,10 +439,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
               `;
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX - 10 + 'px')
-          .style('top', event.pageY + 10 + 'px')
+          .style('left', event.pageX - 150 + 'px')
+          .style('top', event.pageY + 150 + 'px')
           .transition()
-          .duration(200)
+          .duration(100)
           .style('opacity', 1);
 
         d3.selectAll(`*:not(.source-${kebabCase(data.name)})`)
@@ -467,10 +467,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
+        tooltip.transition().duration(300).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
-          .duration(200)
+          .duration(100)
           .style('stroke-opacity', defaultOpacity);
       });
 
@@ -501,19 +501,25 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('left', event.pageX - 350 + 'px')
           .style('top', event.pageY - 25 + 'px')
           .transition()
-          .duration(200)
+          .duration(100)
           .style('opacity', 1);
 
-        d3.selectAll('.link').style('stroke-opacity', fadeOpacity);
+          d3.selectAll(`*:not(.target-${kebabCase(data.name)})`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', fadeOpacity);
 
-        d3.selectAll(`.link.target-${kebabCase(data.name)}`).style(
-          'stroke-opacity',
-          hoverOpacity
-        );
+        d3.selectAll(`.link.target-${kebabCase(data.name)}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link').style('stroke-opacity', defaultOpacity);
+        tooltip.transition().duration(300).style('opacity', 0);
+        d3.selectAll('.link')
+          .transition()
+          .duration(100)
+          .style('stroke-opacity', defaultOpacity);
       });
     /*
      */
