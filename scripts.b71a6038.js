@@ -27252,16 +27252,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
    */
 
   link.on('mouseover', function (event, data) {
-    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n            </div>\n          </div>\n        "); // tooltip
-    //   .html(tooltipHtml)
-    //   .style('top', () => getTooltipPositionY(event) - margin.bottom + 'px')
-    //   .style('left', () => getTooltipPositionX(event) + 20 + 'px')
-    //   .classed('visible', true)
-
+    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n            </div>\n          </div>\n        ");
+    tooltip.html(tooltipHtml).style('top', function () {
+      return getTooltipPositionY(event) + margin.bottom + 'px';
+    }).style('left', function () {
+      return getTooltipPositionX(event) + sankeyGraph.nodeWidth() + 'px';
+    }).classed('visible', true);
     d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity);
     d3.select(this).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function (d) {
-    // tooltip.classed('visible', false);
+    tooltip.classed('visible', false);
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   });
   /** ALL MOUSEOVER EVENTS */
@@ -27347,7 +27347,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   var getTooltipPositionY = function getTooltipPositionY(event) {
     var tooltipDetail = document.querySelector("#tooltip").getBoundingClientRect();
     var containerDetail = document.querySelector("#container").getBoundingClientRect();
-    return tooltipDetail.height + event.pageY > containerDetail.height ? event.pageY - tooltipDetail.height : event.pageY;
+    return tooltipDetail.height + event.pageY > containerDetail.height ? event.pageY - tooltipDetail.height - 20 : event.pageY;
   };
 
   var getTooltipPositionX = function getTooltipPositionX(event) {
