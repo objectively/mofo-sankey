@@ -1,14 +1,20 @@
 import 'regenerator-runtime/runtime';
-var slugify = require('slugify');
+let kebabCase = require('lodash.kebabcase');
+import { min, max } from 'd3-array';
 import { select, selectAll } from 'd3-selection';
 import { csv, json } from 'd3-fetch';
-import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
+import { sankey, sankeyCenter, sankeyLinkHorizontal } from 'd3-sankey';
 import { format } from 'd3-format';
-import { scaleOrdinal } from 'd3-scale';
+import { scaleSqrt, scaleOrdinal, scaleLinear } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
 import { rgb } from 'd3-color';
 import { nest } from 'd3-collection';
 import { transition } from 'd3-transition';
+import { interpolate, interpolateNumber } from 'd3-shape';
+import {
+  customLinkGenerator,
+  customLinkGenerator2
+} from './helpers/custom-link-generator';
 
 let realIssuesToEngagement = require(`./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
 let realEngagementToOutput = require(`./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
@@ -18,10 +24,15 @@ const d3 = Object.assign(
   {
     csv,
     nest,
+    scaleSqrt,
     select,
     selectAll,
     json,
+    min,
+    max,
     sankey,
+    sankeyCenter,
+    scaleLinear,
     sankeyLinkHorizontal,
     format,
     scaleOrdinal,
@@ -31,23 +42,22 @@ const d3 = Object.assign(
   }
 );
 
-// const jsonUrl = `https://gist.githubusercontent.com/tekd/e9d8aee9e059f773aaf52f1130f98c65/raw/4a2af7014f0a8eed1a384f9d3f478fef6f67b218/sankey-test.json`;
-
 /*
   SET UP GRAPH DIMENSIONS
 */
 
-const aspect = 0.8;
+let margin = { top: 20, right: 10, bottom: 20, left: 10 };
 
-var margin = { top: 0, right: 0, bottom: 0, left: 0 };
+let height =
+  document.querySelector('#container').clientHeight -
+  (margin.top + margin.bottom);
+let width =
+  document.querySelector('#container').clientWidth -
+  (margin.left + margin.right);
 
-var height = 500 / aspect;
-var width = 800 / aspect;
-
-/*
-  FORMATTING HELPERS
-*/
-const color = d3.scaleOrdinal(schemeCategory10);
+let defaultOpacity = 0.3;
+let hoverOpacity = 1;
+let fadeOpacity = 0.1;
 
 // SETUP VARIABLES
 let awardsData;
@@ -58,16 +68,31 @@ let elementClasses = {};
 let outputsToProgram;
 let tooltip;
 let tooltipHtml;
-/*
-  APPEND SVG TO PAGE
-*/
+
+// APPEND SVG TO PAGE
 
 let svg = d3
   .select('#container')
   .append('svg')
-  .attr('width', width)
-  .attr('height', height)
-  .append('g');
+  .attr(
+    'width',
+    document.querySelector('#container').clientWidth +
+      (margin.left + margin.right)
+  )
+  .attr(
+    'height',
+    document.querySelector('#container').clientHeight +
+      (margin.top + margin.bottom)
+  )
+  .attr(
+    'viewBox',
+    `0 0 ${document.querySelector('#container').clientWidth} ${
+      document.querySelector('#container').clientHeight
+    }`
+  )
+  .attr('preserveAspectRatio', 'xMinYMin')
+  .append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
 
 /*
   SETUP SANKEY PROPERTIES
@@ -75,20 +100,16 @@ let svg = d3
 
 let sankeyGraph = d3
   .sankey()
-  .nodeWidth(20)
-  .nodePadding(10)
+  .iterations(0)
+  .nodePadding(8)
+  // .linkSort(null)
+  // .nodeSort(null)
   .size([width, height]);
-
-let path = sankeyGraph.links();
 
 /**
  *  ADD TOOLTIPS
  */
-tooltip = d3
-  .select('body')
-  .append('div')
-  .attr('class', 'tooltip')
-  .style('opacity', 0);
+tooltip = d3.select('body').append('div').attr('id', 'tooltip');
 
 /* 
   FORMAT DATA
@@ -97,6 +118,8 @@ tooltip = d3
 Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
   .then((data) => {
     let graph = { nodes: [], links: [] };
+
+    let linkScale = d3.scaleSqrt().domain([0, 84]).range([5, 80]);
 
     nestedIssues = d3
       .nest()
@@ -121,10 +144,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         // Add issueAreas to elementClasses
         elementClasses[issue.source] = 'issue-area';
         elementClasses[issue.target] = 'program';
+
         graph.nodes.push({
           name: issue.source
         });
-        graph.nodes.push({ name: issue.target });
+        graph.nodes.push({
+          name: issue.target
+        });
         graph.links.push({
           source: issue.source,
           target: issue.target,
@@ -192,13 +218,23 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       graph.links[i].source = graphMap.indexOf(graph.links[i].source);
       graph.links[i].target = graphMap.indexOf(graph.links[i].target);
     });
+    let minLinkVal = d3.min(graph.links.map((link) => link.value));
+    let maxLinkVal = d3.max(graph.links.map((link) => link.value));
+    linkScale = d3
+      .scaleLinear()
+      .domain([minLinkVal, maxLinkVal])
+      .range([14, 84]);
 
+    graph.links.forEach((link) => {
+      link.rawValue = link.value;
+      link.value = linkScale(link.value);
+    });
+    console.log(graph);
     return graph;
   })
   .then((data) => {
-    /* LOAD DATA */
-
     let chart = sankeyGraph(data);
+
     /* ADD LINKs */
     let link = svg
       .append('g')
@@ -209,44 +245,17 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .enter()
       .append('path')
       .attr('class', (d) => {
-        return `link ${slugify(d.source.name).toLowerCase()} source-${slugify(
-          d.source.name,
-          { lower: true }
-        )} target-${slugify(d.target.name, { lower: true })}`;
+        return `link ${kebabCase(d.source.name)} source-${kebabCase(
+          d.source.name
+        )} target-${kebabCase(d.target.name)} link-${
+          elementClasses[d.source.name]
+        }`;
       })
-      .attr('d', d3.sankeyLinkHorizontal())
-      .attr('stroke-width', (d) => d.width);
-
-    /**
-     *  ADD TOOLTIPS
-     */
-    /*
-     */
-    link
-      .on('mouseover', function (event, data) {
-        // console.log('link hover', data)
-        tooltipHtml = `
-          <div class="details">
-            <div class="issue-title">
-              ${data.source.name}
-            </div>
-            <div class="total-awards">
-              ${data.target.name} - ${data.value} Awards
-            </div>
-          </div>
-        `;
-
-        tooltip
-          .html(tooltipHtml)
-          .style('left', event.pageX + 'px')
-          .style('top', event.pageY + 'px')
-          .transition()
-          .duration(200)
-          .style('opacity', 1);
-      })
-      .on('mouseout', function (d) {
-        tooltip.transition().duration(500).style('opacity', 0);
+      .attr('d', sankeyLinkHorizontal())
+      .attr('stroke-width', (d) => {
+        return d.width;
       });
+
     /* ADD NODES */
     let node = svg
       .append('g')
@@ -258,24 +267,24 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .append('g')
       .attr('class', 'node');
 
-    /* ADD NODE RECTANGLES */
+    // /* ADD NODE RECTANGLES */
     node
       .append('rect')
       .attr('class', (d) => {
-        return `rect ${slugify(d.name, { lower: true })} ${
-          elementClasses[d.name]
-        }`;
+        return `rect ${kebabCase(d.name)} ${elementClasses[d.name]}`;
       })
-      .attr('x', (d) => d.x0)
-      .attr('y', (d) => d.y0)
-      .attr('height', (d) => {
+      .attr('x', (d) => {
+        return d.x0;
+      })
+      .attr('y', (d) => {
+        return d.y0;
+      })
+      .attr('height', (d, i) => {
         return d.y1 - d.y0;
       })
-      .attr('width', sankeyGraph.nodeWidth())
-      .style('fill', (d) => {
-        return (d.color = color(d.name));
-      })
-      .style('stroke', (d) => d3.rgb(d.color).darker(2));
+      .attr('width', (d) => {
+        return sankeyGraph.nodeWidth();
+      });
 
     /* ADD NODE TITLES */
     node
@@ -283,6 +292,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('x', (d) => d.x0 - 6)
       .attr('y', (d) => (d.y1 + d.y0) / 2)
       .attr('dy', '0.35em')
+
       .attr('text-anchor', 'end')
       .text((d) => {
         return d.name;
@@ -291,7 +301,50 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .attr('x', (d) => d.x1 + 6)
       .attr('text-anchor', 'start');
 
-    /** HIGHLIGHT INDIVIDUAL LINE */
+    /**
+     *  ADD TOOLTIPS
+     */
+
+    link
+      .on('mouseover', function (event, data) {
+        tooltipHtml = `
+          <div class="details">
+            <div class="issue-title">
+              ${data.source.name}
+            </div>
+            <div class="total-awards">
+              ${data.target.name} - ${data.rawValue} Awards
+            </div>
+          </div>
+        `;
+
+        tooltip
+          .html(tooltipHtml)
+          .style('top', () => getTooltipPositionY(event) + margin.bottom + 'px')
+          .style('left', () => getTooltipPositionX(event) + sankeyGraph.nodeWidth() + 'px')
+          .classed('visible', true)
+
+        d3.selectAll('.link')
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', fadeOpacity);
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', hoverOpacity);
+      })
+      .on('mouseout', function (d) {
+        tooltip.classed('visible', false);
+
+        d3.selectAll('.link')
+          .transition()
+          .duration(100)
+          .style('stroke-opacity', defaultOpacity);
+      });
+
+    /** ALL MOUSEOVER EVENTS */
+
+    /** LINK MOUSEOVER */
 
     // ADD TOOLTIPS TO ISSUE AREA NODES
     d3.selectAll(`.issue-area`)
@@ -302,11 +355,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
         if (nodeData) {
           awardsData = nodeData.reduce((acc, issue) => {
-            return (acc += `${issue.target.name} - ${issue.value} ${
-              issue.value > 1 ? 'awards' : `award`
+            return (acc += `${issue.target.name} - ${issue.rawValue} ${
+              issue.rawValue > 1 ? 'awards' : `award`
             }${'</br>'}`);
           }, ``);
         }
+
         tooltipHtml = `
           <div class="details">
             <div class="issue-title">
@@ -320,26 +374,30 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             </div>
           </div>  
         `;
+
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX + 50 + 'px')
-          .style('top', event.pageY + 'px')
-          .transition()
-          .duration(200)
-          .style('opacity', 1);
+          .style('top', () => getTooltipPositionY(event) - margin.bottom + 'px')
+          .style('left', event.pageX + sankeyGraph.nodeWidth() + 'px')
+          .classed('visible', true);
 
-        // highlight all related lines (TODO: privacy + security is not working)
-        d3.selectAll(`.link.${slugify(data.name, { lower: true })}`)
-          .transition()
-          .duration(200)
-          .style('stroke-opacity', 0.7);
-      })
-      .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
         d3.selectAll('.link')
           .transition()
           .duration(200)
-          .style('stroke-opacity', 0.2);
+          .style('stroke-opacity', fadeOpacity);
+        // highlight all related lines
+
+        d3.selectAll(`.link.${kebabCase(data.name)}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', hoverOpacity);
+      })
+      .on('mouseout', () => {
+        tooltip.classed('visible', false);
+        d3.selectAll('.link')
+          .transition()
+          .duration(100)
+          .style('stroke-opacity', defaultOpacity);
       });
 
     // ADD TOOLTIPS TO PROGRAM NODES
@@ -349,51 +407,64 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           (program) => program.source.name === data.name
         );
         let outputs = data.sourceLinks
-          .map((d) => [d.target.name, d.value])
+          .map((d) => [d.target.name, d.rawValue])
           .sort();
 
         tooltipHtml = `
-            <div class="details">
-              <div class="issue-title">
-                ${data.name}
-              </div>
-              <div class="issues-list">
-                <span class="detail-heading">Issues</span>
-                ${data.targetLinks
-                  .map((d) => d.source.name)
-                  .sort()
-                  .join('</br>')}
-              </div>
-              <div class="outputs-list">
-                <span class="detail-heading">Outputs</span>
-                  ${outputs
-                    .map((output) => `${output[1]} ${output[0]}`)
-                    .join('</br>')}
-              </div>
+          <div class="details">
+            <div class="issue-title">
+              ${data.name}
             </div>
+            <div class="issues-list">
+              <span class="detail-heading">Issues</span>
+              ${data.targetLinks
+                .map((d) => d.source.name)
+                .sort()
+                .join('</br>')}
+                </div>
+                <div class="outputs-list">
+                <span class="detail-heading">Outputs</span>
+              ${outputs
+                .map((output) => `${output[1]} ${output[0]}`)
+                .join('</br>')}
+              </div>
+          </div>
           `;
+
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX - 150 + 'px')
-          .style('top', event.pageY + 50 + 'px')
+          .style('top', () => getTooltipPositionY(event) + 20 + 'px')
+          .style('left', () => getTooltipPositionX(event) + 'px')
+          .classed('visible', true);
+
+        d3.selectAll(`*:not(.source-${kebabCase(data.name)})`)
           .transition()
           .duration(200)
-          .style('opacity', 1);
+          .style('stroke-opacity', fadeOpacity);
 
+        d3.selectAll(`*:not(.target-${kebabCase(data.name)})`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', fadeOpacity);
         // issue links
         // sourceLinks
-        d3.selectAll(
-          `.link.source-${slugify(data.name, { lower: true })}`
-        ).style('stroke-opacity', 1);
+        d3.selectAll(`.link.source-${kebabCase(data.name)}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', hoverOpacity);
 
         // targetLinks
-        d3.selectAll(
-          `.link.target-${slugify(data.name, { lower: true })}`
-        ).style('stroke-opacity', 1);
+        d3.selectAll(`.link.target-${kebabCase(data.name)}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link').style('stroke-opacity', 0.2);
+        tooltip.classed('visible', false);
+        d3.selectAll('.link')
+          .transition()
+          .duration(100)
+          .style('stroke-opacity', defaultOpacity);
       });
 
     // ADD TOOLTIPS TO OUTPUT NODES
@@ -408,30 +479,73 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         }, ``);
 
         tooltipHtml = `
-            <div class="details">
-              <div class="issue-title">
-                ${data.name}
-              </div>
-              <div class="outputs-list">
-                <span class="detail-heading">Programs creating this output</span>
-                  ${outputPrograms}
-              </div>
+          <div class="details">
+            <div class="issue-title">
+              ${data.name}
+              <span class="detail-heading">Programs creating this output</span>
             </div>
-          `;
+            <div class="outputs-list">
+              ${outputPrograms}
+            </div>
+          </div>
+        `;
+
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX - 350 + 'px')
-          .style('top', event.pageY - 25 + 'px')
+          .style('top', () => getTooltipPositionY(event) - margin.bottom + 'px')
+          .style('left', () => getTooltipPositionX(event) - sankeyGraph.nodeWidth() + 'px')
+          .classed('visible', true);
+
+        d3.selectAll(`*:not(.target-${kebabCase(data.name)})`)
           .transition()
           .duration(200)
-          .style('opacity', 1);
+          .style('stroke-opacity', fadeOpacity);
 
-        d3.selectAll(
-          `.link.target-${slugify(data.name, { lower: true })}`
-        ).style('stroke-opacity', 1);
+        d3.selectAll(`.link.target-${kebabCase(data.name)}`)
+          .transition()
+          .duration(200)
+          .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(200).style('opacity', 0);
-        d3.selectAll('.link').style('stroke-opacity', 0.2);
+        tooltip.classed('visible', false);
+        d3.selectAll('.link')
+          .transition()
+          .duration(100)
+          .style('stroke-opacity', defaultOpacity);
       });
+    /*
+      HELPERS
+    */
+    const getTooltipPositionY = (event) => {
+      let tooltipDetail = document
+        .querySelector(`#tooltip`)
+        .getBoundingClientRect();
+      let containerDetail = document
+        .querySelector(`#container`)
+        .getBoundingClientRect();
+
+      return tooltipDetail.height + event.pageY > containerDetail.height
+        ? event.pageY - tooltipDetail.height - 20
+        : event.pageY;
+    };
+
+    const getTooltipPositionX = (event) => {
+      let tooltipDetail = document
+        .querySelector(`#tooltip`)
+        .getBoundingClientRect();
+      let containerDetail = document
+        .querySelector(`#container`)
+        .getBoundingClientRect();
+
+      if (
+        event.pageX > containerDetail.width * 0.34 &&
+        event.pageX < containerDetail.width * 0.67
+      ) {
+        return event.pageX - tooltipDetail.width / 2;
+      } else if (event.pageX < containerDetail.width * 0.34) {
+        return event.pageX;
+      } else if (event.pageX > containerDetail.width * 0.67) {
+        return event.pageX - tooltipDetail.width;
+      }
+    };
   });
