@@ -1403,7 +1403,7 @@ function bisector(f) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = number;
+exports.default = _default;
 exports.numbers = numbers;
 
 var _marked = /*#__PURE__*/regeneratorRuntime.mark(numbers);
@@ -1414,7 +1414,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function number(x) {
+function _default(x) {
   return x === null ? NaN : +x;
 }
 
@@ -2224,9 +2224,9 @@ function keyof(value) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = identity;
+exports.default = _default;
 
-function identity(x) {
+function _default(x) {
   return x;
 }
 },{}],"node_modules/d3-array/src/group.js":[function(require,module,exports) {
@@ -2408,9 +2408,9 @@ function nest(values, map, reduce, keys) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = permute;
+exports.default = _default;
 
-function permute(source, keys) {
+function _default(source, keys) {
   return Array.from(keys, function (key) {
     return source[key];
   });
@@ -2422,8 +2422,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = sort;
-exports.compareDefined = compareDefined;
-exports.ascendingDefined = ascendingDefined;
+
+var _ascending = _interopRequireDefault(require("./ascending.js"));
 
 var _permute = _interopRequireDefault(require("./permute.js"));
 
@@ -2453,9 +2453,10 @@ function sort(values) {
 
   var _F = F,
       _F2 = _slicedToArray(_F, 1),
-      f = _F2[0];
+      _F2$ = _F2[0],
+      f = _F2$ === void 0 ? _ascending.default : _F2$;
 
-  if (f && f.length === 1 || F.length > 1) {
+  if (f.length === 1 || F.length > 1) {
     var index = Uint32Array.from(values, function (d, i) {
       return i;
     });
@@ -2471,7 +2472,7 @@ function sort(values) {
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
             var _f = _step.value;
-            var c = ascendingDefined(_f[i], _f[j]);
+            var c = (0, _ascending.default)(_f[i], _f[j]);
             if (c) return c;
           }
         } catch (err) {
@@ -2483,29 +2484,16 @@ function sort(values) {
     } else {
       f = values.map(f);
       index.sort(function (i, j) {
-        return ascendingDefined(f[i], f[j]);
+        return (0, _ascending.default)(f[i], f[j]);
       });
     }
 
     return (0, _permute.default)(values, index);
   }
 
-  return values.sort(f === undefined ? ascendingDefined : compareDefined(f));
+  return values.sort(f);
 }
-
-function compareDefined(compare) {
-  if (typeof compare !== "function") throw new TypeError("compare is not a function");
-  return function (a, b) {
-    var x = compare(a, b);
-    if (x || x === 0) return x;
-    return (compare(b, b) === 0) - (compare(a, a) === 0);
-  };
-}
-
-function ascendingDefined(a, b) {
-  return (a == null || !(a >= a)) - (b == null || !(b >= b)) || (a < b ? -1 : a > b ? 1 : 0);
-}
-},{"./permute.js":"node_modules/d3-array/src/permute.js"}],"node_modules/d3-array/src/groupSort.js":[function(require,module,exports) {
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./permute.js":"node_modules/d3-array/src/permute.js"}],"node_modules/d3-array/src/groupSort.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2583,9 +2571,9 @@ exports.map = map;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = constant;
+exports.default = _default;
 
-function constant(x) {
+function _default(x) {
   return function () {
     return x;
   };
@@ -2596,14 +2584,14 @@ function constant(x) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = ticks;
+exports.default = _default;
 exports.tickIncrement = tickIncrement;
 exports.tickStep = tickStep;
 var e10 = Math.sqrt(50),
     e5 = Math.sqrt(10),
     e2 = Math.sqrt(2);
 
-function ticks(start, stop, count) {
+function _default(start, stop, count) {
   var reverse,
       i = -1,
       n,
@@ -2692,13 +2680,13 @@ function nice(start, stop, count) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = thresholdSturges;
+exports.default = _default;
 
 var _count = _interopRequireDefault(require("../count.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function thresholdSturges(values) {
+function _default(values) {
   return Math.ceil(Math.log((0, _count.default)(values)) / Math.LN2) + 1;
 }
 },{"../count.js":"node_modules/d3-array/src/count.js"}],"node_modules/d3-array/src/bin.js":[function(require,module,exports) {
@@ -2707,7 +2695,7 @@ function thresholdSturges(values) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = bin;
+exports.default = _default;
 
 var _array = require("./array.js");
 
@@ -2743,7 +2731,7 @@ function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Sy
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function bin() {
+function _default() {
   var value = _identity.default,
       domain = _extent.default,
       threshold = _sturges.default;
@@ -2971,15 +2959,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = quickselect;
 
-var _sort = require("./sort.js");
+var _ascending = _interopRequireDefault(require("./ascending.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Based on https://github.com/mourner/quickselect
 // ISC license, Copyright 2018 Vladimir Agafonkin.
 function quickselect(array, k) {
   var left = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
   var right = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : array.length - 1;
-  var compare = arguments.length > 4 ? arguments[4] : undefined;
-  compare = compare === undefined ? _sort.ascendingDefined : (0, _sort.compareDefined)(compare);
+  var compare = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : _ascending.default;
 
   while (right > left) {
     if (right - left > 600) {
@@ -3024,7 +3013,7 @@ function swap(array, i, j) {
   array[i] = array[j];
   array[j] = t;
 }
-},{"./sort.js":"node_modules/d3-array/src/sort.js"}],"node_modules/d3-array/src/quantile.js":[function(require,module,exports) {
+},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/quantile.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3078,7 +3067,7 @@ function quantileSorted(values, p) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = thresholdFreedmanDiaconis;
+exports.default = _default;
 
 var _count = _interopRequireDefault(require("../count.js"));
 
@@ -3086,7 +3075,7 @@ var _quantile = _interopRequireDefault(require("../quantile.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function thresholdFreedmanDiaconis(values, min, max) {
+function _default(values, min, max) {
   return Math.ceil((max - min) / (2 * ((0, _quantile.default)(values, 0.75) - (0, _quantile.default)(values, 0.25)) * Math.pow((0, _count.default)(values), -1 / 3)));
 }
 },{"../count.js":"node_modules/d3-array/src/count.js","../quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/threshold/scott.js":[function(require,module,exports) {
@@ -3095,7 +3084,7 @@ function thresholdFreedmanDiaconis(values, min, max) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = thresholdScott;
+exports.default = _default;
 
 var _count = _interopRequireDefault(require("../count.js"));
 
@@ -3103,7 +3092,7 @@ var _deviation = _interopRequireDefault(require("../deviation.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function thresholdScott(values, min, max) {
+function _default(values, min, max) {
   return Math.ceil((max - min) / (3.5 * (0, _deviation.default)(values) * Math.pow((0, _count.default)(values), -1 / 3)));
 }
 },{"../count.js":"node_modules/d3-array/src/count.js","../deviation.js":"node_modules/d3-array/src/deviation.js"}],"node_modules/d3-array/src/maxIndex.js":[function(require,module,exports) {
@@ -3228,13 +3217,13 @@ function mean(values, valueof) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = median;
+exports.default = _default;
 
 var _quantile = _interopRequireDefault(require("./quantile.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function median(values, valueof) {
+function _default(values, valueof) {
   return (0, _quantile.default)(values, 0.5, valueof);
 }
 },{"./quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/merge.js":[function(require,module,exports) {
@@ -3370,7 +3359,7 @@ function minIndex(values, valueof) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = mode;
+exports.default = _default;
 
 var _internmap = require("internmap");
 
@@ -3388,7 +3377,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function mode(values, valueof) {
+function _default(values, valueof) {
   var counts = new _internmap.InternMap();
 
   if (valueof === undefined) {
@@ -3503,9 +3492,9 @@ function pair(a, b) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = range;
+exports.default = _default;
 
-function range(start, stop, step) {
+function _default(start, stop, step) {
   start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
   var i = -1,
       n = Math.max(0, Math.ceil((stop - start) / step)) | 0,
@@ -3855,13 +3844,13 @@ function sum(values, valueof) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = transpose;
+exports.default = _default;
 
 var _min = _interopRequireDefault(require("./min.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function transpose(matrix) {
+function _default(matrix) {
   if (!(n = matrix.length)) return [];
 
   for (var i = -1, m = (0, _min.default)(matrix, length), transpose = new Array(m); ++i < m;) {
@@ -3882,13 +3871,13 @@ function length(d) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = zip;
+exports.default = _default;
 
 var _transpose = _interopRequireDefault(require("./transpose.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function zip() {
+function _default() {
   return (0, _transpose.default)(arguments);
 }
 },{"./transpose.js":"node_modules/d3-array/src/transpose.js"}],"node_modules/d3-array/src/every.js":[function(require,module,exports) {
@@ -27031,8 +27020,6 @@ var _d3Collection = require("d3-collection");
 
 var _d3Transition = require("d3-transition");
 
-var _d3Interpolate = require("d3-interpolate");
-
 var _d3Shape = require("d3-shape");
 
 var _customLinkGenerator = require("./helpers/custom-link-generator");
@@ -27049,9 +27036,7 @@ var d3 = Object.assign({}, {
   scaleSqrt: _d3Scale.scaleSqrt,
   select: _d3Selection.select,
   selectAll: _d3Selection.selectAll,
-  interpolateNumber: _d3Interpolate.interpolateNumber,
   json: _d3Fetch.json,
-  linkHorizontal: _d3Shape.linkHorizontal,
   min: _d3Array.min,
   max: _d3Array.max,
   sankey: _d3Sankey.sankey,
@@ -27070,9 +27055,9 @@ var d3 = Object.assign({}, {
 
 var margin = {
   top: 20,
-  right: 50,
+  right: 10,
   bottom: 20,
-  left: 50
+  left: 10
 };
 var height = document.querySelector('#container').clientHeight - (margin.top + margin.bottom);
 var width = document.querySelector('#container').clientWidth - (margin.left + margin.right);
@@ -27101,7 +27086,7 @@ var sankeyGraph = d3.sankey().iterations(0).nodePadding(8) // .linkSort(null)
  *  ADD TOOLTIPS
  */
 
-tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+tooltip = d3.select('body').append('div').attr('id', 'tooltip');
 /* 
   FORMAT DATA
 */
@@ -27267,12 +27252,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
    */
 
   link.on('mouseover', function (event, data) {
-    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n            </div>\n          </div>\n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 'px').style('top', event.pageY + 'px').transition().duration(100).style('opacity', 1);
+    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n            </div>\n          </div>\n        "); // tooltip
+    //   .html(tooltipHtml)
+    //   .style('top', () => getTooltipPositionY(event) - margin.bottom + 'px')
+    //   .style('left', () => getTooltipPositionX(event) + 20 + 'px')
+    //   .classed('visible', true)
+
     d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity);
     d3.select(this).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function (d) {
-    tooltip.transition().duration(300).style('opacity', 0);
+    // tooltip.classed('visible', false);
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   });
   /** ALL MOUSEOVER EVENTS */
@@ -27292,12 +27281,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }
 
     tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX + 50 + 'px').style('top', event.pageY + 'px').transition().duration(100).style('opacity', 1);
+    tooltip.html(tooltipHtml).style('top', function () {
+      return getTooltipPositionY(event) - margin.bottom + 'px';
+    }).style('left', event.pageX + sankeyGraph.nodeWidth() + 'px').classed('visible', true);
     d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity); // highlight all related lines
 
     d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(300).style('opacity', 0);
+    tooltip.classed('visible', false);
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO PROGRAM NODES
 
@@ -27308,12 +27299,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     var outputs = data.sourceLinks.map(function (d) {
       return [d.target.name, d.rawValue];
     }).sort();
-    tooltipHtml = "\n          <div class=\"details\">\n          <div class=\"issue-title\">\n          ".concat(data.name, "\n          </div>\n          <div class=\"issues-list\">\n          <span class=\"detail-heading\">Issues</span>\n          ").concat(data.targetLinks.map(function (d) {
+    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"issues-list\">\n              <span class=\"detail-heading\">Issues</span>\n              ").concat(data.targetLinks.map(function (d) {
       return d.source.name;
-    }).sort().join('</br>'), "\n            </div>\n            <div class=\"outputs-list\">\n            <span class=\"detail-heading\">Outputs</span>\n            ").concat(outputs.map(function (output) {
+    }).sort().join('</br>'), "\n                </div>\n                <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Outputs</span>\n              ").concat(outputs.map(function (output) {
       return "".concat(output[1], " ").concat(output[0]);
-    }).join('</br>'), "\n              </div>\n              </div>\n              ");
-    tooltip.html(tooltipHtml).style('left', event.pageX - 150 + 'px').style('top', event.pageY + 150 + 'px').transition().duration(100).style('opacity', 1);
+    }).join('</br>'), "\n              </div>\n          </div>\n          ");
+    tooltip.html(tooltipHtml).style('top', function () {
+      return getTooltipPositionY(event) + 20 + 'px';
+    }).style('left', function () {
+      return getTooltipPositionX(event) + 'px';
+    }).classed('visible', true);
     d3.selectAll("*:not(.source-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
     d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity); // issue links
     // sourceLinks
@@ -27322,7 +27317,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
     d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(300).style('opacity', 0);
+    tooltip.classed('visible', false);
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   }); // ADD TOOLTIPS TO OUTPUT NODES
 
@@ -27333,18 +27328,42 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     var outputPrograms = nodeData.values.reduce(function (acc, program) {
       return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
     }, "");
-    tooltipHtml = "\n        <div class=\"details\">\n        <div class=\"issue-title\">\n        ".concat(data.name, "\n        <span class=\"detail-heading\">Programs creating this output</span>\n        </div>\n        <div class=\"outputs-list\">\n        ").concat(outputPrograms, "\n        </div>\n        </div>\n        ");
-    tooltip.html(tooltipHtml).style('left', event.pageX - 350 + 'px').style('top', event.pageY - 25 + 'px').transition().duration(100).style('opacity', 1);
+    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n              <span class=\"detail-heading\">Programs creating this output</span>\n            </div>\n            <div class=\"outputs-list\">\n              ").concat(outputPrograms, "\n            </div>\n          </div>\n        ");
+    tooltip.html(tooltipHtml).style('top', function () {
+      return getTooltipPositionY(event) - margin.bottom + 'px';
+    }).style('left', function () {
+      return getTooltipPositionX(event) - sankeyGraph.nodeWidth() + 'px';
+    }).classed('visible', true);
     d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
     d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
   }).on('mouseout', function () {
-    tooltip.transition().duration(300).style('opacity', 0);
+    tooltip.classed('visible', false);
     d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
   });
   /*
-   */
+    HELPERS
+  */
+
+  var getTooltipPositionY = function getTooltipPositionY(event) {
+    var tooltipDetail = document.querySelector("#tooltip").getBoundingClientRect();
+    var containerDetail = document.querySelector("#container").getBoundingClientRect();
+    return tooltipDetail.height + event.pageY > containerDetail.height ? event.pageY - tooltipDetail.height : event.pageY;
+  };
+
+  var getTooltipPositionX = function getTooltipPositionX(event) {
+    var tooltipDetail = document.querySelector("#tooltip").getBoundingClientRect();
+    var containerDetail = document.querySelector("#container").getBoundingClientRect();
+
+    if (event.pageX > containerDetail.width * 0.34 && event.pageX < containerDetail.width * 0.67) {
+      return event.pageX - tooltipDetail.width / 2;
+    } else if (event.pageX < containerDetail.width * 0.34) {
+      return event.pageX;
+    } else if (event.pageX > containerDetail.width * 0.67) {
+      return event.pageX - tooltipDetail.width;
+    }
+  };
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-interpolate":"node_modules/d3-interpolate/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -27372,7 +27391,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63504" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58970" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

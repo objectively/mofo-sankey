@@ -10,8 +10,7 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import { rgb } from 'd3-color';
 import { nest } from 'd3-collection';
 import { transition } from 'd3-transition';
-import { interpolate, interpolateNumber } from 'd3-interpolate';
-import { linkHorizontal } from 'd3-shape';
+import { interpolate, interpolateNumber } from 'd3-shape';
 import {
   customLinkGenerator,
   customLinkGenerator2
@@ -28,9 +27,7 @@ const d3 = Object.assign(
     scaleSqrt,
     select,
     selectAll,
-    interpolateNumber,
     json,
-    linkHorizontal,
     min,
     max,
     sankey,
@@ -49,7 +46,7 @@ const d3 = Object.assign(
   SET UP GRAPH DIMENSIONS
 */
 
-let margin = { top: 20, right: 50, bottom: 20, left: 50 };
+let margin = { top: 20, right: 10, bottom: 20, left: 10 };
 
 let height =
   document.querySelector('#container').clientHeight -
@@ -112,11 +109,7 @@ let sankeyGraph = d3
 /**
  *  ADD TOOLTIPS
  */
-tooltip = d3
-  .select('body')
-  .append('div')
-  .attr('class', 'tooltip')
-  .style('opacity', 0);
+tooltip = d3.select('body').append('div').attr('id', 'tooltip');
 
 /* 
   FORMAT DATA
@@ -325,13 +318,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           </div>
         `;
 
-        tooltip
-          .html(tooltipHtml)
-          .style('left', event.pageX + 'px')
-          .style('top', event.pageY + 'px')
-          .transition()
-          .duration(100)
-          .style('opacity', 1);
+        // tooltip
+        //   .html(tooltipHtml)
+        //   .style('top', () => getTooltipPositionY(event) - margin.bottom + 'px')
+        //   .style('left', () => getTooltipPositionX(event) + 20 + 'px')
+        //   .classed('visible', true)
+
         d3.selectAll('.link')
           .transition()
           .duration(200)
@@ -342,7 +334,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', function (d) {
-        tooltip.transition().duration(300).style('opacity', 0);
+        // tooltip.classed('visible', false);
+
         d3.selectAll('.link')
           .transition()
           .duration(100)
@@ -367,6 +360,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             }${'</br>'}`);
           }, ``);
         }
+
         tooltipHtml = `
           <div class="details">
             <div class="issue-title">
@@ -380,13 +374,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             </div>
           </div>  
         `;
+
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX + 50 + 'px')
-          .style('top', event.pageY + 'px')
-          .transition()
-          .duration(100)
-          .style('opacity', 1);
+          .style('top', () => getTooltipPositionY(event) - margin.bottom + 'px')
+          .style('left', event.pageX + sankeyGraph.nodeWidth() + 'px')
+          .classed('visible', true);
 
         d3.selectAll('.link')
           .transition()
@@ -400,7 +393,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(300).style('opacity', 0);
+        tooltip.classed('visible', false);
         d3.selectAll('.link')
           .transition()
           .duration(100)
@@ -419,36 +412,36 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
 
         tooltipHtml = `
           <div class="details">
-          <div class="issue-title">
-          ${data.name}
-          </div>
-          <div class="issues-list">
-          <span class="detail-heading">Issues</span>
-          ${data.targetLinks
-            .map((d) => d.source.name)
-            .sort()
-            .join('</br>')}
+            <div class="issue-title">
+              ${data.name}
             </div>
-            <div class="outputs-list">
-            <span class="detail-heading">Outputs</span>
-            ${outputs
-              .map((output) => `${output[1]} ${output[0]}`)
-              .join('</br>')}
+            <div class="issues-list">
+              <span class="detail-heading">Issues</span>
+              ${data.targetLinks
+                .map((d) => d.source.name)
+                .sort()
+                .join('</br>')}
+                </div>
+                <div class="outputs-list">
+                <span class="detail-heading">Outputs</span>
+              ${outputs
+                .map((output) => `${output[1]} ${output[0]}`)
+                .join('</br>')}
               </div>
-              </div>
-              `;
+          </div>
+          `;
+
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX - 150 + 'px')
-          .style('top', event.pageY + 150 + 'px')
-          .transition()
-          .duration(100)
-          .style('opacity', 1);
+          .style('top', () => getTooltipPositionY(event) + 20 + 'px')
+          .style('left', () => getTooltipPositionX(event) + 'px')
+          .classed('visible', true);
 
         d3.selectAll(`*:not(.source-${kebabCase(data.name)})`)
           .transition()
           .duration(200)
           .style('stroke-opacity', fadeOpacity);
+
         d3.selectAll(`*:not(.target-${kebabCase(data.name)})`)
           .transition()
           .duration(200)
@@ -467,7 +460,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(300).style('opacity', 0);
+        tooltip.classed('visible', false);
         d3.selectAll('.link')
           .transition()
           .duration(100)
@@ -486,25 +479,24 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         }, ``);
 
         tooltipHtml = `
-        <div class="details">
-        <div class="issue-title">
-        ${data.name}
-        <span class="detail-heading">Programs creating this output</span>
-        </div>
-        <div class="outputs-list">
-        ${outputPrograms}
-        </div>
-        </div>
+          <div class="details">
+            <div class="issue-title">
+              ${data.name}
+              <span class="detail-heading">Programs creating this output</span>
+            </div>
+            <div class="outputs-list">
+              ${outputPrograms}
+            </div>
+          </div>
         `;
+
         tooltip
           .html(tooltipHtml)
-          .style('left', event.pageX - 350 + 'px')
-          .style('top', event.pageY - 25 + 'px')
-          .transition()
-          .duration(100)
-          .style('opacity', 1);
+          .style('top', () => getTooltipPositionY(event) - margin.bottom + 'px')
+          .style('left', () => getTooltipPositionX(event) - sankeyGraph.nodeWidth() + 'px')
+          .classed('visible', true);
 
-          d3.selectAll(`*:not(.target-${kebabCase(data.name)})`)
+        d3.selectAll(`*:not(.target-${kebabCase(data.name)})`)
           .transition()
           .duration(200)
           .style('stroke-opacity', fadeOpacity);
@@ -515,12 +507,45 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', () => {
-        tooltip.transition().duration(300).style('opacity', 0);
+        tooltip.classed('visible', false);
         d3.selectAll('.link')
           .transition()
           .duration(100)
           .style('stroke-opacity', defaultOpacity);
       });
     /*
-     */
+      HELPERS
+    */
+    const getTooltipPositionY = (event) => {
+      let tooltipDetail = document
+        .querySelector(`#tooltip`)
+        .getBoundingClientRect();
+      let containerDetail = document
+        .querySelector(`#container`)
+        .getBoundingClientRect();
+
+      return tooltipDetail.height + event.pageY > containerDetail.height
+        ? event.pageY - tooltipDetail.height
+        : event.pageY;
+    };
+
+    const getTooltipPositionX = (event) => {
+      let tooltipDetail = document
+        .querySelector(`#tooltip`)
+        .getBoundingClientRect();
+      let containerDetail = document
+        .querySelector(`#container`)
+        .getBoundingClientRect();
+
+      if (
+        event.pageX > containerDetail.width * 0.34 &&
+        event.pageX < containerDetail.width * 0.67
+      ) {
+        return event.pageX - tooltipDetail.width / 2;
+      } else if (event.pageX < containerDetail.width * 0.34) {
+        return event.pageX;
+      } else if (event.pageX > containerDetail.width * 0.67) {
+        return event.pageX - tooltipDetail.width;
+      }
+    };
   });

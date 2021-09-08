@@ -326,6 +326,9 @@
 
 body {
   margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 svg {
@@ -334,8 +337,11 @@ svg {
 }
 
 #container {
+  position: absolute;
+  outline: red solid 1px;
   width: 100vw;
   height: 100vh;
+  max-height: 100%;
   display: flex;
   justify-content: center;
 }
@@ -349,12 +355,18 @@ svg {
   stroke-opacity: 0.3;
 }
 
-.tooltip {
-  font-family: sans-serif;
+#tooltip {
   position: absolute;
+  font-family: sans-serif;
   background-color: var(--mo-gray-05);
-  width: 20rem;
+  width: calc(100% / 4);
   padding: 8px;
+  visibility: hidden;
+  transition: visibility 1s ease;
+}
+
+#tooltip.visible {
+  visibility: visible;
 }
 
 text {
