@@ -318,11 +318,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           </div>
         `;
 
-        // tooltip
-        //   .html(tooltipHtml)
-        //   .style('top', () => getTooltipPositionY(event) - margin.bottom + 'px')
-        //   .style('left', () => getTooltipPositionX(event) + 20 + 'px')
-        //   .classed('visible', true)
+        tooltip
+          .html(tooltipHtml)
+          .style('top', () => getTooltipPositionY(event) + margin.bottom + 'px')
+          .style('left', () => getTooltipPositionX(event) + sankeyGraph.nodeWidth() + 'px')
+          .classed('visible', true)
 
         d3.selectAll('.link')
           .transition()
@@ -334,7 +334,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           .style('stroke-opacity', hoverOpacity);
       })
       .on('mouseout', function (d) {
-        // tooltip.classed('visible', false);
+        tooltip.classed('visible', false);
 
         d3.selectAll('.link')
           .transition()
@@ -525,7 +525,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         .getBoundingClientRect();
 
       return tooltipDetail.height + event.pageY > containerDetail.height
-        ? event.pageY - tooltipDetail.height
+        ? event.pageY - tooltipDetail.height - 20
         : event.pageY;
     };
 
