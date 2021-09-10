@@ -383,14 +383,14 @@ svg {
   position: absolute;
   font-family: "Nunito Sans", sans-serif;
   background-color: var(--mo-gray-05);
-  width: calc(100% / 4);
+  width: calc(100%/3);
   padding: 8px;
   visibility: hidden;
   transition: visibility 0.4s ease;
 }
 @media screen and (max-width: 768px) {
   #tooltip {
-    width: calc(100% / 2);
+    width: 75%;
   }
 }
 
