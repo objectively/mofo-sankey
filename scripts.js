@@ -42,21 +42,17 @@ const d3 = Object.assign(
   }
 );
 
-/*
-  SET UP GRAPH DIMENSIONS
-*/
-
+/* SET UP GRAPH DIMENSIONS */
 let margin = { top: 0, right: 0, bottom: 0, left: 0 };
-
 let height = document.querySelector('#container').clientHeight;
-
 let width = document.querySelector('#container').clientWidth;
 
+/* SET UP STYLE VARIABLES */
 let defaultOpacity = 0.3;
 let hoverOpacity = 1;
 let fadeOpacity = 0.1;
 
-// SETUP VARIABLES
+/* SETUP VARIABLES */
 let awardsData;
 let nestedIssues;
 let issuesProgramDetail;
@@ -66,8 +62,7 @@ let outputsToProgram;
 let tooltip;
 let tooltipHtml;
 
-// APPEND SVG TO PAGE
-
+/* APPEND SVG TO PAGE */
 let svg = d3
   .select('#container')
   .append('svg')
@@ -78,25 +73,17 @@ let svg = d3
   .append('g')
   .attr('transform', `translate(${margin.left},${margin.top})`);
 
-/*
-  SETUP SANKEY PROPERTIES
-*/
-
+/* SETUP SANKEY PROPERTIES */
 let sankeyGraph = d3
   .sankey()
   .iterations(0)
   .nodePadding(8)
   .size([width, height]);
 
-/**
- *  ADD TOOLTIPS
- */
+/* ADD TOOLTIPS */
 tooltip = d3.select('body').append('div').attr('id', 'tooltip');
 
-/* 
-  FORMAT DATA
-*/
-
+/* FORMAT DATA */
 Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
   .then((data) => {
     let graph = { nodes: [], links: [] };
@@ -141,10 +128,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       });
     });
 
-    //store transformed data before replacing link names
+    // Store transformed data before replacing link names
     issuesProgramDetail = graph.links;
 
-    /** SAVE Outputs to Program for output tooltip*/
+    /* SAVE Outputs to Program for output tooltip */
 
     outputsToProgram = d3
       .nest()
@@ -152,7 +139,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       .key((d) => d['Program'])
       .entries(data[1]);
 
-    /* TRANSFROM SECOND SANKEY*/
+    /* TRANSFORM SECOND SANKEY */
     programsToOutput = d3
       .nest()
       .key((d) => d['Program'])
@@ -194,7 +181,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       return Object.assign({ node: idx }, JSON.parse(node));
     });
 
-    //replace link names
+    // Replace link names
     graph.links.forEach((d, i) => {
       const graphMap = graph.nodes.map((node) => node.name);
       graph.links[i].source = graphMap.indexOf(graph.links[i].source);
@@ -211,15 +198,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       link.rawValue = link.value;
       link.value = linkScale(link.value);
     });
-    console.log(graph);
     return graph;
   })
   .then((data) => {
     let chart = sankeyGraph(data);
 
     function initialize() {
-      //ADD LINKs
-      let link = svg
+      // ADD LINKS
+      svg
         .append('g')
         .selectAll('.link')
         .data(() => {
@@ -251,8 +237,59 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         .attr('class', 'node');
 
       // ADD NODE RECTANGLES
-      node
-        .append('rect')
+      node.append('rect');
+
+      // ADD NODE TITLES
+      node.append('text');
+    } // end initialize
+
+    const getTooltipPositionY = (event) => {
+      let tooltipDetail = document
+        .querySelector(`#tooltip`)
+        .getBoundingClientRect();
+      let containerDetail = document
+        .querySelector(`#container`)
+        .getBoundingClientRect();
+
+      return tooltipDetail.height + event.pageY > containerDetail.height
+        ? containerDetail.height - event.pageY / 4 - tooltipDetail.height
+        : event.pageY;
+    };
+
+    const getTooltipPositionX = (event) => {
+      let tooltipDetail = document
+        .querySelector(`#tooltip`)
+        .getBoundingClientRect();
+      let containerDetail = document
+        .querySelector(`#container`)
+        .getBoundingClientRect();
+
+      if (
+        event.pageX > containerDetail.width * 0.34 &&
+        event.pageX < containerDetail.width * 0.67
+      ) {
+        return event.pageX - tooltipDetail.width / 2;
+      } else if (event.pageX < containerDetail.width * 0.34) {
+        return event.pageX;
+      } else if (event.pageX > containerDetail.width * 0.67) {
+        return event.pageX - tooltipDetail.width;
+      }
+    };
+    const updateLinks = () =>
+      svg
+        .selectAll('.link')
+        .data(() => {
+          return chart.links;
+        })
+        .attr('d', sankeyLinkHorizontal());
+
+    const updateNodes = () =>
+      svg
+        .selectAll('.node')
+        .data(() => {
+          return chart.nodes;
+        })
+        .selectAll('rect')
         .attr('class', (d) => {
           return `rect ${kebabCase(d.name)} ${elementClasses[d.name]}`;
         })
@@ -269,13 +306,12 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           return sankeyGraph.nodeWidth();
         });
 
-      // ADD NODE TITLES
-      node
-        .append('text')
+    const updateText = () =>
+      svg
+        .selectAll('text')
         .attr('x', (d) => d.x0 - 6)
         .attr('y', (d) => (d.y1 + d.y0) / 2)
         .attr('dy', '0.35em')
-
         .attr('text-anchor', 'end')
         .text((d) => {
           return d.name;
@@ -284,8 +320,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         .attr('x', (d) => d.x1 + 6)
         .attr('text-anchor', 'start');
 
-      // ADD TOOLTIPS
-      link
+    const addTooltips = () => {
+      d3.selectAll('.link')
         .on('mouseover', function (event, data) {
           tooltipHtml = `
             <div class="details">
@@ -297,7 +333,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
               </div>
             </div>
           `;
-
           tooltip
             .html(tooltipHtml)
             .style(
@@ -309,7 +344,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
               () => getTooltipPositionX(event) + sankeyGraph.nodeWidth() + 'px'
             )
             .classed('visible', true);
-
           d3.selectAll('.link')
             .transition()
             .duration(200)
@@ -328,7 +362,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             .style('stroke-opacity', defaultOpacity);
         });
 
-      /** ALL MOUSEOVER EVENTS */
       // ADD TOOLTIPS TO ISSUE AREA NODES
       d3.selectAll(`.issue-area`)
         .on('mouseover', (event, data) => {
@@ -345,18 +378,18 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           }
 
           tooltipHtml = `
-        <div class="details">
-          <div class="issue-title">
-            ${data.name}
-          </div>
-          <div class="total-programs">
-            ${nodeData.length} Programs
-          </div>
-          <div class="total-awards">
-            ${awardsData}
-          </div>
-        </div>  
-      `;
+            <div class="details">
+              <div class="issue-title">
+                ${data.name}
+              </div>
+              <div class="total-programs">
+                ${nodeData.length} Programs
+              </div>
+              <div class="total-awards">
+                ${awardsData}
+              </div>
+            </div>  
+          `;
 
           tooltip
             .html(tooltipHtml)
@@ -397,25 +430,25 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             .sort();
 
           tooltipHtml = `
-        <div class="details">
-          <div class="issue-title">
-            ${data.name}
-          </div>
-          <div class="issues-list">
-            <span class="detail-heading">Issues</span>
-            ${data.targetLinks
-              .map((d) => d.source.name)
-              .sort()
-              .join('</br>')}
+            <div class="details">
+              <div class="issue-title">
+                ${data.name}
               </div>
-              <div class="outputs-list">
-              <span class="detail-heading">Outputs</span>
-            ${outputs
-              .map((output) => `${output[1]} ${output[0]}`)
-              .join('</br>')}
+              <div class="issues-list">
+                <span class="detail-heading">Issues</span>
+                ${data.targetLinks
+                  .map((d) => d.source.name)
+                  .sort()
+                  .join('</br>')}
+                  </div>
+                  <div class="outputs-list">
+                  <span class="detail-heading">Outputs</span>
+                ${outputs
+                  .map((output) => `${output[1]} ${output[0]}`)
+                  .join('</br>')}
+                </div>
             </div>
-        </div>
-        `;
+          `;
 
           tooltip
             .html(tooltipHtml)
@@ -432,8 +465,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             .transition()
             .duration(200)
             .style('stroke-opacity', fadeOpacity);
-          // issue links
-          // sourceLinks
+
           d3.selectAll(`.link.source-${kebabCase(data.name)}`)
             .transition()
             .duration(200)
@@ -465,16 +497,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           }, ``);
 
           tooltipHtml = `
-        <div class="details">
-          <div class="issue-title">
-            ${data.name}
-            <span class="detail-heading">Programs creating this output</span>
-          </div>
-          <div class="outputs-list">
-            ${outputPrograms}
-          </div>
-        </div>
-      `;
+<div class="details">
+<div class="issue-title">
+  ${data.name}
+  <span class="detail-heading">Programs creating this output</span>
+</div>
+<div class="outputs-list">
+  ${outputPrograms}
+</div>
+</div>
+`;
 
           tooltip
             .html(tooltipHtml)
@@ -505,90 +537,8 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             .duration(100)
             .style('stroke-opacity', defaultOpacity);
         });
-      /*
-    HELPERS
-  */
-      const getTooltipPositionY = (event) => {
-        let tooltipDetail = document
-          .querySelector(`#tooltip`)
-          .getBoundingClientRect();
-        let containerDetail = document
-          .querySelector(`#container`)
-          .getBoundingClientRect();
+    };
 
-        return tooltipDetail.height + event.pageY > containerDetail.height
-          ? event.pageY - tooltipDetail.height - 20
-          : event.pageY;
-      };
-
-      const getTooltipPositionX = (event) => {
-        let tooltipDetail = document
-          .querySelector(`#tooltip`)
-          .getBoundingClientRect();
-        let containerDetail = document
-          .querySelector(`#container`)
-          .getBoundingClientRect();
-
-        if (
-          event.pageX > containerDetail.width * 0.34 &&
-          event.pageX < containerDetail.width * 0.67
-        ) {
-          return event.pageX - tooltipDetail.width / 2;
-        } else if (event.pageX < containerDetail.width * 0.34) {
-          return event.pageX;
-        } else if (event.pageX > containerDetail.width * 0.67) {
-          return event.pageX - tooltipDetail.width;
-        }
-      };
-    } // end initialize
-
-    function updateLinks() {
-      svg
-        .selectAll('.link')
-        .data(() => {
-          return chart.links;
-        })
-        .attr('d', sankeyLinkHorizontal());
-    }
-
-    function updateNodes() {
-      svg
-        .selectAll('.node')
-        .data(() => {
-          return chart.nodes;
-        })
-        .selectAll('rect')
-        .attr('class', (d) => {
-          return `rect ${kebabCase(d.name)} ${elementClasses[d.name]}`;
-        })
-        .attr('x', (d) => {
-          return d.x0;
-        })
-        .attr('y', (d) => {
-          return d.y0;
-        })
-        .attr('height', (d, i) => {
-          return d.y1 - d.y0;
-        })
-        .attr('width', (d) => {
-          return sankeyGraph.nodeWidth();
-        });
-    }
-    function updateText() {
-      svg
-        .selectAll('text')
-        .attr('x', (d) => d.x0 - 6)
-        .attr('y', (d) => (d.y1 + d.y0) / 2)
-        .attr('dy', '0.35em')
-
-        .attr('text-anchor', 'end')
-        .text((d) => {
-          return d.name;
-        })
-        .filter((d) => d.x0 < width / 2)
-        .attr('x', (d) => d.x1 + 6)
-        .attr('text-anchor', 'start');
-    }
     function draw() {
       const newDimensions = document
         .querySelector('#container')
@@ -612,10 +562,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       updateLinks();
       updateNodes();
       updateText();
+      addTooltips();
     } // end draw *****************************************
 
     /** RESIZE WINDOW AND REDRAW SVG */
     initialize();
-
+    draw();
     window.addEventListener('resize', draw);
   });

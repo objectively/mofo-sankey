@@ -395,9 +395,9 @@ svg {
   position: absolute;
   font-family: 'Nunito Sans', sans-serif;
   background-color: var(--mo-gray-05);
-  width: calc(100% / 4);
+  width: calc(100%/3);
   @media screen and (max-width: 768px) {
-    width: calc(100% / 2);
+    width: 75%;
   }
   padding: 8px;
   visibility: hidden;
@@ -430,9 +430,6 @@ text {
   font-weight: 700;
 }
 
-.total-programs {
-  // font-weight: 700;
-}
 
 .programs-count,
 .total-awards {

@@ -27060,9 +27060,7 @@ var d3 = Object.assign({}, {
   rgb: _d3Color.rgb,
   transition: _d3Transition.transition
 });
-/*
-  SET UP GRAPH DIMENSIONS
-*/
+/* SET UP GRAPH DIMENSIONS */
 
 var margin = {
   top: 0,
@@ -27072,9 +27070,12 @@ var margin = {
 };
 var height = document.querySelector('#container').clientHeight;
 var width = document.querySelector('#container').clientWidth;
+/* SET UP STYLE VARIABLES */
+
 var defaultOpacity = 0.3;
 var hoverOpacity = 1;
-var fadeOpacity = 0.1; // SETUP VARIABLES
+var fadeOpacity = 0.1;
+/* SETUP VARIABLES */
 
 var awardsData;
 var nestedIssues;
@@ -27083,22 +27084,17 @@ var programsToOutput;
 var elementClasses = {};
 var outputsToProgram;
 var tooltip;
-var tooltipHtml; // APPEND SVG TO PAGE
+var tooltipHtml;
+/* APPEND SVG TO PAGE */
 
 var svg = d3.select('#container').append('svg').attr('width', width).attr('height', height).attr('viewBox', [0, 0, width, height]).attr('preserveAspectRatio', 'xMinYMin meet').append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
-/*
-  SETUP SANKEY PROPERTIES
-*/
+/* SETUP SANKEY PROPERTIES */
 
 var sankeyGraph = d3.sankey().iterations(0).nodePadding(8).size([width, height]);
-/**
- *  ADD TOOLTIPS
- */
+/* ADD TOOLTIPS */
 
 tooltip = d3.select('body').append('div').attr('id', 'tooltip');
-/* 
-  FORMAT DATA
-*/
+/* FORMAT DATA */
 
 Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
 .then(function (data) {
@@ -27140,17 +27136,17 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         value: issue.totalAwards
       });
     });
-  }); //store transformed data before replacing link names
+  }); // Store transformed data before replacing link names
 
   issuesProgramDetail = graph.links;
-  /** SAVE Outputs to Program for output tooltip*/
+  /* SAVE Outputs to Program for output tooltip */
 
   outputsToProgram = d3.nest().key(function (d) {
     return d['Primary Output\n(pick ONE)'];
   }).key(function (d) {
     return d['Program'];
   }).entries(data[1]);
-  /* TRANSFROM SECOND SANKEY*/
+  /* TRANSFORM SECOND SANKEY */
 
   programsToOutput = d3.nest().key(function (d) {
     return d['Program'];
@@ -27193,7 +27189,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     return Object.assign({
       node: idx
     }, JSON.parse(node));
-  }); //replace link names
+  }); // Replace link names
 
   graph.links.forEach(function (d, i) {
     var graphMap = graph.nodes.map(function (node) {
@@ -27213,14 +27209,13 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     link.rawValue = link.value;
     link.value = linkScale(link.value);
   });
-  console.log(graph);
   return graph;
 }).then(function (data) {
   var chart = sankeyGraph(data);
 
   function initialize() {
-    //ADD LINKs
-    var link = svg.append('g').selectAll('.link').data(function () {
+    // ADD LINKS
+    svg.append('g').selectAll('.link').data(function () {
       return chart.links;
     }).enter().append('path').attr('class', function (d) {
       return "link ".concat(kebabCase(d.source.name), " source-").concat(kebabCase(d.source.name), " target-").concat(kebabCase(d.target.name), " link-").concat(elementClasses[d.source.name]);
@@ -27232,7 +27227,41 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       return chart.nodes;
     }).enter().append('g').attr('class', 'node'); // ADD NODE RECTANGLES
 
-    node.append('rect').attr('class', function (d) {
+    node.append('rect'); // ADD NODE TITLES
+
+    node.append('text');
+  } // end initialize
+
+
+  var getTooltipPositionY = function getTooltipPositionY(event) {
+    var tooltipDetail = document.querySelector("#tooltip").getBoundingClientRect();
+    var containerDetail = document.querySelector("#container").getBoundingClientRect();
+    return tooltipDetail.height + event.pageY > containerDetail.height ? containerDetail.height - event.pageY / 4 - tooltipDetail.height : event.pageY;
+  };
+
+  var getTooltipPositionX = function getTooltipPositionX(event) {
+    var tooltipDetail = document.querySelector("#tooltip").getBoundingClientRect();
+    var containerDetail = document.querySelector("#container").getBoundingClientRect();
+
+    if (event.pageX > containerDetail.width * 0.34 && event.pageX < containerDetail.width * 0.67) {
+      return event.pageX - tooltipDetail.width / 2;
+    } else if (event.pageX < containerDetail.width * 0.34) {
+      return event.pageX;
+    } else if (event.pageX > containerDetail.width * 0.67) {
+      return event.pageX - tooltipDetail.width;
+    }
+  };
+
+  var updateLinks = function updateLinks() {
+    return svg.selectAll('.link').data(function () {
+      return chart.links;
+    }).attr('d', (0, _d3Sankey.sankeyLinkHorizontal)());
+  };
+
+  var updateNodes = function updateNodes() {
+    return svg.selectAll('.node').data(function () {
+      return chart.nodes;
+    }).selectAll('rect').attr('class', function (d) {
       return "rect ".concat(kebabCase(d.name), " ").concat(elementClasses[d.name]);
     }).attr('x', function (d) {
       return d.x0;
@@ -27242,9 +27271,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       return d.y1 - d.y0;
     }).attr('width', function (d) {
       return sankeyGraph.nodeWidth();
-    }); // ADD NODE TITLES
+    });
+  };
 
-    node.append('text').attr('x', function (d) {
+  var updateText = function updateText() {
+    return svg.selectAll('text').attr('x', function (d) {
       return d.x0 - 6;
     }).attr('y', function (d) {
       return (d.y1 + d.y0) / 2;
@@ -27254,9 +27285,11 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       return d.x0 < width / 2;
     }).attr('x', function (d) {
       return d.x1 + 6;
-    }).attr('text-anchor', 'start'); // ADD TOOLTIPS
+    }).attr('text-anchor', 'start');
+  };
 
-    link.on('mouseover', function (event, data) {
+  var addTooltips = function addTooltips() {
+    d3.selectAll('.link').on('mouseover', function (event, data) {
       tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.source.name, "\n              </div>\n              <div class=\"total-awards\">\n                ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n              </div>\n            </div>\n          ");
       tooltip.html(tooltipHtml).style('top', function () {
         return getTooltipPositionY(event) + margin.bottom + 'px';
@@ -27268,9 +27301,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     }).on('mouseout', function (d) {
       tooltip.classed('visible', false);
       d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
-    });
-    /** ALL MOUSEOVER EVENTS */
-    // ADD TOOLTIPS TO ISSUE AREA NODES
+    }); // ADD TOOLTIPS TO ISSUE AREA NODES
 
     d3.selectAll(".issue-area").on('mouseover', function (event, data) {
       var nodeData = issuesProgramDetail.filter(function (program) {
@@ -27283,7 +27314,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         }, "");
       }
 
-      tooltipHtml = "\n        <div class=\"details\">\n          <div class=\"issue-title\">\n            ".concat(data.name, "\n          </div>\n          <div class=\"total-programs\">\n            ").concat(nodeData.length, " Programs\n          </div>\n          <div class=\"total-awards\">\n            ").concat(awardsData, "\n          </div>\n        </div>  \n      ");
+      tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"total-programs\">\n                ").concat(nodeData.length, " Programs\n              </div>\n              <div class=\"total-awards\">\n                ").concat(awardsData, "\n              </div>\n            </div>  \n          ");
       tooltip.html(tooltipHtml).style('top', function () {
         return getTooltipPositionY(event) - margin.bottom + 'px';
       }).style('left', event.pageX + sankeyGraph.nodeWidth() + 'px').classed('visible', true);
@@ -27302,20 +27333,18 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       var outputs = data.sourceLinks.map(function (d) {
         return [d.target.name, d.rawValue];
       }).sort();
-      tooltipHtml = "\n        <div class=\"details\">\n          <div class=\"issue-title\">\n            ".concat(data.name, "\n          </div>\n          <div class=\"issues-list\">\n            <span class=\"detail-heading\">Issues</span>\n            ").concat(data.targetLinks.map(function (d) {
+      tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Issues</span>\n                ").concat(data.targetLinks.map(function (d) {
         return d.source.name;
-      }).sort().join('</br>'), "\n              </div>\n              <div class=\"outputs-list\">\n              <span class=\"detail-heading\">Outputs</span>\n            ").concat(outputs.map(function (output) {
+      }).sort().join('</br>'), "\n                  </div>\n                  <div class=\"outputs-list\">\n                  <span class=\"detail-heading\">Outputs</span>\n                ").concat(outputs.map(function (output) {
         return "".concat(output[1], " ").concat(output[0]);
-      }).join('</br>'), "\n            </div>\n        </div>\n        ");
+      }).join('</br>'), "\n                </div>\n            </div>\n          ");
       tooltip.html(tooltipHtml).style('top', function () {
         return getTooltipPositionY(event) + 20 + 'px';
       }).style('left', function () {
         return getTooltipPositionX(event) + 'px';
       }).classed('visible', true);
       d3.selectAll("*:not(.source-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
-      d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity); // issue links
-      // sourceLinks
-
+      d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
       d3.selectAll(".link.source-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity); // targetLinks
 
       d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
@@ -27332,7 +27361,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       var outputPrograms = nodeData.values.reduce(function (acc, program) {
         return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
       }, "");
-      tooltipHtml = "\n        <div class=\"details\">\n          <div class=\"issue-title\">\n            ".concat(data.name, "\n            <span class=\"detail-heading\">Programs creating this output</span>\n          </div>\n          <div class=\"outputs-list\">\n            ").concat(outputPrograms, "\n          </div>\n        </div>\n      ");
+      tooltipHtml = "\n<div class=\"details\">\n<div class=\"issue-title\">\n  ".concat(data.name, "\n  <span class=\"detail-heading\">Programs creating this output</span>\n</div>\n<div class=\"outputs-list\">\n  ").concat(outputPrograms, "\n</div>\n</div>\n");
       tooltip.html(tooltipHtml).style('top', function () {
         return getTooltipPositionY(event) - margin.bottom + 'px';
       }).style('left', function () {
@@ -27344,66 +27373,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       tooltip.classed('visible', false);
       d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
     });
-    /*
-    HELPERS
-    */
-
-    var getTooltipPositionY = function getTooltipPositionY(event) {
-      var tooltipDetail = document.querySelector("#tooltip").getBoundingClientRect();
-      var containerDetail = document.querySelector("#container").getBoundingClientRect();
-      return tooltipDetail.height + event.pageY > containerDetail.height ? event.pageY - tooltipDetail.height - 20 : event.pageY;
-    };
-
-    var getTooltipPositionX = function getTooltipPositionX(event) {
-      var tooltipDetail = document.querySelector("#tooltip").getBoundingClientRect();
-      var containerDetail = document.querySelector("#container").getBoundingClientRect();
-
-      if (event.pageX > containerDetail.width * 0.34 && event.pageX < containerDetail.width * 0.67) {
-        return event.pageX - tooltipDetail.width / 2;
-      } else if (event.pageX < containerDetail.width * 0.34) {
-        return event.pageX;
-      } else if (event.pageX > containerDetail.width * 0.67) {
-        return event.pageX - tooltipDetail.width;
-      }
-    };
-  } // end initialize
-
-
-  function updateLinks() {
-    svg.selectAll('.link').data(function () {
-      return chart.links;
-    }).attr('d', (0, _d3Sankey.sankeyLinkHorizontal)());
-  }
-
-  function updateNodes() {
-    svg.selectAll('.node').data(function () {
-      return chart.nodes;
-    }).selectAll('rect').attr('class', function (d) {
-      return "rect ".concat(kebabCase(d.name), " ").concat(elementClasses[d.name]);
-    }).attr('x', function (d) {
-      return d.x0;
-    }).attr('y', function (d) {
-      return d.y0;
-    }).attr('height', function (d, i) {
-      return d.y1 - d.y0;
-    }).attr('width', function (d) {
-      return sankeyGraph.nodeWidth();
-    });
-  }
-
-  function updateText() {
-    svg.selectAll('text').attr('x', function (d) {
-      return d.x0 - 6;
-    }).attr('y', function (d) {
-      return (d.y1 + d.y0) / 2;
-    }).attr('dy', '0.35em').attr('text-anchor', 'end').text(function (d) {
-      return d.name;
-    }).filter(function (d) {
-      return d.x0 < width / 2;
-    }).attr('x', function (d) {
-      return d.x1 + 6;
-    }).attr('text-anchor', 'start');
-  }
+  };
 
   function draw() {
     var newDimensions = document.querySelector('#container').getBoundingClientRect(); // Resize SVG
@@ -27416,12 +27386,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     updateLinks();
     updateNodes();
     updateText();
+    addTooltips();
   } // end draw *****************************************
 
   /** RESIZE WINDOW AND REDRAW SVG */
 
 
   initialize();
+  draw();
   window.addEventListener('resize', draw);
 });
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
@@ -27452,7 +27424,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60546" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50124" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
