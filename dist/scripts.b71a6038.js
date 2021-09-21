@@ -1403,7 +1403,7 @@ function bisector(f) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = number;
 exports.numbers = numbers;
 
 var _marked = /*#__PURE__*/regeneratorRuntime.mark(numbers);
@@ -1414,7 +1414,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _default(x) {
+function number(x) {
   return x === null ? NaN : +x;
 }
 
@@ -2224,9 +2224,9 @@ function keyof(value) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = identity;
 
-function _default(x) {
+function identity(x) {
   return x;
 }
 },{}],"node_modules/d3-array/src/group.js":[function(require,module,exports) {
@@ -2408,9 +2408,9 @@ function nest(values, map, reduce, keys) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = permute;
 
-function _default(source, keys) {
+function permute(source, keys) {
   return Array.from(keys, function (key) {
     return source[key];
   });
@@ -2422,8 +2422,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = sort;
-
-var _ascending = _interopRequireDefault(require("./ascending.js"));
+exports.compareDefined = compareDefined;
+exports.ascendingDefined = ascendingDefined;
 
 var _permute = _interopRequireDefault(require("./permute.js"));
 
@@ -2453,10 +2453,9 @@ function sort(values) {
 
   var _F = F,
       _F2 = _slicedToArray(_F, 1),
-      _F2$ = _F2[0],
-      f = _F2$ === void 0 ? _ascending.default : _F2$;
+      f = _F2[0];
 
-  if (f.length === 1 || F.length > 1) {
+  if (f && f.length === 1 || F.length > 1) {
     var index = Uint32Array.from(values, function (d, i) {
       return i;
     });
@@ -2472,7 +2471,7 @@ function sort(values) {
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
             var _f = _step.value;
-            var c = (0, _ascending.default)(_f[i], _f[j]);
+            var c = ascendingDefined(_f[i], _f[j]);
             if (c) return c;
           }
         } catch (err) {
@@ -2484,16 +2483,29 @@ function sort(values) {
     } else {
       f = values.map(f);
       index.sort(function (i, j) {
-        return (0, _ascending.default)(f[i], f[j]);
+        return ascendingDefined(f[i], f[j]);
       });
     }
 
     return (0, _permute.default)(values, index);
   }
 
-  return values.sort(f);
+  return values.sort(f === undefined ? ascendingDefined : compareDefined(f));
 }
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js","./permute.js":"node_modules/d3-array/src/permute.js"}],"node_modules/d3-array/src/groupSort.js":[function(require,module,exports) {
+
+function compareDefined(compare) {
+  if (typeof compare !== "function") throw new TypeError("compare is not a function");
+  return function (a, b) {
+    var x = compare(a, b);
+    if (x || x === 0) return x;
+    return (compare(b, b) === 0) - (compare(a, a) === 0);
+  };
+}
+
+function ascendingDefined(a, b) {
+  return (a == null || !(a >= a)) - (b == null || !(b >= b)) || (a < b ? -1 : a > b ? 1 : 0);
+}
+},{"./permute.js":"node_modules/d3-array/src/permute.js"}],"node_modules/d3-array/src/groupSort.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2571,9 +2583,9 @@ exports.map = map;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = constant;
 
-function _default(x) {
+function constant(x) {
   return function () {
     return x;
   };
@@ -2584,14 +2596,14 @@ function _default(x) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = ticks;
 exports.tickIncrement = tickIncrement;
 exports.tickStep = tickStep;
 var e10 = Math.sqrt(50),
     e5 = Math.sqrt(10),
     e2 = Math.sqrt(2);
 
-function _default(start, stop, count) {
+function ticks(start, stop, count) {
   var reverse,
       i = -1,
       n,
@@ -2680,13 +2692,13 @@ function nice(start, stop, count) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = thresholdSturges;
 
 var _count = _interopRequireDefault(require("../count.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _default(values) {
+function thresholdSturges(values) {
   return Math.ceil(Math.log((0, _count.default)(values)) / Math.LN2) + 1;
 }
 },{"../count.js":"node_modules/d3-array/src/count.js"}],"node_modules/d3-array/src/bin.js":[function(require,module,exports) {
@@ -2695,7 +2707,7 @@ function _default(values) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = bin;
 
 var _array = require("./array.js");
 
@@ -2731,7 +2743,7 @@ function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Sy
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _default() {
+function bin() {
   var value = _identity.default,
       domain = _extent.default,
       threshold = _sturges.default;
@@ -2959,16 +2971,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = quickselect;
 
-var _ascending = _interopRequireDefault(require("./ascending.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _sort = require("./sort.js");
 
 // Based on https://github.com/mourner/quickselect
 // ISC license, Copyright 2018 Vladimir Agafonkin.
 function quickselect(array, k) {
   var left = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
   var right = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : array.length - 1;
-  var compare = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : _ascending.default;
+  var compare = arguments.length > 4 ? arguments[4] : undefined;
+  compare = compare === undefined ? _sort.ascendingDefined : (0, _sort.compareDefined)(compare);
 
   while (right > left) {
     if (right - left > 600) {
@@ -3013,7 +3024,7 @@ function swap(array, i, j) {
   array[i] = array[j];
   array[j] = t;
 }
-},{"./ascending.js":"node_modules/d3-array/src/ascending.js"}],"node_modules/d3-array/src/quantile.js":[function(require,module,exports) {
+},{"./sort.js":"node_modules/d3-array/src/sort.js"}],"node_modules/d3-array/src/quantile.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3067,7 +3078,7 @@ function quantileSorted(values, p) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = thresholdFreedmanDiaconis;
 
 var _count = _interopRequireDefault(require("../count.js"));
 
@@ -3075,7 +3086,7 @@ var _quantile = _interopRequireDefault(require("../quantile.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _default(values, min, max) {
+function thresholdFreedmanDiaconis(values, min, max) {
   return Math.ceil((max - min) / (2 * ((0, _quantile.default)(values, 0.75) - (0, _quantile.default)(values, 0.25)) * Math.pow((0, _count.default)(values), -1 / 3)));
 }
 },{"../count.js":"node_modules/d3-array/src/count.js","../quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/threshold/scott.js":[function(require,module,exports) {
@@ -3084,7 +3095,7 @@ function _default(values, min, max) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = thresholdScott;
 
 var _count = _interopRequireDefault(require("../count.js"));
 
@@ -3092,7 +3103,7 @@ var _deviation = _interopRequireDefault(require("../deviation.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _default(values, min, max) {
+function thresholdScott(values, min, max) {
   return Math.ceil((max - min) / (3.5 * (0, _deviation.default)(values) * Math.pow((0, _count.default)(values), -1 / 3)));
 }
 },{"../count.js":"node_modules/d3-array/src/count.js","../deviation.js":"node_modules/d3-array/src/deviation.js"}],"node_modules/d3-array/src/maxIndex.js":[function(require,module,exports) {
@@ -3217,13 +3228,13 @@ function mean(values, valueof) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = median;
 
 var _quantile = _interopRequireDefault(require("./quantile.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _default(values, valueof) {
+function median(values, valueof) {
   return (0, _quantile.default)(values, 0.5, valueof);
 }
 },{"./quantile.js":"node_modules/d3-array/src/quantile.js"}],"node_modules/d3-array/src/merge.js":[function(require,module,exports) {
@@ -3359,7 +3370,7 @@ function minIndex(values, valueof) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = mode;
 
 var _internmap = require("internmap");
 
@@ -3377,7 +3388,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _default(values, valueof) {
+function mode(values, valueof) {
   var counts = new _internmap.InternMap();
 
   if (valueof === undefined) {
@@ -3492,9 +3503,9 @@ function pair(a, b) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = range;
 
-function _default(start, stop, step) {
+function range(start, stop, step) {
   start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
   var i = -1,
       n = Math.max(0, Math.ceil((stop - start) / step)) | 0,
@@ -3844,13 +3855,13 @@ function sum(values, valueof) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = transpose;
 
 var _min = _interopRequireDefault(require("./min.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _default(matrix) {
+function transpose(matrix) {
   if (!(n = matrix.length)) return [];
 
   for (var i = -1, m = (0, _min.default)(matrix, length), transpose = new Array(m); ++i < m;) {
@@ -3871,13 +3882,13 @@ function length(d) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = zip;
 
 var _transpose = _interopRequireDefault(require("./transpose.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _default() {
+function zip() {
   return (0, _transpose.default)(arguments);
 }
 },{"./transpose.js":"node_modules/d3-array/src/transpose.js"}],"node_modules/d3-array/src/every.js":[function(require,module,exports) {
@@ -27049,21 +27060,22 @@ var d3 = Object.assign({}, {
   rgb: _d3Color.rgb,
   transition: _d3Transition.transition
 });
-/*
-  SET UP GRAPH DIMENSIONS
-*/
+/* SET UP GRAPH DIMENSIONS */
 
 var margin = {
-  top: 20,
-  right: 10,
-  bottom: 20,
-  left: 10
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0
 };
-var height = document.querySelector('#container').clientHeight - (margin.top + margin.bottom);
-var width = document.querySelector('#container').clientWidth - (margin.left + margin.right);
+var height = document.querySelector('#container').clientHeight;
+var width = document.querySelector('#container').clientWidth;
+/* SET UP STYLE VARIABLES */
+
 var defaultOpacity = 0.3;
 var hoverOpacity = 1;
-var fadeOpacity = 0.1; // SETUP VARIABLES
+var fadeOpacity = 0.1;
+/* SETUP VARIABLES */
 
 var awardsData;
 var nestedIssues;
@@ -27072,24 +27084,17 @@ var programsToOutput;
 var elementClasses = {};
 var outputsToProgram;
 var tooltip;
-var tooltipHtml; // APPEND SVG TO PAGE
+var tooltipHtml;
+/* APPEND SVG TO PAGE */
 
-var svg = d3.select('#container').append('svg').attr('width', document.querySelector('#container').clientWidth + (margin.left + margin.right)).attr('height', document.querySelector('#container').clientHeight + (margin.top + margin.bottom)).attr('viewBox', "0 0 ".concat(document.querySelector('#container').clientWidth, " ").concat(document.querySelector('#container').clientHeight)).attr('preserveAspectRatio', 'xMinYMin').append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
-/*
-  SETUP SANKEY PROPERTIES
-*/
+var svg = d3.select('#container').append('svg').attr('width', width).attr('height', height).attr('viewBox', [0, 0, width, height]).attr('preserveAspectRatio', 'xMinYMin meet').append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
+/* SETUP SANKEY PROPERTIES */
 
-var sankeyGraph = d3.sankey().iterations(0).nodePadding(8) // .linkSort(null)
-// .nodeSort(null)
-.size([width, height]);
-/**
- *  ADD TOOLTIPS
- */
+var sankeyGraph = d3.sankey().iterations(0).nodePadding(8).size([width, height]);
+/* ADD TOOLTIPS */
 
 tooltip = d3.select('body').append('div').attr('id', 'tooltip');
-/* 
-  FORMAT DATA
-*/
+/* FORMAT DATA */
 
 Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
 .then(function (data) {
@@ -27131,17 +27136,17 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         value: issue.totalAwards
       });
     });
-  }); //store transformed data before replacing link names
+  }); // Store transformed data before replacing link names
 
   issuesProgramDetail = graph.links;
-  /** SAVE Outputs to Program for output tooltip*/
+  /* SAVE Outputs to Program for output tooltip */
 
   outputsToProgram = d3.nest().key(function (d) {
     return d['Primary Output\n(pick ONE)'];
   }).key(function (d) {
     return d['Program'];
   }).entries(data[1]);
-  /* TRANSFROM SECOND SANKEY*/
+  /* TRANSFORM SECOND SANKEY */
 
   programsToOutput = d3.nest().key(function (d) {
     return d['Program'];
@@ -27184,7 +27189,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     return Object.assign({
       node: idx
     }, JSON.parse(node));
-  }); //replace link names
+  }); // Replace link names
 
   graph.links.forEach(function (d, i) {
     var graphMap = graph.nodes.map(function (node) {
@@ -27204,150 +27209,34 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     link.rawValue = link.value;
     link.value = linkScale(link.value);
   });
-  console.log(graph);
   return graph;
 }).then(function (data) {
   var chart = sankeyGraph(data);
-  /* ADD LINKs */
 
-  var link = svg.append('g').selectAll('.link').data(function () {
-    return chart.links;
-  }).enter().append('path').attr('class', function (d) {
-    return "link ".concat(kebabCase(d.source.name), " source-").concat(kebabCase(d.source.name), " target-").concat(kebabCase(d.target.name), " link-").concat(elementClasses[d.source.name]);
-  }).attr('d', (0, _d3Sankey.sankeyLinkHorizontal)()).attr('stroke-width', function (d) {
-    return d.width;
-  });
-  /* ADD NODES */
+  function initialize() {
+    // ADD LINKS
+    svg.append('g').selectAll('.link').data(function () {
+      return chart.links;
+    }).enter().append('path').attr('class', function (d) {
+      return "link ".concat(kebabCase(d.source.name), " source-").concat(kebabCase(d.source.name), " target-").concat(kebabCase(d.target.name), " link-").concat(elementClasses[d.source.name]);
+    }).attr('d', (0, _d3Sankey.sankeyLinkHorizontal)()).attr('stroke-width', function (d) {
+      return d.width;
+    }); // ADD NODES
 
-  var node = svg.append('g').selectAll('.node').data(function () {
-    return chart.nodes;
-  }).enter().append('g').attr('class', 'node'); // /* ADD NODE RECTANGLES */
+    var node = svg.append('g').selectAll('.node').data(function () {
+      return chart.nodes;
+    }).enter().append('g').attr('class', 'node'); // ADD NODE RECTANGLES
 
-  node.append('rect').attr('class', function (d) {
-    return "rect ".concat(kebabCase(d.name), " ").concat(elementClasses[d.name]);
-  }).attr('x', function (d) {
-    return d.x0;
-  }).attr('y', function (d) {
-    return d.y0;
-  }).attr('height', function (d, i) {
-    return d.y1 - d.y0;
-  }).attr('width', function (d) {
-    return sankeyGraph.nodeWidth();
-  });
-  /* ADD NODE TITLES */
+    node.append('rect'); // ADD NODE TITLES
 
-  node.append('text').attr('x', function (d) {
-    return d.x0 - 6;
-  }).attr('y', function (d) {
-    return (d.y1 + d.y0) / 2;
-  }).attr('dy', '0.35em').attr('text-anchor', 'end').text(function (d) {
-    return d.name;
-  }).filter(function (d) {
-    return d.x0 < width / 2;
-  }).attr('x', function (d) {
-    return d.x1 + 6;
-  }).attr('text-anchor', 'start');
-  /**
-   *  ADD TOOLTIPS
-   */
+    node.append('text');
+  } // end initialize
 
-  link.on('mouseover', function (event, data) {
-    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.source.name, "\n            </div>\n            <div class=\"total-awards\">\n              ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n            </div>\n          </div>\n        ");
-    tooltip.html(tooltipHtml).style('top', function () {
-      return getTooltipPositionY(event) + margin.bottom + 'px';
-    }).style('left', function () {
-      return getTooltipPositionX(event) + sankeyGraph.nodeWidth() + 'px';
-    }).classed('visible', true);
-    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity);
-    d3.select(this).transition().duration(200).style('stroke-opacity', hoverOpacity);
-  }).on('mouseout', function (d) {
-    tooltip.classed('visible', false);
-    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
-  });
-  /** ALL MOUSEOVER EVENTS */
-
-  /** LINK MOUSEOVER */
-  // ADD TOOLTIPS TO ISSUE AREA NODES
-
-  d3.selectAll(".issue-area").on('mouseover', function (event, data) {
-    var nodeData = issuesProgramDetail.filter(function (program) {
-      return program.source.name === data.name;
-    });
-
-    if (nodeData) {
-      awardsData = nodeData.reduce(function (acc, issue) {
-        return acc += "".concat(issue.target.name, " - ").concat(issue.rawValue, " ").concat(issue.rawValue > 1 ? 'awards' : "award", '</br>');
-      }, "");
-    }
-
-    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n              ").concat(nodeData.length, " Programs\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n          </div>  \n        ");
-    tooltip.html(tooltipHtml).style('top', function () {
-      return getTooltipPositionY(event) - margin.bottom + 'px';
-    }).style('left', event.pageX + sankeyGraph.nodeWidth() + 'px').classed('visible', true);
-    d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity); // highlight all related lines
-
-    d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
-  }).on('mouseout', function () {
-    tooltip.classed('visible', false);
-    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
-  }); // ADD TOOLTIPS TO PROGRAM NODES
-
-  d3.selectAll("rect.program").on('mouseover', function (event, data) {
-    var nodeData = issuesProgramDetail.filter(function (program) {
-      return program.source.name === data.name;
-    });
-    var outputs = data.sourceLinks.map(function (d) {
-      return [d.target.name, d.rawValue];
-    }).sort();
-    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"issues-list\">\n              <span class=\"detail-heading\">Issues</span>\n              ").concat(data.targetLinks.map(function (d) {
-      return d.source.name;
-    }).sort().join('</br>'), "\n                </div>\n                <div class=\"outputs-list\">\n                <span class=\"detail-heading\">Outputs</span>\n              ").concat(outputs.map(function (output) {
-      return "".concat(output[1], " ").concat(output[0]);
-    }).join('</br>'), "\n              </div>\n          </div>\n          ");
-    tooltip.html(tooltipHtml).style('top', function () {
-      return getTooltipPositionY(event) + 20 + 'px';
-    }).style('left', function () {
-      return getTooltipPositionX(event) + 'px';
-    }).classed('visible', true);
-    d3.selectAll("*:not(.source-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
-    d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity); // issue links
-    // sourceLinks
-
-    d3.selectAll(".link.source-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity); // targetLinks
-
-    d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
-  }).on('mouseout', function () {
-    tooltip.classed('visible', false);
-    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
-  }); // ADD TOOLTIPS TO OUTPUT NODES
-
-  d3.selectAll(".output").on('mouseover', function (event, data) {
-    var nodeData = outputsToProgram.filter(function (output) {
-      return output.key === data.name;
-    })[0];
-    var outputPrograms = nodeData.values.reduce(function (acc, program) {
-      return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
-    }, "");
-    tooltipHtml = "\n          <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n              <span class=\"detail-heading\">Programs creating this output</span>\n            </div>\n            <div class=\"outputs-list\">\n              ").concat(outputPrograms, "\n            </div>\n          </div>\n        ");
-    tooltip.html(tooltipHtml).style('top', function () {
-      return getTooltipPositionY(event) - margin.bottom + 'px';
-    }).style('left', function () {
-      return getTooltipPositionX(event) - sankeyGraph.nodeWidth() + 'px';
-    }).classed('visible', true);
-    d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
-    d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
-  }).on('mouseout', function () {
-    tooltip.classed('visible', false);
-    d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
-  });
-  /*
-    HELPERS
-  */
 
   var getTooltipPositionY = function getTooltipPositionY(event) {
     var tooltipDetail = document.querySelector("#tooltip").getBoundingClientRect();
     var containerDetail = document.querySelector("#container").getBoundingClientRect();
-    return tooltipDetail.height + event.pageY > containerDetail.height ? event.pageY - tooltipDetail.height - 20 : event.pageY;
+    return tooltipDetail.height + event.pageY > containerDetail.height ? containerDetail.height - event.pageY / 4 - tooltipDetail.height : event.pageY;
   };
 
   var getTooltipPositionX = function getTooltipPositionX(event) {
@@ -27362,6 +27251,150 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       return event.pageX - tooltipDetail.width;
     }
   };
+
+  var updateLinks = function updateLinks() {
+    return svg.selectAll('.link').data(function () {
+      return chart.links;
+    }).attr('d', (0, _d3Sankey.sankeyLinkHorizontal)());
+  };
+
+  var updateNodes = function updateNodes() {
+    return svg.selectAll('.node').data(function () {
+      return chart.nodes;
+    }).selectAll('rect').attr('class', function (d) {
+      return "rect ".concat(kebabCase(d.name), " ").concat(elementClasses[d.name]);
+    }).attr('x', function (d) {
+      return d.x0;
+    }).attr('y', function (d) {
+      return d.y0;
+    }).attr('height', function (d, i) {
+      return d.y1 - d.y0;
+    }).attr('width', function (d) {
+      return sankeyGraph.nodeWidth();
+    });
+  };
+
+  var updateText = function updateText() {
+    return svg.selectAll('text').attr('x', function (d) {
+      return d.x0 - 6;
+    }).attr('y', function (d) {
+      return (d.y1 + d.y0) / 2;
+    }).attr('dy', '0.35em').attr('text-anchor', 'end').text(function (d) {
+      return d.name;
+    }).filter(function (d) {
+      return d.x0 < width / 2;
+    }).attr('x', function (d) {
+      return d.x1 + 6;
+    }).attr('text-anchor', 'start');
+  };
+
+  var addTooltips = function addTooltips() {
+    d3.selectAll('.link').on('mouseover', function (event, data) {
+      tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.source.name, "\n              </div>\n              <div class=\"total-awards\">\n                ").concat(data.target.name, " - ").concat(data.rawValue, " Awards\n              </div>\n            </div>\n          ");
+      tooltip.html(tooltipHtml).style('top', function () {
+        return getTooltipPositionY(event) + margin.bottom + 'px';
+      }).style('left', function () {
+        return getTooltipPositionX(event) + sankeyGraph.nodeWidth() + 'px';
+      }).classed('visible', true);
+      d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity);
+      d3.select(this).transition().duration(200).style('stroke-opacity', hoverOpacity);
+    }).on('mouseout', function (d) {
+      tooltip.classed('visible', false);
+      d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
+    }); // ADD TOOLTIPS TO ISSUE AREA NODES
+
+    d3.selectAll(".issue-area").on('mouseover', function (event, data) {
+      var nodeData = issuesProgramDetail.filter(function (program) {
+        return program.source.name === data.name;
+      });
+
+      if (nodeData) {
+        awardsData = nodeData.reduce(function (acc, issue) {
+          return acc += "".concat(issue.target.name, " - ").concat(issue.rawValue, " ").concat(issue.rawValue > 1 ? 'awards' : "award", '</br>');
+        }, "");
+      }
+
+      tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"total-programs\">\n                ").concat(nodeData.length, " Programs\n              </div>\n              <div class=\"total-awards\">\n                ").concat(awardsData, "\n              </div>\n            </div>  \n          ");
+      tooltip.html(tooltipHtml).style('top', function () {
+        return getTooltipPositionY(event) - margin.bottom + 'px';
+      }).style('left', event.pageX + sankeyGraph.nodeWidth() + 'px').classed('visible', true);
+      d3.selectAll('.link').transition().duration(200).style('stroke-opacity', fadeOpacity); // highlight all related lines
+
+      d3.selectAll(".link.".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
+    }).on('mouseout', function () {
+      tooltip.classed('visible', false);
+      d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
+    }); // ADD TOOLTIPS TO PROGRAM NODES
+
+    d3.selectAll("rect.program").on('mouseover', function (event, data) {
+      var nodeData = issuesProgramDetail.filter(function (program) {
+        return program.source.name === data.name;
+      });
+      var outputs = data.sourceLinks.map(function (d) {
+        return [d.target.name, d.rawValue];
+      }).sort();
+      tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Issues</span>\n                ").concat(data.targetLinks.map(function (d) {
+        return d.source.name;
+      }).sort().join('</br>'), "\n                  </div>\n                  <div class=\"outputs-list\">\n                  <span class=\"detail-heading\">Outputs</span>\n                ").concat(outputs.map(function (output) {
+        return "".concat(output[1], " ").concat(output[0]);
+      }).join('</br>'), "\n                </div>\n            </div>\n          ");
+      tooltip.html(tooltipHtml).style('top', function () {
+        return getTooltipPositionY(event) + 20 + 'px';
+      }).style('left', function () {
+        return getTooltipPositionX(event) + 'px';
+      }).classed('visible', true);
+      d3.selectAll("*:not(.source-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
+      d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
+      d3.selectAll(".link.source-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity); // targetLinks
+
+      d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
+    }).on('mouseout', function () {
+      tooltip.classed('visible', false);
+      d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
+    });
+    /*ADD TOOLTIPS TO OUTPUT NODES */
+
+    d3.selectAll(".output").on('mouseover', function (event, data) {
+      var nodeData = outputsToProgram.filter(function (output) {
+        return output.key === data.name;
+      })[0];
+      var outputPrograms = nodeData.values.reduce(function (acc, program) {
+        return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
+      }, "");
+      tooltipHtml = "\n<div class=\"details\">\n<div class=\"issue-title\">\n  ".concat(data.name, "\n  <span class=\"detail-heading\">Programs creating this output</span>\n</div>\n<div class=\"outputs-list\">\n  ").concat(outputPrograms, "\n</div>\n</div>\n");
+      tooltip.html(tooltipHtml).style('top', function () {
+        return getTooltipPositionY(event) - margin.bottom + 'px';
+      }).style('left', function () {
+        return getTooltipPositionX(event) - sankeyGraph.nodeWidth() + 'px';
+      }).classed('visible', true);
+      d3.selectAll("*:not(.target-".concat(kebabCase(data.name), ")")).transition().duration(200).style('stroke-opacity', fadeOpacity);
+      d3.selectAll(".link.target-".concat(kebabCase(data.name))).transition().duration(200).style('stroke-opacity', hoverOpacity);
+    }).on('mouseout', function () {
+      tooltip.classed('visible', false);
+      d3.selectAll('.link').transition().duration(100).style('stroke-opacity', defaultOpacity);
+    });
+  };
+
+  function draw() {
+    var newDimensions = document.querySelector('#container').getBoundingClientRect(); // Resize SVG
+
+    d3.select('svg').attr('width', newDimensions.width).attr('height', newDimensions.height).attr('viewBox', [0, 0, newDimensions.width, newDimensions.height]).attr('preserveAspectRatio', 'xMinYMin').append('g');
+    var nodes = chart.nodes,
+        links = chart.links;
+    var newSankey = d3.sankey().iterations(0).nodePadding(8).size([newDimensions.width, newDimensions.height]);
+    newSankey.nodes(nodes).links(links)();
+    updateLinks();
+    updateNodes();
+    updateText();
+    addTooltips();
+  } // end draw *****************************************
+
+  /** RESIZE WINDOW AND REDRAW SVG */
+
+
+  initialize();
+  draw();
+  window.addEventListener('resize', draw);
 });
 },{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -27391,7 +27424,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58970" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50124" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
