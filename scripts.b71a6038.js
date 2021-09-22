@@ -27002,10 +27002,16 @@ var customLinkGenerator = (0, _d3Shape.linkHorizontal)().x(function (d) {
   return d.y0;
 });
 exports.customLinkGenerator = customLinkGenerator;
-},{"d3-shape":"node_modules/d3-shape/src/index.js"}],"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":[function(require,module,exports) {
-module.exports = "/Sankey data - Moz F&A - Issue Area _ Program _ Output.b5bad402.csv";
-},{}],"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":[function(require,module,exports) {
-module.exports = "/Sankey data - Moz F&A - Output _ Program _ Issue Area.04826edd.csv";
+},{"d3-shape":"node_modules/d3-shape/src/index.js"}],"data/9-21-21-Copy of Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":[function(require,module,exports) {
+module.exports = "/9-21-21-Copy of Sankey data - Moz F&A - Issue Area _ Program _ Output.9f7370f9.csv";
+},{}],"data/9-21-21-Copy of Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":[function(require,module,exports) {
+module.exports = "/9-21-21-Copy of Sankey data - Moz F&A - Output _ Program _ Issue Area.71b78eeb.csv";
+},{}],"data/9-21-21-Copy of Sankey data - Moz F&A - FOCUS - Total Investment $.csv":[function(require,module,exports) {
+module.exports = "/9-21-21-Copy of Sankey data - Moz F&A - FOCUS - Total Investment $.7fc84541.csv";
+},{}],"data/9-21-21-Copy of Sankey data - Moz F&A - PROGRAMS - Total Investment $.csv":[function(require,module,exports) {
+module.exports = "/9-21-21-Copy of Sankey data - Moz F&A - PROGRAMS - Total Investment $.a99eb639.csv";
+},{}],"data/9-21-21-Copy of Sankey data - Moz F&A - OUTPUT - Total Investment $.csv":[function(require,module,exports) {
+module.exports = "/9-21-21-Copy of Sankey data - Moz F&A - OUTPUT - Total Investment $.5ef49ade.csv";
 },{}],"scripts.js":[function(require,module,exports) {
 "use strict";
 
@@ -27037,9 +27043,15 @@ var _customLinkGenerator = require("./helpers/custom-link-generator");
 
 var kebabCase = require('lodash.kebabcase');
 
-var realIssuesToEngagement = require("./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv");
+var issuesToEngagement = require("./data/9-21-21-Copy of Sankey data - Moz F&A - Issue Area _ Program _ Output.csv");
 
-var realEngagementToOutput = require("./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv");
+var engagementToOutput = require("./data/9-21-21-Copy of Sankey data - Moz F&A - Output _ Program _ Issue Area.csv");
+
+var focusTotalInvestment = require("./data/9-21-21-Copy of Sankey data - Moz F&A - FOCUS - Total Investment $.csv");
+
+var programTotalInvestment = require("./data/9-21-21-Copy of Sankey data - Moz F&A - PROGRAMS - Total Investment $.csv");
+
+var outputTotalInvestment = require("./data/9-21-21-Copy of Sankey data - Moz F&A - OUTPUT - Total Investment $.csv");
 
 var d3 = Object.assign({}, {
   csv: _d3Fetch.csv,
@@ -27063,13 +27075,13 @@ var d3 = Object.assign({}, {
 /* SET UP GRAPH DIMENSIONS */
 
 var margin = {
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: 0
+  top: 15,
+  right: 15,
+  bottom: 30,
+  left: 15
 };
-var height = document.querySelector('#container').clientHeight;
-var width = document.querySelector('#container').clientWidth;
+var height = document.querySelector('#container').clientHeight - (margin.top + margin.bottom);
+var width = document.querySelector('#container').clientWidth - (margin.left + margin.right);
 /* SET UP STYLE VARIABLES */
 
 var defaultOpacity = 0.3;
@@ -27085,9 +27097,12 @@ var elementClasses = {};
 var outputsToProgram;
 var tooltip;
 var tooltipHtml;
+var focusInvestment;
+var programInvestment;
+var outputInvestment;
 /* APPEND SVG TO PAGE */
 
-var svg = d3.select('#container').append('svg').attr('width', width).attr('height', height).attr('viewBox', [0, 0, width, height]).attr('preserveAspectRatio', 'xMinYMin meet').append('g').attr('transform', "translate(".concat(margin.left, ",").concat(margin.top, ")"));
+var svg = d3.select('#container').append('svg').attr('width', width).attr('height', height).attr('viewBox', [0, 0, width, height]).attr('preserveAspectRatio', 'xMinYMin meet').append('g');
 /* SETUP SANKEY PROPERTIES */
 
 var sankeyGraph = d3.sankey().iterations(0).nodePadding(8).size([width, height]);
@@ -27096,8 +27111,13 @@ var sankeyGraph = d3.sankey().iterations(0).nodePadding(8).size([width, height])
 tooltip = d3.select('body').append('div').attr('id', 'tooltip');
 /* FORMAT DATA */
 
-Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
+Promise.all([d3.csv(issuesToEngagement), d3.csv(engagementToOutput), d3.csv(focusTotalInvestment), d3.csv(programTotalInvestment), d3.csv(outputTotalInvestment)]) // begin
 .then(function (data) {
+  // Investment numbers for tooltip
+  focusInvestment = data[2];
+  programInvestment = data[3];
+  outputInvestment = data[4]; // Graph data
+
   var graph = {
     nodes: [],
     links: []
@@ -27211,6 +27231,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   });
   return graph;
 }).then(function (data) {
+  console.log(data);
   var chart = sankeyGraph(data);
 
   function initialize() {
@@ -27314,7 +27335,16 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         }, "");
       }
 
-      tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"total-programs\">\n                ").concat(nodeData.length, " Programs\n              </div>\n              <div class=\"total-awards\">\n                ").concat(awardsData, "\n              </div>\n            </div>  \n          ");
+      var investment = focusInvestment.filter(function (focus) {
+        return focus['Issue Area Tags\n(pick ONE) '] === data.name;
+      })[0];
+
+      if (data.name === "Other/unavailable") {
+        tooltipHtml = "\n            <div class=\"details\">\n            <div class=\"issue-title\">\n              ".concat(data.name, "\n            </div>\n            <div class=\"total-programs\">\n            </div>\n            <div class=\"total-awards\">\n              ").concat(awardsData, "\n            </div>\n            <div class=\"total-investment\">\n              Total investment: 2016-2020: ").concat(investment['SUM of Fellow/ Award Amount \n(total, incl suppl)'], "\n            </div>\n          </div>  \n            ");
+      } else {
+        tooltipHtml = "\n              <div class=\"details\">\n                <div class=\"issue-title\">\n                  ".concat(data.name, "\n                </div>\n                <div class=\"total-programs\">\n                  ").concat(nodeData.length, " programs supported work on ").concat(data.name, "\n                </div>\n                <div class=\"total-awards\">\n                  ").concat(awardsData, "\n                </div>\n                <div class=\"total-investment\">\n                  Total investment: 2016-2020: ").concat(investment['SUM of Fellow/ Award Amount \n(total, incl suppl)'], "\n                </div>\n              </div>  \n            ");
+      }
+
       tooltip.html(tooltipHtml).style('top', function () {
         return getTooltipPositionY(event) - margin.bottom + 'px';
       }).style('left', event.pageX + sankeyGraph.nodeWidth() + 'px').classed('visible', true);
@@ -27333,11 +27363,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
       var outputs = data.sourceLinks.map(function (d) {
         return [d.target.name, d.rawValue];
       }).sort();
-      tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Issues</span>\n                ").concat(data.targetLinks.map(function (d) {
-        return d.source.name;
-      }).sort().join('</br>'), "\n                  </div>\n                  <div class=\"outputs-list\">\n                  <span class=\"detail-heading\">Outputs</span>\n                ").concat(outputs.map(function (output) {
-        return "".concat(output[1], " ").concat(output[0]);
-      }).join('</br>'), "\n                </div>\n            </div>\n          ");
+      var investment = programInvestment.filter(function (program) {
+        return program['Program'] === data.name;
+      })[0];
+      tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              </div>\n              <div class=\"issues-list\">\n                <span class=\"detail-heading\">Internet Health Issue Area</span>\n                ").concat(data.targetLinks.map(function (d) {
+        return "".concat(d.source.name, " - ").concat(d.rawValue, " ").concat(d.rawValue > 1 ? 'awards' : 'award');
+      }).sort().join('</br>'), "\n                  </div>\n                  <div class=\"outputs-list\">\n                  <span class=\"detail-heading\">Fellow and Awardee Outputs</span>\n                ").concat(outputs.map(function (output) {
+        return "".concat(output[0], " - ").concat(output[1], " ").concat(parseInt(output[1]) > 1 ? 'awards' : 'award');
+      }).join('</br>'), "\n                </div>\n                <div class=\"total-investment\">\n                Total investment 2016-2020: ").concat(investment['SUM of Fellow/ Award Amount \n(total, incl suppl)'], "\n              </div>\n            </div>\n          ");
       tooltip.html(tooltipHtml).style('top', function () {
         return getTooltipPositionY(event) + 20 + 'px';
       }).style('left', function () {
@@ -27359,9 +27392,18 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         return output.key === data.name;
       })[0];
       var outputPrograms = nodeData.values.reduce(function (acc, program) {
-        return acc += "".concat(program.key, " - ").concat(program.values.length, "</br>");
+        return acc += "".concat(program.key, " - ").concat(program.values.length, " ").concat(program.values.length > 1 ? 'awards' : "award", "</br>");
       }, "");
-      tooltipHtml = "\n<div class=\"details\">\n<div class=\"issue-title\">\n  ".concat(data.name, "\n  <span class=\"detail-heading\">Programs creating this output</span>\n</div>\n<div class=\"outputs-list\">\n  ").concat(outputPrograms, "\n</div>\n</div>\n");
+      var investment = outputInvestment.filter(function (output) {
+        return output['Primary Output\n(pick ONE)'] === data.name;
+      })[0];
+
+      if (data.name === 'Other/not available') {
+        tooltipHtml = "\n            <div class=\"details\">\n              <div class=\"issue-title\">\n                ".concat(data.name, "\n              <span class=\"detail-heading\">\n              </span>\n              </div>\n              <div class=\"outputs-list\">\n                ").concat(outputPrograms, "\n              </div>\n              <div class=\"total-investment\">\n                Total investment 2016-2020: ").concat(investment['SUM of Fellow/ Award Amount \n(total, incl suppl)'], "\n              </div>\n            </div>\n            ");
+      } else {
+        tooltipHtml = "\n              <div class=\"details\">\n                <div class=\"issue-title\">\n                  ".concat(data.name, "\n                <span class=\"detail-heading\">\n                  ").concat(nodeData.values.length, " program(s) had ").concat(data.name, " as an output\n                </span>\n                </div>\n                <div class=\"outputs-list\">\n                  ").concat(outputPrograms, "\n                </div>\n                <div class=\"total-investment\">\n                  Total investment 2016-2020: ").concat(investment['SUM of Fellow/ Award Amount \n(total, incl suppl)'], "\n                </div>\n              </div>\n              ");
+      }
+
       tooltip.html(tooltipHtml).style('top', function () {
         return getTooltipPositionY(event) - margin.bottom + 'px';
       }).style('left', function () {
@@ -27378,10 +27420,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   function draw() {
     var newDimensions = document.querySelector('#container').getBoundingClientRect(); // Resize SVG
 
-    d3.select('svg').attr('width', newDimensions.width).attr('height', newDimensions.height).attr('viewBox', [0, 0, newDimensions.width, newDimensions.height]).attr('preserveAspectRatio', 'xMinYMin').append('g');
+    d3.select('svg').attr('width', newDimensions.width - (margin.left + margin.right)).attr('height', newDimensions.height - (margin.top + margin.bottom)).attr('viewBox', [0, 0, newDimensions.width - (margin.left + margin.right), newDimensions.height - (margin.top + margin.bottom)]).attr('preserveAspectRatio', 'xMinYMin').append('g');
     var nodes = chart.nodes,
         links = chart.links;
-    var newSankey = d3.sankey().iterations(0).nodePadding(8).size([newDimensions.width, newDimensions.height]);
+    var newSankey = d3.sankey().iterations(0).nodePadding(8).size([newDimensions.width - (margin.left + margin.right), newDimensions.height - (margin.top + margin.bottom)]);
     newSankey.nodes(nodes).links(links)();
     updateLinks();
     updateNodes();
@@ -27396,7 +27438,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
   draw();
   window.addEventListener('resize', draw);
 });
-},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"node_modules/regenerator-runtime/runtime.js","lodash.kebabcase":"node_modules/lodash.kebabcase/index.js","d3-array":"node_modules/d3-array/src/index.js","d3-selection":"node_modules/d3-selection/src/index.js","d3-fetch":"node_modules/d3-fetch/src/index.js","d3-sankey":"node_modules/d3-sankey/src/index.js","d3-format":"node_modules/d3-format/src/index.js","d3-scale":"node_modules/d3-scale/src/index.js","d3-scale-chromatic":"node_modules/d3-scale-chromatic/src/index.js","d3-color":"node_modules/d3-color/src/index.js","d3-collection":"node_modules/d3-collection/src/index.js","d3-transition":"node_modules/d3-transition/src/index.js","d3-shape":"node_modules/d3-shape/src/index.js","./helpers/custom-link-generator":"helpers/custom-link-generator.js","./data/9-21-21-Copy of Sankey data - Moz F&A - Issue Area _ Program _ Output.csv":"data/9-21-21-Copy of Sankey data - Moz F&A - Issue Area _ Program _ Output.csv","./data/9-21-21-Copy of Sankey data - Moz F&A - Output _ Program _ Issue Area.csv":"data/9-21-21-Copy of Sankey data - Moz F&A - Output _ Program _ Issue Area.csv","./data/9-21-21-Copy of Sankey data - Moz F&A - FOCUS - Total Investment $.csv":"data/9-21-21-Copy of Sankey data - Moz F&A - FOCUS - Total Investment $.csv","./data/9-21-21-Copy of Sankey data - Moz F&A - PROGRAMS - Total Investment $.csv":"data/9-21-21-Copy of Sankey data - Moz F&A - PROGRAMS - Total Investment $.csv","./data/9-21-21-Copy of Sankey data - Moz F&A - OUTPUT - Total Investment $.csv":"data/9-21-21-Copy of Sankey data - Moz F&A - OUTPUT - Total Investment $.csv"}],"../../../../../../../../../home/tekd/.nvm/versions/node/v14.17.1/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -27424,7 +27466,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50124" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58707" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

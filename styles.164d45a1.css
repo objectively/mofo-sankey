@@ -355,11 +355,6 @@ body {
   overflow: hidden;
 }
 
-svg {
-  height: 100%;
-  width: 100%;
-}
-
 #container {
   position: absolute;
   width: 100%;
@@ -368,6 +363,14 @@ svg {
   min-width: 100%;
   display: flex;
   justify-content: center;
+}
+
+#container-header {
+  display: block;
+  font-family: "Zilla Slab", serif;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
 }
 
 .node rect {
@@ -383,10 +386,11 @@ svg {
   position: absolute;
   font-family: "Nunito Sans", sans-serif;
   background-color: var(--mo-gray-05);
-  width: calc(100%/3);
+  width: calc(100% / 3);
   padding: 8px;
   visibility: hidden;
   transition: visibility 0.4s ease;
+  opacity: 0.85;
 }
 @media screen and (max-width: 768px) {
   #tooltip {
@@ -399,21 +403,30 @@ svg {
 }
 
 text {
-  font-family: sans-serif;
+  font-family: "Nunito Sans", sans-serif;
   font-size: 0.7rem;
+  display: inline-block;
+}
+@media screen and (max-width: 768px) {
+  text {
+    display: none;
+  }
 }
 
-.issue-title,
-.detail-heading {
+.issue-title {
   font-size: 1.6rem;
   font-weight: 700;
   display: block;
+  font-family: "Zilla Slab", serif;
+  padding: 4px 0;
 }
 
 .detail-heading {
+  font-family: "Nunito Sans", sans-serif;
   font-size: 1rem;
   font-weight: 700;
   display: block;
+  padding: 4px 0;
 }
 
 .total-programs {
@@ -424,6 +437,12 @@ text {
 .programs-count,
 .total-awards {
   font-weight: 400;
+  padding: 4px 0;
+}
+
+.total-investment {
+  font-weight: 700;
+  padding: 4px 0;
 }
 
 /*# sourceMappingURL=/styles.164d45a1.css.map */
