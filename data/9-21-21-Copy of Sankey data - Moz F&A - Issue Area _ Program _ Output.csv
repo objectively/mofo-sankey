@@ -2,9 +2,9 @@
 (pick ONE) ",Program,"Primary Output
 (pick ONE)",Number of Awards
 Decentralization,Discretionary Awards,Workshop or Convening,1
+Decentralization,Fellow in Residence/ Senior Fellows,Art or Media,1
 Decentralization,Fellow in Residence/ Senior Fellows,Other/not available,2
-Decentralization,Mozilla Fellows,Art or Media,1
-Decentralization,Mozilla Fellows,Public Resource,1
+Decentralization,Fellow in Residence/ Senior Fellows,Public Resource,1
 Decentralization,Mozilla Science Mini Grants,Curriculum or Educational Resource,1
 Decentralization,Mozilla Science Mini Grants,Software,1
 Decentralization,NSF WINS,Hardware,10
@@ -23,6 +23,7 @@ Digital Inclusion,Discretionary Awards,Other/not available,1
 Digital Inclusion,Discretionary Awards,Public Resource,5
 Digital Inclusion,Discretionary Awards,Software,1
 Digital Inclusion,Discretionary Awards,Workshop or Convening,3
+Digital Inclusion,Fellow in Residence/ Senior Fellows,Policy recommendations,1
 Digital Inclusion,Fellow in Residence/ Senior Fellows,Public Resource,2
 Digital Inclusion,Fellow in Residence/ Senior Fellows,Research,1
 Digital Inclusion,Gigabit Community Fund,Curriculum or Educational Resource,7
@@ -37,7 +38,6 @@ Digital Inclusion,MOSS,Capacity Building,3
 Digital Inclusion,MOSS,General Operating Support,5
 Digital Inclusion,MOSS,Hardware,1
 Digital Inclusion,MOSS,Software,3
-Digital Inclusion,Mozilla Fellows,Policy recommendations,1
 Digital Inclusion,Mozilla Science Mini Grants,Curriculum or Educational Resource,1
 Digital Inclusion,NSF WINS,Hardware,11
 Digital Inclusion,Open News Fellows,Curriculum or Educational Resource,1
@@ -65,7 +65,7 @@ Open Innovation,Discretionary Awards,Public Resource,4
 Open Innovation,Discretionary Awards,Workshop or Convening,5
 Open Innovation,Fellow in Residence/ Senior Fellows,Curriculum or Educational Resource,2
 Open Innovation,Fellow in Residence/ Senior Fellows,Other/not available,1
-Open Innovation,Fellow in Residence/ Senior Fellows,Public Resource,2
+Open Innovation,Fellow in Residence/ Senior Fellows,Public Resource,4
 Open Innovation,Fellow in Residence/ Senior Fellows,Research,2
 Open Innovation,Gigabit Community Fund,Curriculum or Educational Resource,10
 Open Innovation,MOSS,Capacity Building,1
@@ -73,7 +73,6 @@ Open Innovation,MOSS,General Operating Support,42
 Open Innovation,MOSS,Hardware,3
 Open Innovation,MOSS,Other/not available,7
 Open Innovation,MOSS,Software,18
-Open Innovation,Mozilla Fellows,Public Resource,2
 Open Innovation,Mozilla Science Mini Grants,Art or Media,1
 Open Innovation,Mozilla Science Mini Grants,Curriculum or Educational Resource,14
 Open Innovation,Mozilla Science Mini Grants,Public Resource,5
@@ -110,13 +109,12 @@ Privacy+Security,Discretionary Awards,Capacity Building,1
 Privacy+Security,Discretionary Awards,Other/not available,1
 Privacy+Security,Discretionary Awards,Public Resource,3
 Privacy+Security,Discretionary Awards,Workshop or Convening,5
+Privacy+Security,Fellow in Residence/ Senior Fellows,Art or Media,1
 Privacy+Security,Fellow in Residence/ Senior Fellows,Curriculum or Educational Resource,1
-Privacy+Security,Fellow in Residence/ Senior Fellows,Public Resource,2
+Privacy+Security,Fellow in Residence/ Senior Fellows,Public Resource,4
 Privacy+Security,MOSS,Capacity Building,1
 Privacy+Security,MOSS,General Operating Support,37
 Privacy+Security,MOSS,Software,12
-Privacy+Security,Mozilla Fellows,Art or Media,1
-Privacy+Security,Mozilla Fellows,Public Resource,2
 Privacy+Security,Open Science Fellows,Art or Media,1
 Privacy+Security,Open Science Fellows,Other/not available,1
 Privacy+Security,Open Science Fellows,Public Resource,2
@@ -138,10 +136,9 @@ Privacy+Security,Tech Policy Fellows,Policy recommendations,1
 Privacy+Security,Tech Policy Fellows,Public Resource,4
 Trustworthy AI,Creative Media Awards,Art or Media,9
 Trustworthy AI,Discretionary Awards,Public Resource,1
-Trustworthy AI,Fellow in Residence/ Senior Fellows,Other/not available,1
-Trustworthy AI,Mozilla Fellows,Other/not available,1
-Trustworthy AI,Mozilla Fellows,Public Resource,1
-Trustworthy AI,Mozilla Fellows,Research,4
+Trustworthy AI,Fellow in Residence/ Senior Fellows,Other/not available,2
+Trustworthy AI,Fellow in Residence/ Senior Fellows,Public Resource,1
+Trustworthy AI,Fellow in Residence/ Senior Fellows,Research,4
 Trustworthy AI,Mozilla Science Mini Grants,Curriculum or Educational Resource,1
 Web Literacy,Advocacy Network Fund,Workshop or Convening,2
 Web Literacy,Creative Media Awards,Art or Media,14
