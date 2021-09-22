@@ -5,9 +5,9 @@ Art or Media,Creative Media Awards,Privacy+Security,7
 Art or Media,Creative Media Awards,Trustworthy AI,9
 Art or Media,Creative Media Awards,Web Literacy,14
 Art or Media,Discretionary Awards,Web Literacy,1
+Art or Media,Fellow in Residence/ Senior Fellows,Decentralization,1
+Art or Media,Fellow in Residence/ Senior Fellows,Privacy+Security,1
 Art or Media,Fellow in Residence/ Senior Fellows,Web Literacy,1
-Art or Media,Mozilla Fellows,Decentralization,1
-Art or Media,Mozilla Fellows,Privacy+Security,1
 Art or Media,Mozilla Science Mini Grants,Open Innovation,1
 Art or Media,Open Science Fellows,Digital Inclusion,1
 Art or Media,Open Science Fellows,Open Innovation,1
@@ -66,10 +66,9 @@ Other/not available,Discretionary Awards,Other/unavailable,16
 Other/not available,Discretionary Awards,Privacy+Security,1
 Other/not available,Fellow in Residence/ Senior Fellows,Decentralization,2
 Other/not available,Fellow in Residence/ Senior Fellows,Open Innovation,1
-Other/not available,Fellow in Residence/ Senior Fellows,Trustworthy AI,1
+Other/not available,Fellow in Residence/ Senior Fellows,Trustworthy AI,2
 Other/not available,Gigabit Community Fund,Digital Inclusion,1
 Other/not available,MOSS,Open Innovation,7
-Other/not available,Mozilla Fellows,Trustworthy AI,1
 Other/not available,Open Science Fellows,Privacy+Security,1
 Other/not available,Open Web Fellows,Digital Inclusion,1
 Other/not available,Other Programs,Decentralization,1
@@ -78,7 +77,7 @@ Other/not available,Other Programs,Open Innovation,1
 Other/not available,Other Programs,Other/unavailable,2
 Other/not available,Other Programs,Privacy+Security,1
 Other/not available,Tech Policy Fellows,Privacy+Security,1
-Policy recommendations,Mozilla Fellows,Digital Inclusion,1
+Policy recommendations,Fellow in Residence/ Senior Fellows,Digital Inclusion,1
 Policy recommendations,Open Science Fellows,Open Innovation,1
 Policy recommendations,Open Web Fellows,Privacy+Security,3
 Policy recommendations,Tech + Society Fellows,Digital Inclusion,1
@@ -93,16 +92,14 @@ Public Resource,Discretionary Awards,Digital Inclusion,5
 Public Resource,Discretionary Awards,Open Innovation,4
 Public Resource,Discretionary Awards,Privacy+Security,3
 Public Resource,Discretionary Awards,Trustworthy AI,1
+Public Resource,Fellow in Residence/ Senior Fellows,Decentralization,1
 Public Resource,Fellow in Residence/ Senior Fellows,Digital Inclusion,2
-Public Resource,Fellow in Residence/ Senior Fellows,Open Innovation,2
-Public Resource,Fellow in Residence/ Senior Fellows,Privacy+Security,2
+Public Resource,Fellow in Residence/ Senior Fellows,Open Innovation,4
+Public Resource,Fellow in Residence/ Senior Fellows,Privacy+Security,4
+Public Resource,Fellow in Residence/ Senior Fellows,Trustworthy AI,1
 Public Resource,Fellow in Residence/ Senior Fellows,Web Literacy,1
 Public Resource,Gigabit Community Fund,Web Literacy,1
 Public Resource,Hive,Digital Inclusion,13
-Public Resource,Mozilla Fellows,Decentralization,1
-Public Resource,Mozilla Fellows,Open Innovation,2
-Public Resource,Mozilla Fellows,Privacy+Security,2
-Public Resource,Mozilla Fellows,Trustworthy AI,1
 Public Resource,Mozilla Science Mini Grants,Open Innovation,5
 Public Resource,Open Science Fellows,Decentralization,1
 Public Resource,Open Science Fellows,Digital Inclusion,1
@@ -125,9 +122,9 @@ Public Resource,Tech Policy Fellows,Privacy+Security,4
 Public Resource,Tech Policy Fellows,Web Literacy,1
 Research,Fellow in Residence/ Senior Fellows,Digital Inclusion,1
 Research,Fellow in Residence/ Senior Fellows,Open Innovation,2
+Research,Fellow in Residence/ Senior Fellows,Trustworthy AI,4
 Research,Fellow in Residence/ Senior Fellows,Web Literacy,1
 Research,Gigabit Community Fund,Web Literacy,1
-Research,Mozilla Fellows,Trustworthy AI,4
 Research,Open News Fellows,Digital Inclusion,1
 Research,Open News Fellows,Open Innovation,2
 Research,Open Web Fellows,Open Innovation,2

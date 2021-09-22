@@ -16,8 +16,11 @@ import {
   customLinkGenerator2
 } from './helpers/custom-link-generator';
 
-let realIssuesToEngagement = require(`./data/real/Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
-let realEngagementToOutput = require(`./data/real/Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
+let issuesToEngagement = require(`./data/9-21-21-Copy of Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
+let engagementToOutput = require(`./data/9-21-21-Copy of Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
+let focusTotalInvestment = require(`./data/9-21-21-Copy of Sankey data - Moz F&A - FOCUS - Total Investment $.csv`);
+let programTotalInvestment = require(`./data/9-21-21-Copy of Sankey data - Moz F&A - PROGRAMS - Total Investment $.csv`);
+let outputTotalInvestment = require(`./data/9-21-21-Copy of Sankey data - Moz F&A - OUTPUT - Total Investment $.csv`);
 
 const d3 = Object.assign(
   {},
@@ -43,9 +46,13 @@ const d3 = Object.assign(
 );
 
 /* SET UP GRAPH DIMENSIONS */
-let margin = { top: 0, right: 0, bottom: 0, left: 0 };
-let height = document.querySelector('#container').clientHeight;
-let width = document.querySelector('#container').clientWidth;
+let margin = { top: 15, right: 15, bottom: 30, left: 15 };
+let height =
+  document.querySelector('#container').clientHeight -
+  (margin.top + margin.bottom);
+let width =
+  document.querySelector('#container').clientWidth -
+  (margin.left + margin.right);
 
 /* SET UP STYLE VARIABLES */
 let defaultOpacity = 0.3;
@@ -61,6 +68,9 @@ let elementClasses = {};
 let outputsToProgram;
 let tooltip;
 let tooltipHtml;
+let focusInvestment;
+let programInvestment;
+let outputInvestment;
 
 /* APPEND SVG TO PAGE */
 let svg = d3
@@ -70,8 +80,7 @@ let svg = d3
   .attr('height', height)
   .attr('viewBox', [0, 0, width, height])
   .attr('preserveAspectRatio', 'xMinYMin meet')
-  .append('g')
-  .attr('transform', `translate(${margin.left},${margin.top})`);
+  .append('g');
 
 /* SETUP SANKEY PROPERTIES */
 let sankeyGraph = d3
@@ -84,8 +93,20 @@ let sankeyGraph = d3
 tooltip = d3.select('body').append('div').attr('id', 'tooltip');
 
 /* FORMAT DATA */
-Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) // begin
+Promise.all([
+  d3.csv(issuesToEngagement),
+  d3.csv(engagementToOutput),
+  d3.csv(focusTotalInvestment),
+  d3.csv(programTotalInvestment),
+  d3.csv(outputTotalInvestment)
+]) // begin
   .then((data) => {
+    // Investment numbers for tooltip
+    focusInvestment = data[2];
+    programInvestment = data[3];
+    outputInvestment = data[4];
+
+    // Graph data
     let graph = { nodes: [], links: [] };
 
     let linkScale = d3.scaleSqrt().domain([0, 84]).range([5, 80]);
@@ -132,7 +153,6 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     issuesProgramDetail = graph.links;
 
     /* SAVE Outputs to Program for output tooltip */
-
     outputsToProgram = d3
       .nest()
       .key((d) => d['Primary Output\n(pick ONE)'])
@@ -201,6 +221,7 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
     return graph;
   })
   .then((data) => {
+    console.log(data);
     let chart = sankeyGraph(data);
 
     function initialize() {
@@ -377,19 +398,43 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             }, ``);
           }
 
-          tooltipHtml = `
+          let investment = focusInvestment.filter(
+            (focus) => focus['Issue Area Tags\n(pick ONE) '] === data.name
+          )[0];
+          if (data.name === `Other/unavailable`) {
+            tooltipHtml = `
             <div class="details">
-              <div class="issue-title">
-                ${data.name}
-              </div>
-              <div class="total-programs">
-                ${nodeData.length} Programs
-              </div>
-              <div class="total-awards">
-                ${awardsData}
-              </div>
-            </div>  
-          `;
+            <div class="issue-title">
+              ${data.name}
+            </div>
+            <div class="total-programs">
+            </div>
+            <div class="total-awards">
+              ${awardsData}
+            </div>
+            <div class="total-investment">
+              Total investment: 2016-2020: ${investment['SUM of Fellow/ Award Amount \n(total, incl suppl)']}
+            </div>
+          </div>  
+            `;
+          } else {
+            tooltipHtml = `
+              <div class="details">
+                <div class="issue-title">
+                  ${data.name}
+                </div>
+                <div class="total-programs">
+                  ${nodeData.length} programs supported work on ${data.name}
+                </div>
+                <div class="total-awards">
+                  ${awardsData}
+                </div>
+                <div class="total-investment">
+                  Total investment: 2016-2020: ${investment['SUM of Fellow/ Award Amount \n(total, incl suppl)']}
+                </div>
+              </div>  
+            `;
+          }
 
           tooltip
             .html(tooltipHtml)
@@ -429,24 +474,43 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
             .map((d) => [d.target.name, d.rawValue])
             .sort();
 
+          let investment = programInvestment.filter(
+            (program) => program['Program'] === data.name
+          )[0];
           tooltipHtml = `
             <div class="details">
               <div class="issue-title">
                 ${data.name}
               </div>
               <div class="issues-list">
-                <span class="detail-heading">Issues</span>
+                <span class="detail-heading">Internet Health Issue Area</span>
                 ${data.targetLinks
-                  .map((d) => d.source.name)
+                  .map((d) => {
+                    return `${d.source.name} - ${d.rawValue} ${
+                      d.rawValue > 1 ? 'awards' : 'award'
+                    }`;
+                  })
                   .sort()
                   .join('</br>')}
                   </div>
                   <div class="outputs-list">
-                  <span class="detail-heading">Outputs</span>
+                  <span class="detail-heading">Fellow and Awardee Outputs</span>
                 ${outputs
-                  .map((output) => `${output[1]} ${output[0]}`)
+                  .map(
+                    (output) =>
+                      `${output[0]} - ${output[1]} ${
+                        parseInt(output[1]) > 1 ? 'awards' : 'award'
+                      }`
+                  )
                   .join('</br>')}
                 </div>
+                <div class="total-investment">
+                Total investment 2016-2020: ${
+                  investment[
+                    'SUM of Fellow/ Award Amount \n(total, incl suppl)'
+                  ]
+                }
+              </div>
             </div>
           `;
 
@@ -493,20 +557,49 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
           })[0];
 
           let outputPrograms = nodeData.values.reduce((acc, program) => {
-            return (acc += `${program.key} - ${program.values.length}</br>`);
+            return (acc += `${program.key} - ${program.values.length} ${
+              program.values.length > 1 ? 'awards' : `award`
+            }</br>`);
           }, ``);
 
-          tooltipHtml = `
-<div class="details">
-<div class="issue-title">
-  ${data.name}
-  <span class="detail-heading">Programs creating this output</span>
-</div>
-<div class="outputs-list">
-  ${outputPrograms}
-</div>
-</div>
-`;
+          let investment = outputInvestment.filter(
+            (output) => output['Primary Output\n(pick ONE)'] === data.name
+          )[0];
+
+          if (data.name === 'Other/not available') {
+            tooltipHtml = `
+            <div class="details">
+              <div class="issue-title">
+                ${data.name}
+              <span class="detail-heading">
+              </span>
+              </div>
+              <div class="outputs-list">
+                ${outputPrograms}
+              </div>
+              <div class="total-investment">
+                Total investment 2016-2020: ${investment['SUM of Fellow/ Award Amount \n(total, incl suppl)']}
+              </div>
+            </div>
+            `;
+          } else {
+            tooltipHtml = `
+              <div class="details">
+                <div class="issue-title">
+                  ${data.name}
+                <span class="detail-heading">
+                  ${nodeData.values.length} program(s) had ${data.name} as an output
+                </span>
+                </div>
+                <div class="outputs-list">
+                  ${outputPrograms}
+                </div>
+                <div class="total-investment">
+                  Total investment 2016-2020: ${investment['SUM of Fellow/ Award Amount \n(total, incl suppl)']}
+                </div>
+              </div>
+              `;
+          }
 
           tooltip
             .html(tooltipHtml)
@@ -545,9 +638,14 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         .getBoundingClientRect();
       // Resize SVG
       d3.select('svg')
-        .attr('width', newDimensions.width)
-        .attr('height', newDimensions.height)
-        .attr('viewBox', [0, 0, newDimensions.width, newDimensions.height])
+        .attr('width', newDimensions.width - (margin.left + margin.right))
+        .attr('height', newDimensions.height - (margin.top + margin.bottom))
+        .attr('viewBox', [
+          0,
+          0,
+          newDimensions.width - (margin.left + margin.right),
+          newDimensions.height - (margin.top + margin.bottom)
+        ])
         .attr('preserveAspectRatio', 'xMinYMin')
         .append('g');
 
@@ -556,7 +654,10 @@ Promise.all([d3.csv(realIssuesToEngagement), d3.csv(realEngagementToOutput)]) //
         .sankey()
         .iterations(0)
         .nodePadding(8)
-        .size([newDimensions.width, newDimensions.height]);
+        .size([
+          newDimensions.width - (margin.left + margin.right),
+          newDimensions.height - (margin.top + margin.bottom)
+        ]);
 
       newSankey.nodes(nodes).links(links)();
       updateLinks();
