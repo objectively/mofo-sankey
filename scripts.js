@@ -2,19 +2,13 @@ import 'regenerator-runtime/runtime';
 let kebabCase = require('lodash.kebabcase');
 import { min, max } from 'd3-array';
 import { select, selectAll } from 'd3-selection';
-import { csv, json } from 'd3-fetch';
+import { csv } from 'd3-fetch';
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from 'd3-sankey';
 import { format } from 'd3-format';
-import { scaleSqrt, scaleOrdinal, scaleLinear } from 'd3-scale';
-import { schemeCategory10 } from 'd3-scale-chromatic';
-import { rgb } from 'd3-color';
+import { scaleSqrt } from 'd3-scale';
 import { nest } from 'd3-collection';
 import { transition } from 'd3-transition';
-import { interpolate, interpolateNumber } from 'd3-shape';
-import {
-  customLinkGenerator,
-  customLinkGenerator2
-} from './helpers/custom-link-generator';
+
 
 let issuesToEngagement = require(`./data/9-21-21-Copy of Sankey data - Moz F&A - Issue Area _ Program _ Output.csv`);
 let engagementToOutput = require(`./data/9-21-21-Copy of Sankey data - Moz F&A - Output _ Program _ Issue Area.csv`);
@@ -30,17 +24,12 @@ const d3 = Object.assign(
     scaleSqrt,
     select,
     selectAll,
-    json,
     min,
     max,
     sankey,
     sankeyCenter,
-    scaleLinear,
     sankeyLinkHorizontal,
     format,
-    scaleOrdinal,
-    schemeCategory10,
-    rgb,
     transition
   }
 );
@@ -221,7 +210,6 @@ Promise.all([
     return graph;
   })
   .then((data) => {
-    console.log(data);
     let chart = sankeyGraph(data);
 
     function initialize() {
