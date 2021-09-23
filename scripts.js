@@ -5,7 +5,7 @@ import { select, selectAll } from 'd3-selection';
 import { csv } from 'd3-fetch';
 import { sankey, sankeyCenter, sankeyLinkHorizontal } from 'd3-sankey';
 import { format } from 'd3-format';
-import { scaleSqrt } from 'd3-scale';
+import { scaleSqrt, scaleLinear } from 'd3-scale';
 import { nest } from 'd3-collection';
 import { transition } from 'd3-transition';
 
@@ -21,6 +21,7 @@ const d3 = Object.assign(
   {
     csv,
     nest,
+    scaleLinear,
     scaleSqrt,
     select,
     selectAll,
